@@ -19,16 +19,75 @@ import { FiMenu } from "react-icons/fi";
 import { LuSearch } from "react-icons/lu";
 import Logo from "../assets/svgs/logo.svg";
 import { CustomDialog } from "./CustomModal";
+import { useJoinWaitingList } from "@/utils/apis/waiting-list.api";
+import toast from "react-hot-toast";
 
 const TopBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { onOpen, onClose } = useDisclosure();
   const isMobile = useBreakpointValue({ base: true, md: false });
 
+  const [form, setForm] = useState({
+    fullName: "",
+    workEmail: "",
+    linkedInProfile: "",
+    referralSource: "",
+    interestDescription: "",
+  });
+
+  const [errors, setErrors] = useState({
+    fullName: false,
+    workEmail: false,
+    referralSource: false,
+    interestDescription: false,
+  });
+
+  const { mutate, isPending } = useJoinWaitingList();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: false }));
+  };
+
+  const handleSubmit = () => {
+    const newErrors = {
+      fullName: form.fullName.trim() === "",
+      workEmail: form.workEmail.trim() === "",
+      referralSource: form.referralSource.trim() === "",
+      interestDescription: form.interestDescription.trim() === "",
+    };
+
+    setErrors(newErrors);
+
+    const hasError = Object.values(newErrors).some((e) => e);
+    if (hasError) return;
+
+    mutate(form, {
+      onSuccess: () => {
+        toast.success("Successfully joined the waitlist!");
+        setIsOpen(false);
+        setForm({
+          fullName: "",
+          workEmail: "",
+          linkedInProfile: "",
+          referralSource: "",
+          interestDescription: "",
+        });
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onError: (error: any) => {
+        const message =
+          error?.response?.data?.message ||
+          "Something went wrong. Please try again.";
+        toast.error(message);
+      },
+    });
+  };
+
   return (
     <Box as="header" px={{ base: 4, md: 10 }} py={4}>
       <Flex align="center" justify="space-between">
-        {/* Logo */}
         <Image src={Logo} maxH="40px" />
 
         {isMobile ? (
@@ -42,24 +101,15 @@ const TopBar = () => {
                 <FiMenu />
               </IconButton>
             </Drawer.Trigger>
-
             <DrawerPositioner>
               <DrawerContent>
                 <DrawerBody mt={10}>
                   <VStack align="start" gap={6}>
-                    <Text cursor="pointer" onClick={onClose}>
-                      Home
-                    </Text>
-                    <Text cursor="pointer" onClick={onClose}>
-                      Features
-                    </Text>
-                    <Text cursor="pointer" onClick={onClose}>
-                      Pricing
-                    </Text>
-                    <Text cursor="pointer" onClick={onClose}>
-                      Contact
-                    </Text>
-
+                    {["Home", "Features", "Pricing", "Contact"].map((text) => (
+                      <Text key={text} cursor="pointer" onClick={onClose}>
+                        {text}
+                      </Text>
+                    ))}
                     <Button
                       colorScheme="blue"
                       borderRadius="full"
@@ -79,12 +129,12 @@ const TopBar = () => {
         ) : (
           <Flex align="center" gap={12}>
             <Flex align="center" gap={6}>
-              <Text cursor="pointer">Home</Text>
-              <Text cursor="pointer">Features</Text>
-              <Text cursor="pointer">Pricing</Text>
-              <Text cursor="pointer">Contact</Text>
+              {["Home", "Features", "Pricing", "Contact"].map((text) => (
+                <Text key={text} cursor="pointer">
+                  {text}
+                </Text>
+              ))}
             </Flex>
-
             <Flex align="center" gap={4}>
               <IconButton aria-label="Search" variant="ghost">
                 <LuSearch />
@@ -102,29 +152,30 @@ const TopBar = () => {
         )}
       </Flex>
 
-      {/* Waitlist Dialog */}
       <CustomDialog
         open={isOpen}
         onOpenChange={setIsOpen}
         headerText="Join Our Waitlist"
         cancelText="Close"
         submitText="Join Waitlist"
-        onSubmit={() => {
-          console.log("Form submitted");
-          setIsOpen(false);
-        }}
+        onSubmit={handleSubmit}
+        isLoading={isPending}
       >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            console.log("Waitlist submitted");
-            setIsOpen(false);
-          }}
-        >
+        <Box>
           <Flex direction="column" gap={4}>
             <Flex direction="column" gap={1.5}>
               <Text fontSize="14px">Name</Text>
-              <Input placeholder="John Doe" name="name" required />
+              <Input
+                placeholder="John Doe"
+                name="fullName"
+                value={form.fullName}
+                onChange={handleInputChange}
+              />
+              {errors.fullName && (
+                <Text color="red.500" fontSize="sm">
+                  {"Name is Required"}
+                </Text>
+              )}
             </Flex>
             <Flex direction="column" gap={1.5}>
               <Text fontSize="14px">Work Email</Text>
@@ -132,38 +183,55 @@ const TopBar = () => {
                 placeholder="johndoe@example.com"
                 type="email"
                 name="workEmail"
-                required
+                value={form.workEmail}
+                onChange={handleInputChange}
               />
+              {errors.workEmail && (
+                <Text color="red.500" fontSize="sm">
+                  {"Email is Required"}
+                </Text>
+              )}
             </Flex>
             <Flex direction="column" gap={1.5}>
-              <Text fontSize="14px">Linked Profile</Text>
+              <Text fontSize="14px">LinkedIn Profile (optional)</Text>
               <Input
-                placeholder="https://linkedin.com/johndoe"
+                placeholder="https://linkedin.com/in/username"
                 type="text"
-                name="linkedin"
-                required
+                name="linkedInProfile"
+                value={form.linkedInProfile}
+                onChange={handleInputChange}
               />
             </Flex>
             <Flex direction="column" gap={1.5}>
               <Text fontSize="14px">How did you hear about us?</Text>
               <Input
                 placeholder="Social Media"
-                type="text"
-                name="hearabout"
-                required
+                name="referralSource"
+                value={form.referralSource}
+                onChange={handleInputChange}
               />
+              {errors.referralSource && (
+                <Text color="red.500" fontSize="sm">
+                  {"Referral source is Required"}
+                </Text>
+              )}
             </Flex>
             <Flex direction="column" gap={1.5}>
               <Text fontSize="14px">Your Interest</Text>
               <Input
                 placeholder="Tell us about your interests"
-                type="text"
-                name="interest"
-                required
+                name="interestDescription"
+                value={form.interestDescription}
+                onChange={handleInputChange}
               />
+              {errors.interestDescription && (
+                <Text color="red.500" fontSize="sm">
+                  {"Interest description is Required"}
+                </Text>
+              )}
             </Flex>
           </Flex>
-        </form>
+        </Box>
       </CustomDialog>
     </Box>
   );

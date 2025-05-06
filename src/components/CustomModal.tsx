@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 interface CustomDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isLoading: boolean;
   headerText: string;
   cancelText: string;
   submitText: string;
@@ -14,6 +15,7 @@ interface CustomDialogProps {
 export const CustomDialog = ({
   open,
   onOpenChange,
+  isLoading,
   headerText,
   cancelText,
   submitText,
@@ -40,7 +42,7 @@ export const CustomDialog = ({
               <Dialog.ActionTrigger asChild>
                 <Button variant="outline">{cancelText}</Button>
               </Dialog.ActionTrigger>
-              <Button colorScheme="blue" onClick={onSubmit}>
+              <Button colorScheme="blue" loading={isLoading} onClick={onSubmit}>
                 {submitText}
               </Button>
             </Dialog.Footer>
