@@ -23,9 +23,9 @@ const Hero = () => {
       {/* Headline */}
       <Heading
         as="h1"
-        fontSize={{ base: "3xl", md: "5xl", lg: "6xl" }}
+        fontSize={{ base: "3xl", md: "5xl", lg: "55px" }}
         lineHeight="1.2"
-        maxW="5xl"
+        maxW="4xl"
         mx="auto"
         mb={{ md: 36, base: 12 }}
         className="cardo"
