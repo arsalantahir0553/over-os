@@ -14,7 +14,7 @@ const Hero = () => {
   const videoTranslateY = useBreakpointValue({ base: "-40%", md: "-60%" });
 
   return (
-    <Box as="section" textAlign="center" px={6} py={10}>
+    <Box as="section" textAlign="center" px={{ base: 0, md: 6 }} py={10}>
       {/* Intro */}
       <Text color="blue.500" fontWeight="semibold" mb={4} fontSize="sm">
         — INTRODUCING OVEROS —
@@ -27,7 +27,7 @@ const Hero = () => {
         lineHeight="1.2"
         maxW="5xl"
         mx="auto"
-        mb={6}
+        mb={{ md: 36, base: 12 }}
         className="cardo"
       >
         <Highlight
@@ -43,35 +43,12 @@ const Hero = () => {
         </Highlight>
       </Heading>
 
-      {/* Buttons */}
-      <Stack
-        direction={{ base: "column", md: "row" }}
-        justify="center"
-        gap={4}
-        mt={8}
-        mb={40}
-        flexWrap="wrap"
-      >
-        <Button colorScheme="blue" size="lg" borderRadius="full" px={8}>
-          Try OverOS
-        </Button>
-        <Button
-          variant="outline"
-          colorScheme="blue"
-          size="lg"
-          borderRadius="full"
-          px={8}
-        >
-          Download App
-        </Button>
-      </Stack>
-
       {/* Blue Box with Video Overlay */}
       <Box
         position="relative"
         bg="blue.900"
         pt={{ base: 24, md: 32 }}
-        pb={10}
+        pb={{ md: 10, base: 4 }}
         borderRadius="3xl"
         minH={{ base: "300px", md: "500px" }}
       >
@@ -111,6 +88,27 @@ const Hero = () => {
           no clicks, just commands
         </Text>
       </Box>
+      {/* Buttons */}
+      <Stack
+        direction={{ base: "column", md: "row" }}
+        justify="center"
+        gap={4}
+        mt={8}
+        flexWrap="wrap"
+      >
+        <Button colorScheme="blue" size="lg" borderRadius="full" px={8}>
+          Try OverOS
+        </Button>
+        <Button
+          variant="outline"
+          colorScheme="blue"
+          size="lg"
+          borderRadius="full"
+          px={8}
+        >
+          Download App
+        </Button>
+      </Stack>
     </Box>
   );
 };
