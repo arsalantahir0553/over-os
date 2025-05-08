@@ -29,6 +29,7 @@ const Hero = () => {
         mx="auto"
         mb={{ md: 36, base: 12 }}
         className="cardo"
+        fontFamily={"Cardo"}
       >
         <Highlight
           query="AI that clicks"

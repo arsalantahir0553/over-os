@@ -16,7 +16,7 @@ const HowWeWork = () => {
         maxW="5xl"
         mx="auto"
         mb={6}
-        className="cardo"
+        fontFamily={"Cardo"}
         maxWidth={{ md: "700px", base: "100%" }}
       >
         Where Your To-Do List Meets Automation.
