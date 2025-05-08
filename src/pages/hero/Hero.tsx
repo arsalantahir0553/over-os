@@ -1,11 +1,10 @@
 import {
   Box,
+  Button,
   Flex,
   Heading,
-  Text,
-  Button,
   Stack,
-  Highlight,
+  Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
 
@@ -23,25 +22,15 @@ const Hero = () => {
       {/* Headline */}
       <Heading
         as="h1"
-        fontSize={{ base: "3xl", md: "5xl", lg: "55px" }}
+        fontSize={{ base: "3xl", md: "5xl", lg: "64px" }}
         lineHeight="1.2"
         maxW="4xl"
         mx="auto"
         mb={{ md: 36, base: 12 }}
-        className="cardo"
-        fontFamily={"Cardo"}
+        fontFamily={"Joan"}
+        fontWeight={400}
       >
-        <Highlight
-          query="AI that clicks"
-          styles={{
-            px: "4",
-            py: "1",
-            rounded: "full",
-            bg: "blue.100",
-          }}
-        >
-          You on Autopilot – AI that clicks types & ships for you.
-        </Highlight>
+        You on Autopilot – AI that clicks types & ships for you.
       </Heading>
 
       {/* Blue Box with Video Overlay */}
@@ -100,7 +89,7 @@ const Hero = () => {
         <Button colorScheme="blue" size="lg" borderRadius="full" px={8}>
           Try OverOS
         </Button>
-        <Button
+        {/* <Button
           variant="outline"
           colorScheme="blue"
           size="lg"
@@ -108,7 +97,7 @@ const Hero = () => {
           px={8}
         >
           Download App
-        </Button>
+        </Button> */}
       </Stack>
     </Box>
   );

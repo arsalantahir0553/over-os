@@ -11,12 +11,13 @@ const HowWeWork = () => {
       {/* Headline */}
       <Heading
         as="h1"
-        fontSize={{ base: "3xl", md: "5xl", lg: "55px" }}
+        fontSize={{ base: "3xl", md: "5xl", lg: "64px" }}
         lineHeight="1.2"
         maxW="5xl"
         mx="auto"
         mb={6}
-        fontFamily={"Cardo"}
+        fontFamily={"Joan"}
+        fontWeight={400}
         maxWidth={{ md: "700px", base: "100%" }}
       >
         Where Your To-Do List Meets Automation.
