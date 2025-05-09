@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Input, Text, Textarea } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useJoinWaitingList } from "@/utils/apis/waiting-list.api";
+import { useSendEmail } from "@/utils/apis/waiting-list.api";
 
 const ContactUs = () => {
   const [form, setForm] = useState({
@@ -24,7 +24,7 @@ const ContactUs = () => {
     interestDescription: false,
   });
 
-  const { mutate, isPending } = useJoinWaitingList();
+  const { mutate: sendEmail, isPending: isSendEmailPending } = useSendEmail();
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -45,26 +45,33 @@ const ContactUs = () => {
     setErrors(newErrors);
     if (Object.values(newErrors).some(Boolean)) return;
 
-    mutate(form, {
-      onSuccess: () => {
-        toast.success("Successfully joined the waitlist!");
-        setForm({
-          fullName: "",
-          workEmail: "",
-          linkedInProfile: "",
-          referralSource: "",
-          interestDescription: "",
-          feedback: "",
-        });
+    sendEmail(
+      {
+        to: form.workEmail,
+        subject: "OverOS - a new user submitted the contact us form",
+        message: form,
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onError: (error: any) => {
-        const message =
-          error?.response?.data?.message ||
-          "Something went wrong. Please try again.";
-        toast.error(message);
-      },
-    });
+      {
+        onSuccess: () => {
+          toast.success("Email sent successfully!");
+          setForm({
+            fullName: "",
+            workEmail: "",
+            linkedInProfile: "",
+            referralSource: "",
+            interestDescription: "",
+            feedback: "",
+          });
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onError: (error: any) => {
+          const message =
+            error?.response?.data?.message ||
+            "Something went wrong. Please try again.";
+          toast.error(message);
+        },
+      }
+    );
   };
 
   return (
@@ -128,7 +135,11 @@ const ContactUs = () => {
             )}
           </Flex>
         ))}
-        <Button colorScheme="blue" onClick={handleSubmit} isLoading={isPending}>
+        <Button
+          colorScheme="blue"
+          onClick={handleSubmit}
+          isLoading={isSendEmailPending}
+        >
           Submit
         </Button>
       </Flex>
