@@ -11,7 +11,7 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <Box>
       <TopBar />
-      <Box as="main" p={4}>
+      <Box as="main" p={{ md: 0, base: 4 }}>
         {children}
       </Box>
       {/* <Footer /> */}

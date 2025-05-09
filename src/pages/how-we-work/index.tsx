@@ -18,7 +18,7 @@ const HowWeWork = () => {
         mb={6}
         fontFamily={"Joan"}
         fontWeight={400}
-        maxWidth={{ md: "1100px", base: "100%" }}
+        maxWidth={{ md: "900px", base: "100%" }}
       >
         AI agent on your Operating System to plan and execute complicated tasks
         end-to-end
