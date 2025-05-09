@@ -4,6 +4,7 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Layout from "./layout";
 import Home from "./pages/home";
 import WaitingList from "./pages/waiting-list";
+import ContactUs from "./pages/contact-us";
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/waiting-list" element={<WaitingList />} />
+            <Route path="/contact-us" element={<ContactUs />} />
           </Routes>
         </Container>
       </Layout>

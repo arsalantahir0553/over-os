@@ -3,22 +3,21 @@ import {
   Button,
   Drawer,
   DrawerBody,
-  DrawerContent,
-  DrawerOverlay,
-  DrawerHeader,
   DrawerCloseButton,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
   Flex,
   IconButton,
   Image,
-  Text,
   VStack,
   useBreakpointValue,
   useDisclosure,
 } from "@chakra-ui/react";
 import { FiMenu } from "react-icons/fi";
 import { LuSearch } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
 import Logo from "../assets/svgs/logo.svg";
-import { Link, useNavigate } from "react-router-dom";
 
 const TopBar = () => {
   const isMobile = useBreakpointValue({ base: true, md: false });
@@ -30,12 +29,12 @@ const TopBar = () => {
     onClose();
   };
 
-  const navLinks = [
-    { title: "Home", url: "/" },
-    { title: "Features", url: "#" },
-    { title: "Pricing", url: "#" },
-    { title: "Contact", url: "#" },
-  ];
+  // const navLinks = [
+  //   { title: "Home", url: "/" },
+  //   { title: "Features", url: "#" },
+  //   { title: "Pricing", url: "#" },
+  //   { title: "Contact", url: "#" },
+  // ];
 
   return (
     <Box as="header" px={{ base: 4, md: 10 }} py={4}>
@@ -63,11 +62,11 @@ const TopBar = () => {
                 <DrawerHeader mt={4}>Menu</DrawerHeader>
                 <DrawerBody>
                   <VStack align="start" spacing={6} mt={4}>
-                    {navLinks.map((nav, index) => (
+                    {/* {navLinks.map((nav, index) => (
                       <Text key={index} cursor="pointer" fontSize="lg">
                         <Link to={nav.url}>{nav.title}</Link>
                       </Text>
-                    ))}
+                    ))} */}
                     <Button
                       colorScheme="blue"
                       borderRadius="full"
@@ -83,13 +82,13 @@ const TopBar = () => {
           </>
         ) : (
           <Flex align="center" gap={12}>
-            <Flex align="center" gap={6}>
+            {/* <Flex align="center" gap={6}>
               {navLinks.map((nav, index) => (
                 <Text key={index} cursor="pointer" fontWeight="medium">
                   <Link to={nav.url}>{nav.title}</Link>
                 </Text>
               ))}
-            </Flex>
+            </Flex> */}
             <Flex align="center" gap={4}>
               <IconButton
                 aria-label="Search"

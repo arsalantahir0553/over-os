@@ -1,15 +1,16 @@
-import { Box, Button, Flex, Input, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Input, Text, Textarea } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useJoinWaitingList } from "@/utils/apis/waiting-list.api";
 
-const WaitingList = () => {
+const ContactUs = () => {
   const [form, setForm] = useState({
     fullName: "",
     workEmail: "",
     linkedInProfile: "",
     referralSource: "",
     interestDescription: "",
+    feedback: "",
   });
 
   useEffect(() => {
@@ -25,7 +26,9 @@ const WaitingList = () => {
 
   const { mutate, isPending } = useJoinWaitingList();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: false }));
@@ -51,6 +54,7 @@ const WaitingList = () => {
           linkedInProfile: "",
           referralSource: "",
           interestDescription: "",
+          feedback: "",
         });
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,9 +68,9 @@ const WaitingList = () => {
   };
 
   return (
-    <Box mt={10} maxW="lg" mx="auto">
+    <Box py={10} maxW="lg" mx="auto">
       <Text fontSize="2xl" fontWeight="bold" mb={6}>
-        Join Our Waiting List
+        Express Your Interest
       </Text>
       <Flex direction="column" gap={4}>
         {[
@@ -92,16 +96,31 @@ const WaitingList = () => {
             label: "Your Interest",
             placeholder: "Tell us about your interests",
           },
-        ].map(({ name, label, placeholder, type = "text" }) => (
+          {
+            name: "feedback",
+            label: "Feedback",
+            placeholder: "Share your thoughts or suggestions",
+            isTextarea: true,
+          },
+        ].map(({ name, label, placeholder, type = "text", isTextarea }) => (
           <Flex direction="column" gap={1} key={name}>
             <Text fontSize="14px">{label}</Text>
-            <Input
-              name={name}
-              type={type}
-              placeholder={placeholder}
-              value={form[name as keyof typeof form]}
-              onChange={handleInputChange}
-            />
+            {isTextarea ? (
+              <Textarea
+                name={name}
+                placeholder={placeholder}
+                value={form[name as keyof typeof form]}
+                onChange={handleInputChange}
+              />
+            ) : (
+              <Input
+                name={name}
+                type={type}
+                placeholder={placeholder}
+                value={form[name as keyof typeof form]}
+                onChange={handleInputChange}
+              />
+            )}
             {errors[name as keyof typeof errors] && (
               <Text color="red.500" fontSize="sm">
                 {`${label} is required`}
@@ -110,11 +129,11 @@ const WaitingList = () => {
           </Flex>
         ))}
         <Button colorScheme="blue" onClick={handleSubmit} isLoading={isPending}>
-          Join Waitlist
+          Submit
         </Button>
       </Flex>
     </Box>
   );
 };
 
-export default WaitingList;
+export default ContactUs;

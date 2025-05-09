@@ -7,11 +7,18 @@ import {
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
   const videoHeight = useBreakpointValue({ base: "200px", md: "460px" });
   const videoTranslateY = useBreakpointValue({ base: "-40%", md: "-60%" });
-
+  const navigate = useNavigate();
+  const handleNavigate = () => {
+    navigate("/waiting-list");
+  };
+  const handleContactNavigate = () => {
+    navigate("/contact-us");
+  };
   return (
     <Box as="section" textAlign="center" px={{ base: 0, md: 6 }} py={10}>
       {/* Intro */}
@@ -26,13 +33,41 @@ const Hero = () => {
         lineHeight="1.2"
         maxW="4xl"
         mx="auto"
-        mb={{ md: 36, base: 12 }}
+        mb={{ md: 8, base: 8 }}
         fontFamily={"Joan"}
         fontWeight={400}
       >
         You on Autopilot – AI that clicks types & ships for you.
       </Heading>
-
+      {/* Buttons */}
+      <Stack
+        direction={{ base: "column", md: "row" }}
+        justify="center"
+        gap={4}
+        mt={8}
+        mb={36}
+        flexWrap="wrap"
+      >
+        <Button
+          colorScheme="blue"
+          size="lg"
+          borderRadius="full"
+          px={8}
+          onClick={() => handleNavigate()}
+        >
+          Try OverOS
+        </Button>
+        <Button
+          variant="outline"
+          colorScheme="blue"
+          size="lg"
+          borderRadius="full"
+          px={8}
+          onClick={() => handleContactNavigate()}
+        >
+          Contact Us
+        </Button>
+      </Stack>
       {/* Blue Box with Video Overlay */}
       <Box
         position="relative"
@@ -78,27 +113,6 @@ const Hero = () => {
           no clicks, just commands
         </Text>
       </Box>
-      {/* Buttons */}
-      <Stack
-        direction={{ base: "column", md: "row" }}
-        justify="center"
-        gap={4}
-        mt={8}
-        flexWrap="wrap"
-      >
-        <Button colorScheme="blue" size="lg" borderRadius="full" px={8}>
-          Try OverOS
-        </Button>
-        {/* <Button
-          variant="outline"
-          colorScheme="blue"
-          size="lg"
-          borderRadius="full"
-          px={8}
-        >
-          Download App
-        </Button> */}
-      </Stack>
     </Box>
   );
 };

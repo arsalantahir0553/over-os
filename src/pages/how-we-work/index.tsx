@@ -11,16 +11,17 @@ const HowWeWork = () => {
       {/* Headline */}
       <Heading
         as="h1"
-        fontSize={{ base: "3xl", md: "5xl", lg: "64px" }}
+        fontSize={{ base: "3xl", md: "5xl", lg: "60px" }}
         lineHeight="1.2"
         maxW="5xl"
         mx="auto"
         mb={6}
         fontFamily={"Joan"}
         fontWeight={400}
-        maxWidth={{ md: "700px", base: "100%" }}
+        maxWidth={{ md: "1100px", base: "100%" }}
       >
-        Where Your To-Do List Meets Automation.
+        AI agent on your Operating System to plan and execute complicated tasks
+        end-to-end
       </Heading>
 
       <Box
