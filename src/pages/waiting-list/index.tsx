@@ -64,7 +64,7 @@ const WaitingList = () => {
   };
 
   return (
-    <Container maxW="7xl" px={{ base: 2, md: 8 }}>
+    <Container maxW="7xl" px={{ base: 2, md: 8 }} pb={8} mb={8}>
       <Box mt={10} maxW="lg" mx="auto">
         <Text fontSize="2xl" fontWeight="bold" mb={6}>
           Join Our Waiting List
@@ -90,8 +90,9 @@ const WaitingList = () => {
             },
             {
               name: "interestDescription",
-              label: "Your Interest",
-              placeholder: "Tell us about your interests",
+              label: "What tasks would you like to automate?",
+              placeholder:
+                "Automate emails, fix and deploy code or generate content",
             },
           ].map(({ name, label, placeholder, type = "text" }) => (
             <Flex direction="column" gap={1} key={name}>

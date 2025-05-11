@@ -4,7 +4,7 @@ const HowWeWork = () => {
   return (
     <Box as="section" textAlign="center" px={{ base: 4, md: 6 }} py={10}>
       {/* Intro */}
-      <Text color="blue.500" fontWeight="semibold" mb={4} fontSize="sm">
+      <Text color="blue.500" fontWeight="semibold" mb={6} fontSize="sm">
         — HOW WE WORK —
       </Text>
 
@@ -15,13 +15,12 @@ const HowWeWork = () => {
         lineHeight="1.2"
         maxW="5xl"
         mx="auto"
-        mb={6}
+        mb={14}
         fontFamily={"Joan"}
         fontWeight={400}
         maxWidth={{ md: "900px", base: "100%" }}
       >
-        AI agent on your Operating System to plan and execute complicated tasks
-        end-to-end
+        AI agent on your Operating System
       </Heading>
 
       <Box
@@ -29,7 +28,7 @@ const HowWeWork = () => {
         color="gray.600"
         maxW={{ md: "900px", base: "100%" }}
         mx="auto"
-        mb={12}
+        mb={20}
       >
         No clicks, no juggling tools — just one simple prompt. Our system
         intelligently understands your request, breaks it into actionable steps,

@@ -15,7 +15,6 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { FiMenu } from "react-icons/fi";
-import { LuSearch } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/svgs/logo.svg";
 
@@ -24,9 +23,13 @@ const TopBar = () => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const handleNav = (path?: string) => {
-    if (path) navigate(path);
-    onClose();
+  // const handleNav = (path?: string) => {
+  //   if (path) navigate(path);
+  //   onClose();
+  // };
+
+  const handleContactNavigate = () => {
+    navigate("/contact-us");
   };
 
   // const navLinks = [
@@ -68,12 +71,13 @@ const TopBar = () => {
                       </Text>
                     ))} */}
                     <Button
+                      variant="outline"
                       colorScheme="blue"
+                      size="md"
                       borderRadius="full"
-                      width="100%"
-                      onClick={() => handleNav("/waiting-list")}
+                      onClick={handleContactNavigate}
                     >
-                      Get Started
+                      Contact Us
                     </Button>
                   </VStack>
                 </DrawerBody>
@@ -90,18 +94,19 @@ const TopBar = () => {
               ))}
             </Flex> */}
             <Flex align="center" gap={4}>
-              <IconButton
+              {/* <IconButton
                 aria-label="Search"
                 variant="ghost"
                 icon={<LuSearch />}
-              />
+              /> */}
               <Button
+                variant="outline"
                 colorScheme="blue"
+                size="md"
                 borderRadius="full"
-                size="lg"
-                onClick={() => navigate("/waiting-list")}
+                onClick={handleContactNavigate}
               >
-                Get Started
+                Contact Us
               </Button>
             </Flex>
           </Flex>

@@ -17,7 +17,6 @@ const ContactUs = () => {
     workEmail: "",
     linkedInProfile: "",
     referralSource: "",
-    interestDescription: "",
     feedback: "",
   });
 
@@ -29,7 +28,6 @@ const ContactUs = () => {
     fullName: false,
     workEmail: false,
     referralSource: false,
-    interestDescription: false,
   });
 
   const { mutate: sendEmail, isPending: isSendEmailPending } = useSendEmail();
@@ -47,7 +45,6 @@ const ContactUs = () => {
       fullName: form.fullName.trim() === "",
       workEmail: form.workEmail.trim() === "",
       referralSource: form.referralSource.trim() === "",
-      interestDescription: form.interestDescription.trim() === "",
     };
 
     setErrors(newErrors);
@@ -67,7 +64,6 @@ const ContactUs = () => {
             workEmail: "",
             linkedInProfile: "",
             referralSource: "",
-            interestDescription: "",
             feedback: "",
           });
         },
@@ -107,15 +103,11 @@ const ContactUs = () => {
               label: "How did you hear about us?",
               placeholder: "Social Media",
             },
-            {
-              name: "interestDescription",
-              label: "Your Interest",
-              placeholder: "Tell us about your interests",
-            },
+
             {
               name: "feedback",
-              label: "Feedback",
-              placeholder: "Share your thoughts or suggestions",
+              label: "How can we help?",
+              placeholder: "",
               isTextarea: true,
             },
           ].map(({ name, label, placeholder, type = "text", isTextarea }) => (

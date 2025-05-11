@@ -1,17 +1,23 @@
-import { Box, Flex, Heading, Image, Text } from "@chakra-ui/react";
+import { Box, Flex, Image, Text } from "@chakra-ui/react";
 import Founder2 from "../../assets/images/ali.jpg";
 import Founder1 from "../../assets/images/yaseen.png";
 
 const foundersData = [
   {
     name: "Yaseen Mohmand",
-    title: "CEO",
+    title: "CTO, OverOS",
     image: Founder1,
+    exp: "Ex–Meta Data Analyst | MS Data Science @ Harvard",
+    description:
+      "Yaseen blends data science and product thinking to build AI systems that act — not just analyze",
   },
   {
     name: "Ali Yousafzai",
-    title: "CEO",
+    title: "CEO, OverOS",
     image: Founder2,
+    exp: "Carnegie Mellon Alum | 2x Founder | AI Engineer",
+    description:
+      "Ali has built AI systems for NASA, Coca-Cola, and early-stage startups — now he’s building the operating system for autonomous AI agents.",
   },
 ];
 
@@ -26,12 +32,12 @@ const Founders = () => {
       bg="linear-gradient(to bottom, #E8FBFF, #E2E5F6)"
     >
       {/* Intro */}
-      <Text color="blue.500" fontWeight="semibold" mb={4} fontSize="sm">
+      <Text color="blue.500" fontWeight="semibold" mb={10} fontSize="sm">
         — MEET FOUNDERS —
       </Text>
 
       {/* Headline */}
-      <Heading
+      {/* <Heading
         as="h1"
         fontSize={{ base: "3xl", md: "5xl", lg: "60px" }}
         lineHeight="1.2"
@@ -43,7 +49,7 @@ const Founders = () => {
         maxWidth={{ md: "600px", base: "100%" }}
       >
         The Visionaries Behind the Workflow
-      </Heading>
+      </Heading> */}
 
       {/* Founder Cards */}
       <Flex
@@ -63,6 +69,7 @@ const Founders = () => {
             bg="white"
             textAlign="center"
             maxW="250px" // Slimmer card
+            minH={"520px"}
             mx="auto" // Ensures it is centered horizontally
             mb={{ base: 6, md: 0 }} // Added bottom margin for mobile view
           >
@@ -87,6 +94,12 @@ const Founders = () => {
               {founder.title}
             </Text>
             <Text fontWeight="bold">{founder.name}</Text>
+            <Text fontSize="sm" color="gray.500">
+              {founder.exp}
+            </Text>
+            <Text mt={2} fontSize="sm" color="gray.800">
+              {founder.description}
+            </Text>
           </Box>
         ))}
       </Flex>
