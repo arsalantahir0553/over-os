@@ -1,21 +1,31 @@
 import { Toaster } from "react-hot-toast";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import Layout from "./layout";
-import ContactUs from "./pages/contact-us";
+
 import Home from "./pages/home";
+import ContactUs from "./pages/contact-us";
 import WaitingList from "./pages/waiting-list";
+import OverOsLayout from "./pages/over-os-ai/layout";
+import Layout from "./layout";
+import DashboardHome from "./pages/over-os-ai";
 
 const App = () => {
   return (
     <Router>
-      <Layout>
-        <Toaster position="top-center" />
-        <Routes>
+      <Toaster position="top-center" />
+      <Routes>
+        {/* Public-facing pages */}
+        <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/waiting-list" element={<WaitingList />} />
           <Route path="/contact-us" element={<ContactUs />} />
-        </Routes>
-      </Layout>
+        </Route>
+
+        {/* Dashboard routes with OverOs layout */}
+        <Route element={<OverOsLayout />}>
+          <Route path="/dashboard" element={<DashboardHome />} />
+          {/* Add more internal routes here */}
+        </Route>
+      </Routes>
     </Router>
   );
 };
