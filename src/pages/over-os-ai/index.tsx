@@ -2,14 +2,20 @@ import {
   Box,
   Card,
   CardBody,
+  Flex,
   Heading,
   Icon,
-  Input,
+  IconButton,
+  InputGroup,
+  InputRightElement,
   SimpleGrid,
   Text,
+  Textarea,
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
+import { PlusIcon } from "lucide-react";
+import { FaLink } from "react-icons/fa";
 import { LuNotepadText } from "react-icons/lu";
 import { MdOutlineDynamicForm, MdOutlineWifiTethering } from "react-icons/md";
 
@@ -52,16 +58,55 @@ const DashboardHome = () => {
           I’ll plan it out and take care of the work.
         </Text>
 
-        <Input
-          mt={6}
-          placeholder="Find my recent knee CT-Scan, sent it to my orthopedic doctor"
-          size="lg"
-          borderRadius="xl"
-          h="60px"
-          bg="white"
-          boxShadow="md"
-        />
+        <Flex align="center" justify="space-between" p={0}>
+          {/* Input Field with Right Icon */}
+          <InputGroup flex="1" mt={6}>
+            <Textarea
+              placeholder="Ask Anything"
+              _placeholder={{ color: "gray.400", fontsize: "12px" }}
+              size="lg"
+              h="80px"
+              borderRadius="2xl"
+              bg="white"
+              pr="3rem"
+              shadow={"md"}
+              resize={"none"}
+            />
+            <InputRightElement top="36px" right="10px">
+              <IconButton
+                icon={<FaLink width={"16px"} />}
+                aria-label="Add"
+                variant="ghost"
+                borderRadius="full"
+                size="sm"
+                bg={"blue.50"}
+                colorScheme="blue"
+              />
+            </InputRightElement>
+          </InputGroup>
 
+          {/* Schedule Link */}
+        </Flex>
+        {/* Left Icon Button */}
+        <Flex w={"full"} justifyContent={"space-between"}>
+          <IconButton
+            icon={<PlusIcon color="gray" />}
+            aria-label="Add"
+            variant="ghost"
+            borderRadius="full"
+            size="sm"
+            bg={"blue.50"}
+            colorScheme="blue"
+          />
+          <Text
+            fontSize="sm"
+            color="blue.500"
+            cursor="pointer"
+            textDecor={"underline"}
+          >
+            Schedule
+          </Text>
+        </Flex>
         <Box pt={10} w="full">
           <Heading size="md" mb={4} fontWeight="medium">
             Trending Workflows
@@ -86,8 +131,10 @@ const DashboardHome = () => {
                       flexShrink={0}
                     />
                     <VStack align="start" spacing={3}>
-                      <Text fontWeight="medium">{workflow.title}</Text>
-                      <Text fontSize="sm" color="gray.600">
+                      <Text fontWeight="medium" fontFamily={"Joan"}>
+                        {workflow.title}
+                      </Text>
+                      <Text fontSize="sm" fontFamily={"Inter"} color="gray.600">
                         {workflow.description}
                       </Text>
                     </VStack>

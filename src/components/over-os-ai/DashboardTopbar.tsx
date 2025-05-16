@@ -34,7 +34,7 @@ const DashboardTopbar = () => {
         fontWeight={400}
         px={6}
       >
-        Share
+        Ai Screen Share
       </Button>
     </Flex>
   );
