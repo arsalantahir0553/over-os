@@ -4,6 +4,8 @@ import Layout from "./layout";
 import ContactUs from "./pages/contact-us";
 import Home from "./pages/home";
 import WaitingList from "./pages/waiting-list";
+import PrivacyPolicy from "./pages/privacy-policy";
+import EULA from "./pages/eula/EULA";
 
 const App = () => {
   return (
@@ -14,6 +16,8 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/waiting-list" element={<WaitingList />} />
           <Route path="/contact-us" element={<ContactUs />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/eula" element={<EULA />} />
         </Routes>
       </Layout>
     </Router>
