@@ -5,12 +5,15 @@ import App from "./App.tsx";
 import { ChakraProvider, theme } from "@chakra-ui/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./utils/apis/query.client.ts";
+import { UserInputProvider } from "./context/chat.provider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ChakraProvider theme={theme}>
-        <App />
+        <UserInputProvider>
+          <App />
+        </UserInputProvider>
       </ChakraProvider>
     </QueryClientProvider>
   </StrictMode>

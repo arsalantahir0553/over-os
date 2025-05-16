@@ -1,3 +1,4 @@
+import { useUserInput } from "@/context/useChatContext";
 import {
   Box,
   Card,
@@ -18,6 +19,7 @@ import { PlusIcon } from "lucide-react";
 import { FaLink } from "react-icons/fa";
 import { LuNotepadText } from "react-icons/lu";
 import { MdOutlineDynamicForm, MdOutlineWifiTethering } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 const trendingWorkflows = [
   {
@@ -42,6 +44,16 @@ const trendingWorkflows = [
 
 const DashboardHome = () => {
   const cardBg = useColorModeValue("white", "gray.800");
+  const { userInput, setUserInput } = useUserInput();
+  const navigate = useNavigate();
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // prevent newline on enter without shift
+      if (userInput.trim() !== "") {
+        navigate("/search");
+      }
+    }
+  };
 
   return (
     <Box maxW="800px" mx="auto" py={6}>
@@ -70,7 +82,14 @@ const DashboardHome = () => {
               bg="white"
               pr="3rem"
               shadow={"md"}
+              fontFamily={"Inter"}
+              fontSize={"17px"}
+              pl={4}
+              color={"gray.600"}
               resize={"none"}
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
             <InputRightElement top="36px" right="10px">
               <IconButton

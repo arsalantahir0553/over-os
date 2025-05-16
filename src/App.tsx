@@ -7,6 +7,7 @@ import WaitingList from "./pages/waiting-list";
 import OverOsLayout from "./pages/over-os-ai/layout";
 import Layout from "./layout";
 import DashboardHome from "./pages/over-os-ai";
+import ChatLoading from "./pages/over-os-ai/chat-loading";
 
 const App = () => {
   return (
@@ -23,6 +24,7 @@ const App = () => {
         {/* Dashboard routes with OverOs layout */}
         <Route element={<OverOsLayout />}>
           <Route path="/dashboard" element={<DashboardHome />} />
+          <Route path="/search" element={<ChatLoading />} />
           {/* Add more internal routes here */}
         </Route>
       </Routes>
