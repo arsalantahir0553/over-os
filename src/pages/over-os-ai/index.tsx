@@ -12,6 +12,7 @@ import {
   Text,
   Textarea,
   useColorModeValue,
+  useDisclosure,
   VStack,
 } from "@chakra-ui/react";
 import { PlusIcon } from "lucide-react";
@@ -20,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import Workflow1 from "../../assets/svgs/workflow-1.svg";
 import Workflow2 from "../../assets/svgs/workflow-2.svg";
 import Workflow3 from "../../assets/svgs/workflow-3.svg";
+import SmartInvoiceModal from "@/components/over-os-ai/SmartInvoiceModal";
 
 const trendingWorkflows = [
   {
@@ -44,6 +46,7 @@ const trendingWorkflows = [
 
 const DashboardHome = () => {
   const cardBg = useColorModeValue("white", "gray.800");
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const { userInput, setUserInput } = useUserInput();
   const navigate = useNavigate();
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -142,7 +145,12 @@ const DashboardHome = () => {
                 borderBottomWidth={"3px"}
               >
                 <CardBody>
-                  <VStack align="start" spacing={4}>
+                  <VStack
+                    align="start"
+                    spacing={4}
+                    onClick={onOpen}
+                    cursor={"pointer"}
+                  >
                     <Image src={workflow.icon} w={"33px"} h={"33px"} />
                     <VStack align="start" spacing={3}>
                       <Text
@@ -167,6 +175,7 @@ const DashboardHome = () => {
           </SimpleGrid>
         </Box>
       </VStack>
+      <SmartInvoiceModal isOpen={isOpen} onClose={onClose} />
     </Box>
   );
 };
