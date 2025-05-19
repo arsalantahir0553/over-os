@@ -4,9 +4,8 @@ import {
   Card,
   CardBody,
   Flex,
-  Heading,
-  Icon,
   IconButton,
+  Image,
   InputGroup,
   InputRightElement,
   SimpleGrid,
@@ -17,25 +16,26 @@ import {
 } from "@chakra-ui/react";
 import { PlusIcon } from "lucide-react";
 import { FaLink } from "react-icons/fa";
-import { LuNotepadText } from "react-icons/lu";
-import { MdOutlineDynamicForm, MdOutlineWifiTethering } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import Workflow1 from "../../assets/svgs/workflow-1.svg";
+import Workflow2 from "../../assets/svgs/workflow-2.svg";
+import Workflow3 from "../../assets/svgs/workflow-3.svg";
 
 const trendingWorkflows = [
   {
-    icon: MdOutlineWifiTethering,
+    icon: Workflow1,
     title: "Send a file from your desktop via Email or Slack",
     description:
       "Agent finds a doc (e.g., resume, NDA, PDF invoice), drafts a message, and sends it through Gmail or Slack.",
   },
   {
-    icon: MdOutlineDynamicForm,
+    icon: Workflow2,
     title: "Auto-fill complex forms using your documents",
     description:
       "Reads local files (e.g., resume, tax data), extracts key info, fills out web forms like job applications.",
   },
   {
-    icon: LuNotepadText,
+    icon: Workflow3,
     title: "Summarize meetings, articles, or documents",
     description:
       "Ingests transcripts, long PDFs, or multiple web articles and outputs a clean summary with headings.",
@@ -50,7 +50,7 @@ const DashboardHome = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault(); // prevent newline on enter without shift
       if (userInput.trim() !== "") {
-        navigate("/search");
+        navigate("/chat");
       }
     }
   };
@@ -58,26 +58,27 @@ const DashboardHome = () => {
   return (
     <Box maxW="800px" mx="auto" py={6}>
       <VStack spacing={2} align="left">
-        <Heading size="xl" fontWeight={400} fontFamily="Joan">
+        <Text fontSize="48px" fontWeight={400} fontFamily="Joan">
           What is your goal?
-        </Heading>
+        </Text>
         <Text
-          fontSize="3xl"
+          fontSize="32px"
           fontWeight={400}
-          color="blue.600"
+          color="primary.500"
           fontFamily="Joan"
+          lineHeight={"24px"}
         >
           I’ll plan it out and take care of the work.
         </Text>
 
-        <Flex align="center" justify="space-between" p={0}>
+        <Flex align="center" justify="space-between" p={0} mt={10}>
           {/* Input Field with Right Icon */}
           <InputGroup flex="1" mt={6}>
             <Textarea
               placeholder="Ask Anything"
               _placeholder={{ color: "gray.400", fontsize: "12px" }}
               size="lg"
-              h="80px"
+              h="101px"
               borderRadius="2xl"
               bg="white"
               pr="3rem"
@@ -91,7 +92,7 @@ const DashboardHome = () => {
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={handleKeyDown}
             />
-            <InputRightElement top="36px" right="10px">
+            <InputRightElement top="56px" right="10px">
               <IconButton
                 icon={<FaLink width={"16px"} />}
                 aria-label="Add"
@@ -126,10 +127,10 @@ const DashboardHome = () => {
             Schedule
           </Text>
         </Flex>
-        <Box pt={10} w="full">
-          <Heading size="md" mb={4} fontWeight="medium">
+        <Box pt={10} mt={4} w="full">
+          <Text fontSize="22px" fontFamily={"Joan"} mb={4} fontWeight="medium">
             Trending Workflows
-          </Heading>
+          </Text>
           <SimpleGrid columns={[1, null, 3]} spacing={6}>
             {trendingWorkflows.map((workflow, index) => (
               <Card
@@ -142,18 +143,20 @@ const DashboardHome = () => {
               >
                 <CardBody>
                   <VStack align="start" spacing={4}>
-                    <Icon
-                      as={workflow.icon}
-                      boxSize={8}
-                      mt={1}
-                      //   color="blue.500"
-                      flexShrink={0}
-                    />
+                    <Image src={workflow.icon} w={"33px"} h={"33px"} />
                     <VStack align="start" spacing={3}>
-                      <Text fontWeight="medium" fontFamily={"Joan"}>
+                      <Text
+                        fontWeight="medium"
+                        fontSize={"18px"}
+                        fontFamily={"Joan"}
+                      >
                         {workflow.title}
                       </Text>
-                      <Text fontSize="sm" fontFamily={"Inter"} color="gray.600">
+                      <Text
+                        fontSize="14px"
+                        fontFamily={"Inter"}
+                        color="gray.600"
+                      >
                         {workflow.description}
                       </Text>
                     </VStack>

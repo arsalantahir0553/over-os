@@ -35,7 +35,7 @@ const DashboardSidebar = () => {
       display="flex"
       flexDirection="column"
       justifyContent="space-between"
-      bg="blue.900"
+      bg="brand.900"
       color="white"
       p={4}
     >
@@ -188,7 +188,11 @@ const DashboardSidebar = () => {
       >
         <Flex gap={3} cursor="pointer" align="center">
           <Avatar size="xs" name="John Doe" />
-          {responsiveIsExpanded && <Text color="gray.800">John Doe</Text>}
+          {responsiveIsExpanded && (
+            <Text color="gray.600" fontSize={"16px"} fontFamily={"Inter"}>
+              John Doe
+            </Text>
+          )}
         </Flex>
         {responsiveIsExpanded && <Image src={SettingsIcon} />}
       </Box>

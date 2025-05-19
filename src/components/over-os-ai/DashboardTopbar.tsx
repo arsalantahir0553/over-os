@@ -27,12 +27,15 @@ const DashboardTopbar = () => {
       {/* Share button with text and icon */}
       <Button
         rightIcon={<PiShareFat />}
-        colorScheme="blue"
         rounded={"full"}
         variant="solid"
         size={"sm"}
         fontWeight={400}
         px={6}
+        bg={"primary.500"}
+        color={"white"}
+        _hover={{ bg: "#1E5AAB" }}
+        _active={{ bg: "#184A8F" }}
       >
         Ai Screen Share
       </Button>
