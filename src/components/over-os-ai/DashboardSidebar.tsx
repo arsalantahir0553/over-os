@@ -28,6 +28,13 @@ const DashboardSidebar = () => {
     md: isExpanded, // medium and up, respect toggle
   });
 
+  const handleNavigate = () => {
+    navigate("/explore");
+  };
+  const handleNewChat = () => {
+    navigate("/dashboard");
+  };
+
   return (
     <Box
       w={responsiveIsExpanded ? "260px" : "80px"}
@@ -93,6 +100,7 @@ const DashboardSidebar = () => {
           py={2}
           rounded="md"
           _hover={{ bg: "whiteAlpha.200" }}
+          onClick={handleNewChat}
         >
           <Image src={NewMessageIcon} alt="New Chat" w={5} h={5} />
           {responsiveIsExpanded && <Text>New Chat</Text>}
@@ -108,6 +116,7 @@ const DashboardSidebar = () => {
           py={2}
           rounded="md"
           _hover={{ bg: "whiteAlpha.200" }}
+          onClick={handleNavigate}
         >
           <Image
             src={ExploreWorkflowsIcon}
