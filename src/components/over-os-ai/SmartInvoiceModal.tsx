@@ -115,7 +115,14 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
             </Box>
           </Box>
 
-          <Flex justify="space-between" gap={4} mb={8} mt={20} wrap="wrap">
+          <Flex
+            justify="space-between"
+            mx={4}
+            gap={4}
+            mb={8}
+            mt={20}
+            wrap="wrap"
+          >
             <Box
               flex="1"
               p={4}
@@ -177,7 +184,7 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
                   fontSize={"30px"}
                   mb={2}
                 >
-                  Key Benifit
+                  Key Benifits
                 </Text>
                 <Box as={"ul"} listStyleType={"none"} fontWeight={350}>
                   <Box fontSize={"15px"} as={"li"}>
@@ -202,7 +209,7 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
 
           <Divider mb={6} />
 
-          <VStack spacing={4}>
+          <VStack spacing={4} pb={10}>
             <Text fontWeight="semibold" fontSize="md">
               What users say
             </Text>
@@ -225,7 +232,7 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
             <Text
               fontSize="sm"
               color="gray.700"
-              maxW="500px"
+              maxW="700px"
               textAlign="center"
             >
               This is absolutely revolutionary. I’ve been waiting on an

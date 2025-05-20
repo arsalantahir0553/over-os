@@ -1,6 +1,5 @@
 import { Button, Flex, IconButton } from "@chakra-ui/react";
 import { FiSearch } from "react-icons/fi";
-import { PiShareFat } from "react-icons/pi";
 
 const DashboardTopbar = () => {
   return (
@@ -18,19 +17,19 @@ const DashboardTopbar = () => {
     >
       {/* Search Icon - right side */}
       <IconButton
-        icon={<FiSearch />}
+        icon={<FiSearch color="gray" />}
         aria-label="Search"
         variant="ghost"
-        fontSize="20px"
+        fontSize="23px"
       />
 
       {/* Share button with text and icon */}
       <Button
-        rightIcon={<PiShareFat />}
         rounded={"full"}
         variant="solid"
-        size={"sm"}
+        fontSize={"22px"}
         fontWeight={400}
+        fontFamily={"Inter"}
         px={6}
         bg={"primary.500"}
         color={"white"}
