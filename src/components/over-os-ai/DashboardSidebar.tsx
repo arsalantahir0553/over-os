@@ -50,7 +50,7 @@ const DashboardSidebar = () => {
       <Flex justify="space-between" align="center" mb={6} position={"relative"}>
         <Image
           src={responsiveIsExpanded ? Logo : LogoCollapsed}
-          maxH="40px"
+          maxH="59px"
           cursor="pointer"
           onClick={() => navigate("/dashboard")}
           mx={responsiveIsExpanded ? 0 : "auto"}
@@ -133,7 +133,7 @@ const DashboardSidebar = () => {
 
         {responsiveIsExpanded && (
           <>
-            <Text fontSize="sm" color="whiteAlpha.700">
+            <Text fontSize="18px" fontFamily={"Joan"} color={"#D9D9D9"} ml={2}>
               Today
             </Text>
             <VStack align="start" spacing={2}>
@@ -147,7 +147,9 @@ const DashboardSidebar = () => {
                   px={2}
                   py={1}
                   rounded="md"
+                  fontSize={"16px"}
                   cursor="pointer"
+                  color={"#D9D9D9"}
                   _hover={{ bg: "whiteAlpha.200" }}
                 >
                   {item}
@@ -155,7 +157,13 @@ const DashboardSidebar = () => {
               ))}
             </VStack>
 
-            <Text fontSize="sm" color="whiteAlpha.700" mt={4}>
+            <Text
+              fontSize="18px"
+              fontFamily={"Joan"}
+              color={"#D9D9D9"}
+              mt={4}
+              ml={2}
+            >
               Yesterday
             </Text>
             <VStack align="start" spacing={2}>
@@ -170,6 +178,8 @@ const DashboardSidebar = () => {
                   px={2}
                   py={1}
                   rounded="md"
+                  fontSize={"16px"}
+                  color={"#D9D9D9"}
                   cursor="pointer"
                   _hover={{ bg: "whiteAlpha.200" }}
                 >

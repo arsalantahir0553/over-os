@@ -1,3 +1,4 @@
+import SmartInvoiceModal from "@/components/over-os-ai/SmartInvoiceModal";
 import { useUserInput } from "@/context/useChatContext";
 import {
   Box,
@@ -11,17 +12,16 @@ import {
   SimpleGrid,
   Text,
   Textarea,
+  Tooltip,
   useColorModeValue,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import { PlusIcon } from "lucide-react";
-import { FaLink } from "react-icons/fa";
+import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Workflow1 from "../../assets/svgs/workflow-1.svg";
 import Workflow2 from "../../assets/svgs/workflow-2.svg";
 import Workflow3 from "../../assets/svgs/workflow-3.svg";
-import SmartInvoiceModal from "@/components/over-os-ai/SmartInvoiceModal";
 
 const trendingWorkflows = [
   {
@@ -79,9 +79,12 @@ const DashboardHome = () => {
           <InputGroup flex="1" mt={6}>
             <Textarea
               placeholder="Ask Anything"
-              _placeholder={{ color: "gray.400", fontsize: "12px" }}
+              _placeholder={{
+                color: "gray.400",
+                fontsize: "12px",
+              }}
               size="lg"
-              h="101px"
+              h="50px"
               borderRadius="2xl"
               bg="white"
               pr="3rem"
@@ -89,22 +92,30 @@ const DashboardHome = () => {
               fontFamily={"Inter"}
               fontSize={"17px"}
               pl={4}
+              pt={4}
               color={"gray.600"}
               resize={"none"}
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={handleKeyDown}
             />
-            <InputRightElement top="56px" right="10px">
-              <IconButton
-                icon={<FaLink width={"16px"} />}
-                aria-label="Add"
-                variant="ghost"
-                borderRadius="full"
-                size="sm"
-                bg={"blue.50"}
-                colorScheme="blue"
-              />
+            <InputRightElement top="36px" right="10px">
+              <Tooltip
+                label="Upload"
+                aria-label="Upload Tooltip"
+                rounded={"8px"}
+                placement="top"
+              >
+                <IconButton
+                  icon={<Upload width="16px" />}
+                  aria-label="Add"
+                  variant="ghost"
+                  borderRadius="full"
+                  size="sm"
+                  bg="blue.50"
+                  colorScheme="blue"
+                />
+              </Tooltip>
             </InputRightElement>
           </InputGroup>
 
@@ -121,14 +132,23 @@ const DashboardHome = () => {
             bg={"blue.50"}
             colorScheme="blue"
           />
-          <Text
-            fontSize="sm"
-            color="blue.500"
-            cursor="pointer"
-            textDecor={"underline"}
+          <Tooltip
+            label="Schedule"
+            aria-label="Schedule Tooltip"
+            rounded={"8px"}
+            placement="top"
           >
-            Schedule
-          </Text>
+            <IconButton
+              icon={<Clock10Icon width="16px" />}
+              aria-label="Add"
+              variant="ghost"
+              borderRadius="full"
+              size="sm"
+              bg="blue.50"
+              mr={3}
+              colorScheme="blue"
+            />
+          </Tooltip>
         </Flex>
         <Box pt={10} mt={4} w="full">
           <Text fontSize="22px" fontFamily={"Joan"} mb={4} fontWeight="medium">
