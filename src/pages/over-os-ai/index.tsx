@@ -81,16 +81,18 @@ const DashboardHome = () => {
               placeholder="Ask Anything"
               _placeholder={{
                 color: "gray.400",
-                fontsize: "12px",
+                fontsize: "16px",
+                fontFamily: "Inter",
+                fontWeight: "400",
               }}
               size="lg"
               h="50px"
               borderRadius="2xl"
               bg="white"
               pr="3rem"
+              fontSize={"16px"}
               shadow={"md"}
               fontFamily={"Inter"}
-              fontSize={"17px"}
               pl={4}
               pt={4}
               color={"gray.600"}

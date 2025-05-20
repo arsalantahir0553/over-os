@@ -198,10 +198,16 @@ const Chat = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               bg="white"
+              fontSize={"16px"}
               h="50px"
               fontFamily={"Inter"}
               resize="none"
-              _placeholder={{ color: "gray.400", fontsize: "16px" }}
+              _placeholder={{
+                color: "gray.400",
+                fontsize: "16px",
+                fontFamily: "Inter",
+                fontWeight: "400",
+              }}
               pl={5}
               pt={4}
             />
