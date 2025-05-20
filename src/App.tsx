@@ -1,25 +1,38 @@
 import { Toaster } from "react-hot-toast";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+
 import Layout from "./layout";
 import ContactUs from "./pages/contact-us";
 import Home from "./pages/home";
+import DashboardHome from "./pages/over-os-ai";
+import OverOsLayout from "./pages/over-os-ai/layout";
 import WaitingList from "./pages/waiting-list";
 import PrivacyPolicy from "./pages/privacy-policy";
 import EULA from "./pages/eula/EULA";
+import Chat from "./pages/over-os-ai/chat";
+import WorkflowLibrary from "./pages/over-os-ai/workflow-library";
 
 const App = () => {
   return (
     <Router>
-      <Layout>
-        <Toaster position="top-center" />
-        <Routes>
+      <Toaster position="top-center" />
+      <Routes>
+        {/* Public-facing pages with main Layout */}
+        <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/waiting-list" element={<WaitingList />} />
           <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/eula" element={<EULA />} />
-        </Routes>
-      </Layout>
+        </Route>
+
+        {/* Dashboard pages with OverOs layout */}
+        <Route element={<OverOsLayout />}>
+          <Route path="/dashboard" element={<DashboardHome />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/explore" element={<WorkflowLibrary />} />
+        </Route>
+      </Routes>
     </Router>
   );
 };
