@@ -1,9 +1,9 @@
 import {
   Box,
   Grid,
-  Heading,
   Image,
   Input,
+  InputGroup,
   Tag,
   Text,
   VStack,
@@ -18,85 +18,103 @@ import Recommended5 from "../../../assets/svgs/recommended-5.svg";
 import Recommended6 from "../../../assets/svgs/recommended-6.svg";
 import Treding1 from "../../../assets/svgs/workflow-1.svg";
 import Treding2 from "../../../assets/svgs/workflow-2.svg";
-import Treding4 from "../../../assets/svgs/workflow-3.svg";
-import Treding3 from "../../../assets/svgs/workflow-4.svg";
+import Treding3 from "../../../assets/svgs/workflow-3.svg";
+import Treding4 from "../../../assets/svgs/workflow-4.svg";
 
 interface WorkflowCardProps {
   icon: string;
   title: string;
   desc: string;
 }
+
 const trending = [
   {
     icon: Treding1,
-    title: "Send all free-form paper slips to Alex’s Slack",
-    desc: "Push physical slips to Slack via OCR, tagging, sorting. Built for external client handoff.",
+    title: "Send a file from your desktop via Email or Slack",
+    desc: "Agent finds a doc (e.g., resume, NDA, PDF invoice), drafts a message, and sends it through Gmail, Outlook, or Slack.",
   },
   {
     icon: Treding2,
-    title: "Auto-ETL complex forms",
-    desc: "OCR and normalize client-submitted paperwork like IRS, contracts, tax forms.",
+    title: "Auto-fill complex forms using your documents",
+    desc: "Reads local files (e.g., ID, resume, tax data), extracts key info, fills out web forms like job applications or DMV renewals.",
   },
   {
     icon: Treding3,
-    title: "Book a consulting call",
-    desc: "Client books + fills call-prep form. Analyst gets structured context automatically.",
+    title: "Book a meeting and send confirmations",
+    desc: "Checks calendar availability, opens browser to Calendly/Google, books meeting, and confirms by email or chat.",
   },
   {
     icon: Treding4,
-    title: "Streamline receipts, statements",
-    desc: "Ingest + classify receipts, PDFs, bank statements. Prepares for accounting software.",
+    title: "Summarize meetings, articles, or documents",
+    desc: "Ingests transcripts, long PDFs, or multiple web articles and outputs a clean summary with key takeaways.",
   },
 ];
 
 const recommended = [
   {
     icon: Recommended1,
-    title: "Email-to-booking 1.0",
-    desc: "Client emails get parsed + sorted to calendar-ready prompts for admin.",
+    title: "Turn receipts or scanned docs into expense reports",
+    desc: "Watches a folder for receipts, OCRs them, fills expense templates or submits to QuickBooks.",
   },
   {
     icon: Recommended2,
-    title: "Track deadlines and send reminders",
-    desc: "Remind internal or external contacts for docs, filings, etc.",
+    title: "Track deadlines and send smart reminders",
+    desc: "Parses documents, forms, or tasks for dates and sets calendar events + Slack/email reminders.",
   },
   {
     icon: Recommended3,
-    title: "Research & draft custom agreements",
-    desc: "Respond to early client signals with accurate, fill-ready docs.",
+    title: "Research & draft custom outreach messages",
+    desc: "Agent takes a CSV of leads, researches each online, and drafts personalized cold emails or LinkedIn messages.",
   },
   {
     icon: Recommended4,
-    title: "Prepare weekly report slide deck",
-    desc: "Autofill a weekly template with updated data + wins.",
+    title: "Prepare a weekly report or slide deck",
+    desc: "Aggregates files, logs, updates from your system and auto-generates a ready-to-send report or presentation.",
   },
   {
     icon: Recommended5,
-    title: "Smart filters",
-    desc: "Create rules for classifying workflows based on keywords or document types.",
+    title: "Find the housing in a zipcode",
+    desc: "Go over to airbnb & apartments.com, Browser adds in right filter and reaches out to relevant property owners for info",
   },
   {
     icon: Recommended6,
-    title: "Lead Capture → CRM Upload/Email trigger",
-    desc: "Auto-uploads captured leads into CRM, sends a welcome email.",
+    title: "Lead Capture → CRM Update/Email marketing",
+    desc: "Connects form apps (Typeform, Webflow) to CRMs (HubSpot, Salesforce); static field mapping.",
   },
 ];
 
 const WorkflowCard = ({ icon, title, desc }: WorkflowCardProps) => (
   <Box
-    borderRadius="lg"
-    boxShadow="md"
-    bg="white"
-    p={4}
+    borderRadius="2xl"
+    boxShadow="lg"
+    borderBottom={"2px"}
+    borderColor={"primary.500"}
+    bgGradient="linear(to-b, white, gray.50)"
+    p={6}
     w="full"
     h="100%"
-    _hover={{ boxShadow: "xl" }}
+    transition="all 0.25s ease"
+    _hover={{
+      transform: "translateY(-6px)",
+      boxShadow: "2xl",
+    }}
   >
-    <Image src={icon} boxSize="40px" mb={3} alt={title} />
-    <Text fontWeight="400" fontSize="md" mb={2}>
+    <Image src={icon} boxSize="50px" mb={4} alt={title} />
+    <Text
+      fontWeight="500"
+      fontSize="18px"
+      fontFamily={"Joan"}
+      mb={2}
+      color="gray.700"
+    >
       {title}
     </Text>
-    <Text fontSize="sm" color="gray.600">
+    <Text
+      fontSize="14px"
+      fontFamily={"Inter"}
+      fontWeight={400}
+      color="gray.500"
+    >
       {desc}
     </Text>
   </Box>
@@ -104,22 +122,32 @@ const WorkflowCard = ({ icon, title, desc }: WorkflowCardProps) => (
 
 const WorkflowLibrary = () => {
   return (
-    <Box px={8} py={6} bg="gray.50" minH="100vh">
-      <Text fontSize="28px" fontWeight={400} fontFamily={"joan"} mb={4}>
-        Workflow library
-      </Text>
-
-      <Input
-        placeholder="Search workflow here"
-        w={"full"}
+    <Box px={{ base: 4, md: 12 }} py={10} bg="gray.50" minH="100vh">
+      <Text
+        fontSize={{ base: "2xl", md: "28px" }}
+        fontWeight={400}
+        fontFamily="Joan"
         mb={4}
-        h={"71px"}
-        _placeholder={{ color: "gray.400" }}
-        pl={4}
-        borderRadius={"10px"}
-      />
+      >
+        Research Workflows
+      </Text>
+      {/* <Text fontSize="md" color="gray.500" mb={6}>
+        Automate tasks, save hours, and scale your team’s productivity.
+      </Text> */}
 
-      <Wrap spacing={3} mb={6}>
+      <InputGroup mb={6}>
+        <Input
+          placeholder="Search workflows here"
+          h="64px"
+          fontSize="18px"
+          borderRadius="10px"
+          borderColor="gray.300"
+          _placeholder={{ color: "gray.400", fontsize: "18px" }}
+          _focusVisible={{ borderColor: "blue.400", boxShadow: "sm" }}
+        />
+      </InputGroup>
+
+      <Wrap spacing={3} mb={10}>
         {[
           "Client",
           "Research",
@@ -127,19 +155,20 @@ const WorkflowLibrary = () => {
           "Medical",
           "Personal Use",
           "Search",
-        ].map((tag) => (
-          <WrapItem key={tag}>
+        ].map((tag, idx) => (
+          <WrapItem key={idx}>
             <Tag
-              cursor={"pointer"}
               size="lg"
-              borderWidth={"1px"}
-              fontSize={"18px"}
-              borderColor={"gray.300"}
-              color={"gray.400"}
-              variant="ghost"
-              colorScheme="gray"
-              borderRadius={"full"}
-              _hover={{ borderColor: "#2368C4", color: "#2368C4" }}
+              px={4}
+              py={1}
+              fontSize="15px"
+              fontWeight={500}
+              color={"white"}
+              bg={"primary.500"}
+              variant="solid"
+              borderRadius="full"
+              cursor="pointer"
+              _hover={{ bg: "brand.500" }}
             >
               {tag}
             </Tag>
@@ -147,16 +176,21 @@ const WorkflowLibrary = () => {
         ))}
       </Wrap>
 
-      <VStack align="start" spacing={6}>
+      <VStack align="start" spacing={10}>
         <Box w="full">
-          <Heading size="md" mb={4}>
-            Trending Workflow
-          </Heading>
+          <Text
+            fontSize={{ base: "2xl", md: "24px" }}
+            fontWeight={400}
+            fontFamily="Joan"
+            mb={3}
+          >
+            🔥 Trending Workflows
+          </Text>
           <Grid
             templateColumns={{
               base: "1fr",
               md: "repeat(2, 1fr)",
-              lg: "repeat(4, 1fr)",
+              xl: "repeat(4, 1fr)",
             }}
             gap={6}
           >
@@ -167,14 +201,19 @@ const WorkflowLibrary = () => {
         </Box>
 
         <Box w="full">
-          <Heading size="md" mb={4}>
-            Recommended For You
-          </Heading>
+          <Text
+            fontSize={{ base: "2xl", md: "24px" }}
+            fontWeight={400}
+            fontFamily="Joan"
+            mb={3}
+          >
+            ⭐ Recommended For You
+          </Text>
           <Grid
             templateColumns={{
               base: "1fr",
               md: "repeat(2, 1fr)",
-              lg: "repeat(3, 1fr)",
+              xl: "repeat(3, 1fr)",
             }}
             gap={6}
           >

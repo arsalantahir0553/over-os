@@ -1,4 +1,13 @@
-import { Button, Flex, IconButton } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+} from "@chakra-ui/react";
+import { ChevronDownIcon } from "lucide-react";
 import { FiSearch } from "react-icons/fi";
 
 const DashboardTopbar = () => {
@@ -22,6 +31,30 @@ const DashboardTopbar = () => {
         variant="ghost"
         fontSize="23px"
       />
+
+      {/* Menu Button */}
+      <Menu>
+        <MenuButton
+          as={Button}
+          rounded={"full"}
+          variant="solid"
+          fontSize={"22px"}
+          fontWeight={400}
+          fontFamily={"Inter"}
+          px={6}
+          bg={"primary.500"}
+          color={"white"}
+          _hover={{ bg: "#1E5AAB" }}
+          _active={{ bg: "#184A8F" }}
+          rightIcon={<ChevronDownIcon />}
+        >
+          Workflows
+        </MenuButton>
+        <MenuList>
+          <MenuItem>View Logs</MenuItem>
+          <MenuItem>Settings</MenuItem>
+        </MenuList>
+      </Menu>
 
       {/* Share button with text and icon */}
       <Button

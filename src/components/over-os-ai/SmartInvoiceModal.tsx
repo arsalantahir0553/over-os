@@ -127,16 +127,13 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
               flex="1"
               p={4}
               bg="gray.50"
+              border="1px solid"
+              borderColor="primary.300"
               borderRadius="md"
               minH="300px"
               minW="250px"
             >
-              <Flex
-                direction="column"
-                justify="center"
-                h="100%"
-                pl={4} // left padding
-              >
+              <Flex direction="column" justify="center" h="100%" pl={4}>
                 <Text
                   fontWeight={400}
                   fontFamily={"Joan"}
@@ -167,28 +164,24 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
               flex="1"
               p={4}
               bg="gray.50"
+              border="1px solid"
+              borderColor="primary.300"
               borderRadius="md"
               minH="300px"
               minW="250px"
             >
-              <Flex
-                direction="column"
-                justify="center"
-                h="100%"
-                pl={4} // left padding
-              >
-                {" "}
+              <Flex direction="column" justify="center" h="100%" pl={4}>
                 <Text
                   fontWeight={400}
                   fontFamily={"Joan"}
                   fontSize={"30px"}
                   mb={2}
                 >
-                  Key Benifits
+                  Key Benefits
                 </Text>
                 <Box as={"ul"} listStyleType={"none"} fontWeight={350}>
                   <Box fontSize={"15px"} as={"li"}>
-                    Save Hours Every Weeks
+                    Save Hours Every Week
                   </Box>
                   <Box fontSize={"15px"} as={"li"}>
                     Drastically Reduce Errors
@@ -210,7 +203,12 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
           <Divider mb={6} />
 
           <VStack spacing={4} pb={10}>
-            <Text fontWeight="semibold" fontSize="md">
+            <Text
+              fontWeight="400"
+              fontFamily={"Joan"}
+              fontSize="30px"
+              letterSpacing={"1%"}
+            >
               What users say
             </Text>
             <Image
@@ -220,8 +218,15 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
               w="60px"
               h="60px"
             />
-            <Text fontWeight="medium">Arsalan Hanif</Text>
-            <Text fontSize="sm" color="gray.600">
+            <Text fontWeight="400" fontSize={"21.8px"} lineHeight={"150%"}>
+              Arsalan Hanif
+            </Text>
+            <Text
+              fontWeight="400"
+              fontSize={"16.35px"}
+              lineHeight={"150%"}
+              color={"primary.400"}
+            >
               Head of Automation @ InvoiceAI
             </Text>
             <Flex gap={1}>
@@ -230,8 +235,10 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
               ))}
             </Flex>
             <Text
-              fontSize="sm"
-              color="gray.700"
+              fontWeight="400"
+              fontSize={"15px"}
+              lineHeight={"144%"}
+              color={"primary.400"}
               maxW="700px"
               textAlign="center"
             >

@@ -17,6 +17,8 @@ const customTheme = extendTheme({
     },
     primary: {
       500: "#2368C4",
+      300: "#D9D9D9",
+      400: "#5C5C5C",
     },
   },
   fonts: {
