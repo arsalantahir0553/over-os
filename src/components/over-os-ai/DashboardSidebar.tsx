@@ -12,7 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ExploreWorkflowsIcon from "../../assets/svgs/explore-workflows.svg";
-import Logo from "../../assets/svgs/dashboard-logo.svg";
+import Logo from "../../assets/svgs/logo-beta.svg";
 import LogoCollapsed from "../../assets/svgs/logo-collapsed.svg";
 import NewMessageIcon from "../../assets/svgs/new-message.svg";
 import SettingsIcon from "../../assets/svgs/settings.svg";

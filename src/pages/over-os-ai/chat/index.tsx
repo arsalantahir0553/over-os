@@ -111,10 +111,12 @@ const Chat = () => {
                 maxW="70%"
                 px={4}
                 py={2}
-                borderRadius="lg"
+                borderRadius="20px"
                 bg={messages[0].from === "me" ? "white" : "transparent"}
                 color={messages[0].from === "me" ? "gray.800" : "white"}
-                boxShadow="md"
+                border={
+                  messages[0].from === "me" ? "1px solid #D9D9D9" : "none"
+                }
               >
                 <Text fontFamily={"Inter"} fontSize={"17px"}>
                   {messages[0].text}
@@ -174,10 +176,10 @@ const Chat = () => {
                   maxW="70%"
                   px={4}
                   py={2}
-                  borderRadius="lg"
+                  borderRadius="20px"
                   bg={msg.from === "me" ? "white" : "transparent"}
                   color={msg.from === "me" ? "gray.800" : "gray.800"}
-                  boxShadow={msg.from === "me" ? "md" : "none"}
+                  border={msg.from === "me" ? "1px solid #D9D9D9" : "none"}
                 >
                   <Text
                     fontFamily={msg.from === "me" ? "Inter" : ""}
