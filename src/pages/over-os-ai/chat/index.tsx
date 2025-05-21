@@ -1,6 +1,17 @@
 import { useUserInput } from "@/context/useChatContext";
-import { Box, Flex, Text, Textarea, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  IconButton,
+  InputGroup,
+  InputRightElement,
+  Text,
+  Textarea,
+  Tooltip,
+  VStack,
+} from "@chakra-ui/react";
 import { animate, motion, useMotionValue } from "framer-motion";
+import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FaBrain, FaCogs, FaRobot, FaSearch, FaSpinner } from "react-icons/fa";
 
@@ -91,12 +102,12 @@ const Chat = () => {
   return (
     <Flex
       direction="column"
-      h="83.5vh"
+      h="81.5vh"
       maxH="100vh"
       maxW={"90%"}
       mx={"auto"}
       px={4}
-      py={2}
+      pt={2}
       bg="gray.50"
     >
       {!isLoading ? (
@@ -192,28 +203,82 @@ const Chat = () => {
             ))}
           </VStack>
 
-          <Box mt="auto" pt={2}>
-            <Textarea
-              placeholder="Ask Anything"
-              value={input}
-              borderRadius={"20px"}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              bg="white"
-              fontSize={"16px"}
-              h="50px"
-              fontFamily={"Inter"}
-              resize="none"
-              _placeholder={{
-                color: "gray.400",
-                fontsize: "16px",
-                fontFamily: "Inter",
-                fontWeight: "400",
-              }}
-              pl={5}
-              pt={4}
+          <Flex align="center" justify="space-between" mb={2}>
+            {/* Input Field with Right Icon */}
+            <InputGroup flex="1" mt={6}>
+              <Textarea
+                placeholder="Ask Anything"
+                _placeholder={{
+                  color: "gray.400",
+                  fontsize: "16px",
+                  fontFamily: "Inter",
+                  fontWeight: "400",
+                }}
+                size="lg"
+                h="50px"
+                borderRadius="2xl"
+                bg="white"
+                pr="3rem"
+                fontSize={"16px"}
+                fontFamily={"Inter"}
+                pl={4}
+                pt={4}
+                color={"gray.600"}
+                resize={"none"}
+                value={userInput}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+              <InputRightElement top="36px" right="10px">
+                <Tooltip
+                  label="Upload"
+                  aria-label="Upload Tooltip"
+                  rounded={"8px"}
+                  placement="top"
+                >
+                  <IconButton
+                    icon={<Upload width="16px" />}
+                    aria-label="Add"
+                    variant="ghost"
+                    borderRadius="full"
+                    size="sm"
+                    bg="blue.50"
+                    colorScheme="blue"
+                  />
+                </Tooltip>
+              </InputRightElement>
+            </InputGroup>
+
+            {/* Schedule Link */}
+          </Flex>
+          <Flex w={"full"} justifyContent={"space-between"}>
+            <IconButton
+              icon={<PlusIcon color="gray" />}
+              aria-label="Add"
+              variant="ghost"
+              borderRadius="full"
+              size="sm"
+              bg={"blue.50"}
+              colorScheme="blue"
             />
-          </Box>
+            <Tooltip
+              label="Schedule"
+              aria-label="Schedule Tooltip"
+              rounded={"8px"}
+              placement="top"
+            >
+              <IconButton
+                icon={<Clock10Icon width="16px" />}
+                aria-label="Add"
+                variant="ghost"
+                borderRadius="full"
+                size="sm"
+                bg="blue.50"
+                mr={3}
+                colorScheme="blue"
+              />
+            </Tooltip>
+          </Flex>
         </>
       )}
     </Flex>
