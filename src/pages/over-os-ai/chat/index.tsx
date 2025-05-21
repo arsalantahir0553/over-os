@@ -225,7 +225,7 @@ const Chat = () => {
                 pt={4}
                 color={"gray.600"}
                 resize={"none"}
-                value={userInput}
+                value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
               />
