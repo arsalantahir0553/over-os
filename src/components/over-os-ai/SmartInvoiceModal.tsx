@@ -4,6 +4,7 @@ import {
   Center,
   Divider,
   Flex,
+  Icon,
   Image,
   Modal,
   ModalCloseButton,
@@ -16,11 +17,25 @@ import {
 import { FaStar } from "react-icons/fa";
 import graphImage from "../../assets/images/graph.png";
 import TestimonialImage from "../../assets/images/testimonial.png";
+import { CheckCircleIcon, StarIcon } from "lucide-react";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
 }
+
+const peopleList = [
+  "Accountants and bookkeepers to speedup their calculations",
+  "Freelancers and consultants",
+  "Small to mid-sized business owners",
+  "Finance teams handling recurring vendor invoices and receipts",
+];
+
+const benefitsList = [
+  "Eliminate time-consuming manual entry by automating invoice processing and categorization",
+  "Minimize human mistakes like typos, duplicates, and misclassifications with AI-driven precision",
+  "Invoices are intelligently classified using historical data, vendor profiles, and spending patterns",
+];
 
 const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
   return (
@@ -115,90 +130,7 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
             </Box>
           </Box>
 
-          <Flex
-            justify="space-between"
-            mx={4}
-            gap={4}
-            mb={8}
-            mt={20}
-            wrap="wrap"
-          >
-            <Box
-              flex="1"
-              p={4}
-              bg="gray.50"
-              border="1px solid"
-              borderColor="primary.300"
-              borderRadius="md"
-              minH="300px"
-              minW="250px"
-            >
-              <Flex direction="column" justify="center" h="100%" pl={4}>
-                <Text
-                  fontWeight={400}
-                  fontFamily={"Joan"}
-                  fontSize={"30px"}
-                  mb={2}
-                >
-                  Who This Is For
-                </Text>
-                <Box as={"ul"} listStyleType={"none"} fontWeight={350}>
-                  <Box fontSize={"15px"} as={"li"}>
-                    Accountants and bookkeepers
-                  </Box>
-                  <Box fontSize={"15px"} as={"li"}>
-                    Freelancers and consultants
-                  </Box>
-                  <Box fontSize={"15px"} as={"li"}>
-                    Small to mid-sized business owners
-                  </Box>
-                  <Box fontSize={"15px"} as={"li"}>
-                    Finance teams handling recurring vendor invoices and
-                    receipts
-                  </Box>
-                </Box>
-              </Flex>
-            </Box>
-
-            <Box
-              flex="1"
-              p={4}
-              bg="gray.50"
-              border="1px solid"
-              borderColor="primary.300"
-              borderRadius="md"
-              minH="300px"
-              minW="250px"
-            >
-              <Flex direction="column" justify="center" h="100%" pl={4}>
-                <Text
-                  fontWeight={400}
-                  fontFamily={"Joan"}
-                  fontSize={"30px"}
-                  mb={2}
-                >
-                  Key Benefits
-                </Text>
-                <Box as={"ul"} listStyleType={"none"} fontWeight={350}>
-                  <Box fontSize={"15px"} as={"li"}>
-                    Save Hours Every Week
-                  </Box>
-                  <Box fontSize={"15px"} as={"li"}>
-                    Drastically Reduce Errors
-                  </Box>
-                  <Box fontSize={"15px"} as={"li"}>
-                    Instant, Smart Categorization
-                  </Box>
-                  <Box fontSize={"15px"} as={"li"}>
-                    Seamless QuickBooks Integration
-                  </Box>
-                  <Box fontSize={"15px"} as={"li"}>
-                    Faster Month-End Close
-                  </Box>
-                </Box>
-              </Flex>
-            </Box>
-          </Flex>
+          <EnhancedInfoSection />
 
           <Divider mb={6} />
 
@@ -254,3 +186,80 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
 };
 
 export default SmartInvoiceModal;
+
+const InfoCard = ({
+  title,
+  subtitle,
+  items,
+  icon,
+  color,
+}: {
+  title: string;
+  subtitle?: string;
+  items: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: any;
+  color: string;
+}) => (
+  <Box
+    flex="1"
+    minW="280px"
+    borderRadius="2xl"
+    p={6}
+    bgGradient={`linear(to-br, ${color}.50, white)`}
+    boxShadow="md"
+    border={`1px solid`}
+    borderColor={`${color}.200`}
+    transition="all 0.3s"
+    _hover={{ boxShadow: "xl", transform: "translateY(-4px)" }}
+  >
+    <Text fontSize="30px" fontWeight={40} fontFamily="Joan" mb={2}>
+      {title}
+    </Text>
+    {subtitle && (
+      <Text fontSize="sm" color="gray.500" mb={4}>
+        {subtitle}
+      </Text>
+    )}
+
+    <VStack align="start" spacing={3}>
+      {items.map((item, idx) => (
+        <Flex key={idx}>
+          <Icon as={icon} mt={"5px"} color={`${color}.500`} mr={2} />
+          <Text fontSize="15" fontWeight={350} color="gray.700">
+            {item}
+          </Text>
+        </Flex>
+      ))}
+    </VStack>
+  </Box>
+);
+
+const EnhancedInfoSection = () => {
+  return (
+    <Flex
+      justify="space-between"
+      mx={{ base: 4, md: 10 }}
+      gap={8}
+      mt={20}
+      wrap="wrap"
+      mb={16}
+    >
+      <InfoCard
+        title="Who This Is For"
+        subtitle="Ideal users who’ll benefit the most"
+        items={peopleList}
+        icon={StarIcon}
+        color="blue"
+      />
+
+      <InfoCard
+        title="Key Benefits"
+        subtitle="What you gain by using our workflows"
+        items={benefitsList}
+        icon={CheckCircleIcon}
+        color="green"
+      />
+    </Flex>
+  );
+};

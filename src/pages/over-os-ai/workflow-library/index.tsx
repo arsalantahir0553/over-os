@@ -1,5 +1,6 @@
 import {
   Box,
+  Flex,
   Grid,
   Image,
   Input,
@@ -20,6 +21,12 @@ import Treding1 from "../../../assets/svgs/workflow-1.svg";
 import Treding2 from "../../../assets/svgs/workflow-2.svg";
 import Treding3 from "../../../assets/svgs/workflow-3.svg";
 import Treding4 from "../../../assets/svgs/workflow-4.svg";
+import Treding5 from "../../../assets/svgs/workflow-5.svg";
+import Treding6 from "../../../assets/svgs/workflow-6.svg";
+import RightArrowOrange from "../../../assets/svgs/right-arrow-orange.svg";
+import Trending from "../../../assets/svgs/trending.svg";
+import RecommendedIcon from "../../../assets/svgs/recomennded-workflow-icon.svg";
+import AllWorkflowsIcon from "../../../assets/svgs/all-workflows.svg";
 
 interface WorkflowCardProps {
   icon: string;
@@ -48,9 +55,49 @@ const trending = [
     title: "Summarize meetings, articles, or documents",
     desc: "Ingests transcripts, long PDFs, or multiple web articles and outputs a clean summary with key takeaways.",
   },
+  {
+    icon: Treding5,
+    title: "Summarize meetings, articles, or documents",
+    desc: "Ingests transcripts, long PDFs, or multiple web articles and outputs a clean summary with key takeaways.",
+  },
+  {
+    icon: Treding6,
+    title: "Summarize meetings, articles, or documents",
+    desc: "Ingests transcripts, long PDFs, or multiple web articles and outputs a clean summary with key takeaways.",
+  },
 ];
 
-const recommended = [
+const allWorkflows = [
+  {
+    icon: Treding1,
+    title: "Send a file from your desktop via Email or Slack",
+    desc: "Agent finds a doc (e.g., resume, NDA, PDF invoice), drafts a message, and sends it through Gmail, Outlook, or Slack.",
+  },
+  {
+    icon: Treding2,
+    title: "Auto-fill complex forms using your documents",
+    desc: "Reads local files (e.g., ID, resume, tax data), extracts key info, fills out web forms like job applications or DMV renewals.",
+  },
+  {
+    icon: Treding3,
+    title: "Book a meeting and send confirmations",
+    desc: "Checks calendar availability, opens browser to Calendly/Google, books meeting, and confirms by email or chat.",
+  },
+  {
+    icon: Treding4,
+    title: "Summarize meetings, articles, or documents",
+    desc: "Ingests transcripts, long PDFs, or multiple web articles and outputs a clean summary with key takeaways.",
+  },
+  {
+    icon: Treding5,
+    title: "Summarize meetings, articles, or documents",
+    desc: "Ingests transcripts, long PDFs, or multiple web articles and outputs a clean summary with key takeaways.",
+  },
+  {
+    icon: Treding6,
+    title: "Summarize meetings, articles, or documents",
+    desc: "Ingests transcripts, long PDFs, or multiple web articles and outputs a clean summary with key takeaways.",
+  },
   {
     icon: Recommended1,
     title: "Turn receipts or scanned docs into expense reports",
@@ -84,40 +131,41 @@ const recommended = [
 ];
 
 const WorkflowCard = ({ icon, title, desc }: WorkflowCardProps) => (
-  <Box
-    borderRadius="2xl"
-    boxShadow="lg"
-    borderBottom={"2px"}
-    borderColor={"primary.500"}
-    bgGradient="linear(to-b, white, gray.50)"
-    p={6}
-    w="full"
-    h="100%"
-    transition="all 0.25s ease"
-    _hover={{
-      transform: "translateY(-6px)",
-      boxShadow: "2xl",
-    }}
-  >
-    <Image src={icon} boxSize="50px" mb={4} alt={title} />
-    <Text
-      fontWeight="500"
-      fontSize="18px"
-      fontFamily={"Joan"}
-      mb={2}
-      color="gray.700"
+  <Flex align="start" gap={4} cursor="pointer" bg={"white"} minH="180px" p={4}>
+    <Image src={icon} w="44px" h="44px" />
+
+    <Flex
+      direction="column"
+      justify="space-between"
+      h="100%"
+      flex={1}
+      minH="175px"
     >
-      {title}
-    </Text>
-    <Text
-      fontSize="14px"
-      fontFamily={"Inter"}
-      fontWeight={400}
-      color="gray.500"
-    >
-      {desc}
-    </Text>
-  </Box>
+      <Box>
+        <Text fontWeight="400" fontSize="17px" fontFamily="Joan" mb={1}>
+          {title}
+        </Text>
+        <Text mt={4} fontSize="12px" fontFamily="Inter" color="gray.600">
+          {desc}
+        </Text>
+      </Box>
+
+      <Box mt="auto" pt={2}>
+        <Text
+          fontSize="14px"
+          color={"#D97757"}
+          fontWeight="400"
+          fontFamily="Inter"
+          display="inline-flex"
+          alignItems="center"
+          gap={1}
+        >
+          {"Get started"}
+          <Image src={RightArrowOrange} />
+        </Text>
+      </Box>
+    </Flex>
+  </Flex>
 );
 
 const WorkflowLibrary = () => {
@@ -179,12 +227,13 @@ const WorkflowLibrary = () => {
       <VStack align="start" spacing={10}>
         <Box w="full">
           <Text
-            fontSize={{ base: "2xl", md: "24px" }}
+            fontSize={{ base: "2xl", md: "32px" }}
             fontWeight={400}
             fontFamily="Joan"
             mb={3}
+            display={"flex"}
           >
-            🔥 Trending Workflows
+            Trending Workflows <Image ml={2} src={Trending} />
           </Text>
           <Grid
             templateColumns={{
@@ -202,22 +251,47 @@ const WorkflowLibrary = () => {
 
         <Box w="full">
           <Text
-            fontSize={{ base: "2xl", md: "24px" }}
+            fontSize={{ base: "2xl", md: "32px" }}
             fontWeight={400}
             fontFamily="Joan"
             mb={3}
+            display={"flex"}
           >
-            ⭐ Recommended For You
+            Recommended Workflows <Image ml={2} src={RecommendedIcon} />
           </Text>
           <Grid
             templateColumns={{
               base: "1fr",
               md: "repeat(2, 1fr)",
-              xl: "repeat(3, 1fr)",
+              xl: "repeat(4, 1fr)",
             }}
             gap={6}
           >
-            {recommended.map((item, idx) => (
+            {trending.map((item, idx) => (
+              <WorkflowCard key={idx} {...item} />
+            ))}
+          </Grid>
+        </Box>
+
+        <Box w="full">
+          <Text
+            fontSize={{ base: "2xl", md: "32px" }}
+            fontWeight={400}
+            fontFamily="Joan"
+            mb={3}
+            display={"flex"}
+          >
+            All Workflows <Image ml={2} src={AllWorkflowsIcon} />
+          </Text>
+          <Grid
+            templateColumns={{
+              base: "1fr",
+              md: "repeat(2, 1fr)",
+              xl: "repeat(4, 1fr)",
+            }}
+            gap={6}
+          >
+            {allWorkflows.map((item, idx) => (
               <WorkflowCard key={idx} {...item} />
             ))}
           </Grid>

@@ -1,27 +1,33 @@
 import {
   Avatar,
   Box,
-  Divider,
   Flex,
+  IconButton,
   Image,
   Text,
-  VStack,
-  IconButton,
   useBreakpointValue,
+  VStack,
 } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+} from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ExploreWorkflowsIcon from "../../assets/svgs/explore-workflows.svg";
 import Logo from "../../assets/svgs/logo-beta.svg";
 import LogoCollapsed from "../../assets/svgs/logo-collapsed.svg";
+import MyWorkflowsIcon from "../../assets/svgs/my-workflows.svg";
 import NewMessageIcon from "../../assets/svgs/new-message.svg";
 import SettingsIcon from "../../assets/svgs/settings.svg";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 const DashboardSidebar = () => {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(true);
-
+  const [showExplore, setShowExplore] = useState(false);
+  const [showMyWorkflows, setShowMyWorkflows] = useState(false);
   // Automatically collapse sidebar on small screens
   const responsiveIsExpanded = useBreakpointValue({
     base: false, // small screens (mobile)
@@ -98,6 +104,7 @@ const DashboardSidebar = () => {
           w={isExpanded ? "full" : ""}
           px={responsiveIsExpanded ? 2 : 2}
           py={2}
+          mt={16}
           rounded="md"
           _hover={{ bg: "whiteAlpha.200" }}
           onClick={handleNewChat}
@@ -110,84 +117,137 @@ const DashboardSidebar = () => {
           as="button"
           display="flex"
           alignItems="center"
-          gap={2}
+          justifyContent="space-between"
           w={isExpanded ? "full" : ""}
           px={responsiveIsExpanded ? 2 : 2}
           py={2}
           rounded="md"
           _hover={{ bg: "whiteAlpha.200" }}
-          onClick={handleNavigate}
+          onClick={() => setShowExplore(!showExplore)}
         >
-          <Image
-            src={ExploreWorkflowsIcon}
-            alt="Explore workflows"
-            w={5}
-            h={5}
-          />
-          {responsiveIsExpanded && <Text>Explore workflows</Text>}
+          <Flex align="center" gap={2}>
+            <Image src={ExploreWorkflowsIcon} alt="Explore" w={5} h={5} />
+            {responsiveIsExpanded && <Text>Explore Workflows</Text>}
+          </Flex>
+          {responsiveIsExpanded &&
+            (showExplore ? (
+              <ChevronUpIcon size={16} />
+            ) : (
+              <ChevronDownIcon size={16} />
+            ))}
         </Box>
 
-        {responsiveIsExpanded && (
-          <Divider my={4} borderColor="whiteAlpha.400" />
+        {showExplore && responsiveIsExpanded && (
+          <VStack align="start" spacing={1} pl={6}>
+            {[
+              "Software Engineers",
+              "Accountants & Bookkeepers",
+              "Content Creators",
+              "Researchers",
+              "Customer Support Agents",
+              "Startup Operators",
+              "Recruiters",
+              "Legal Analysts",
+              "Grad Researchers",
+            ].map((item) => (
+              <Text
+                key={item}
+                py={1}
+                px={2}
+                fontSize="14px"
+                rounded="md"
+                cursor="pointer"
+                _hover={{ bg: "whiteAlpha.200" }}
+                onClick={handleNavigate}
+              >
+                {item}
+              </Text>
+            ))}
+          </VStack>
         )}
 
-        {responsiveIsExpanded && (
-          <>
-            <Text fontSize="18px" fontFamily={"Joan"} color={"#D9D9D9"} ml={2}>
+        {/* My Workflows Dropdown */}
+        <Box
+          as="button"
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          w={isExpanded ? "full" : ""}
+          px={responsiveIsExpanded ? 2 : 2}
+          py={2}
+          rounded="md"
+          _hover={{ bg: "whiteAlpha.200" }}
+          onClick={() => setShowMyWorkflows(!showMyWorkflows)}
+        >
+          <Flex align="center" gap={2}>
+            <Image src={MyWorkflowsIcon} alt="My Workflows" w={5} h={5} />
+            {responsiveIsExpanded && <Text>My Workflows</Text>}
+          </Flex>
+          {responsiveIsExpanded &&
+            (showMyWorkflows ? (
+              <ChevronUpIcon size={16} />
+            ) : (
+              <ChevronDownIcon size={16} />
+            ))}
+        </Box>
+
+        {showMyWorkflows && responsiveIsExpanded && (
+          <VStack align="start" spacing={2} pl={6}>
+            <Text
+              ml={2}
+              fontSize="20px"
+              fontWeight={400}
+              fontFamily={"Joan"}
+              mt={2}
+            >
               Today
             </Text>
-            <VStack align="start" spacing={2}>
-              {[
-                "Climate Change News",
-                "Workout plan for beginners",
-                "Tools for remote teams",
-              ].map((item) => (
-                <Text
-                  key={item}
-                  px={2}
-                  py={1}
-                  rounded="md"
-                  fontSize={"16px"}
-                  cursor="pointer"
-                  color={"#D9D9D9"}
-                  _hover={{ bg: "whiteAlpha.200" }}
-                >
-                  {item}
-                </Text>
-              ))}
-            </VStack>
+            {[
+              "Climate Change News",
+              "Workout plan for beginners",
+              "Tools for remote teams",
+            ].map((item) => (
+              <Text
+                key={item}
+                py={1}
+                px={2}
+                fontSize="14px"
+                rounded="md"
+                cursor="pointer"
+                _hover={{ bg: "whiteAlpha.200" }}
+              >
+                {item}
+              </Text>
+            ))}
 
             <Text
-              fontSize="18px"
-              fontFamily={"Joan"}
-              color={"#D9D9D9"}
-              mt={4}
               ml={2}
+              fontSize="20px"
+              fontWeight={400}
+              fontFamily={"Joan"}
+              mt={4}
             >
               Yesterday
             </Text>
-            <VStack align="start" spacing={2}>
-              {[
-                "Climate Change News",
-                "Tools for remote teams",
-                "Workout plan for beginners",
-                "Climate Change News",
-              ].map((item, idx) => (
-                <Text
-                  key={idx}
-                  px={2}
-                  py={1}
-                  rounded="md"
-                  fontSize={"16px"}
-                  color={"#D9D9D9"}
-                  cursor="pointer"
-                  _hover={{ bg: "whiteAlpha.200" }}
-                >
-                  {item}
-                </Text>
-              ))}
-            </VStack>
-          </>
+            {[
+              "Climate Change News",
+              "Tools for remote teams",
+              "Workout plan for beginners",
+              "Climate Change News",
+            ].map((item, idx) => (
+              <Text
+                key={idx}
+                py={1}
+                px={2}
+                fontSize="14px"
+                rounded="md"
+                cursor="pointer"
+                _hover={{ bg: "whiteAlpha.200" }}
+              >
+                {item}
+              </Text>
+            ))}
+          </VStack>
         )}
       </VStack>
 
