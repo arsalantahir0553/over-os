@@ -1,9 +1,16 @@
 import {
   Avatar,
   Box,
+  Button,
   Flex,
   IconButton,
   Image,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  SkeletonCircle,
+  SkeletonText,
   Text,
   useBreakpointValue,
   VStack,
@@ -22,6 +29,8 @@ import LogoCollapsed from "../../assets/svgs/logo-collapsed.svg";
 import MyWorkflowsIcon from "../../assets/svgs/my-workflows.svg";
 import NewMessageIcon from "../../assets/svgs/new-message.svg";
 import SettingsIcon from "../../assets/svgs/settings.svg";
+import { useLoggedInUser, useLogout } from "@/utils/apis/auth.api";
+import { FiLogOut } from "react-icons/fi";
 
 const DashboardSidebar = () => {
   const navigate = useNavigate();
@@ -33,6 +42,8 @@ const DashboardSidebar = () => {
     base: false, // small screens (mobile)
     md: isExpanded, // medium and up, respect toggle
   });
+
+  const { data: User, isLoading } = useLoggedInUser();
 
   const handleNavigate = () => {
     navigate("/explore");
@@ -252,31 +263,99 @@ const DashboardSidebar = () => {
       </VStack>
 
       {/* Footer Profile */}
-      <Box
-        display="flex"
-        bg={responsiveIsExpanded ? "white" : "transparent"} // Remove white bg when shrunk
-        h={10}
-        rounded={responsiveIsExpanded ? "full" : "none"} // Remove rounding when shrunk
-        mx={2}
-        gap={3}
-        justifyContent={responsiveIsExpanded ? "space-between" : "center"}
-        px={responsiveIsExpanded ? 4 : 0} // Remove padding when shrunk
-        alignItems="center"
-        mt={4}
-        boxShadow={responsiveIsExpanded ? "sm" : "none"} // Remove shadow if any
-      >
-        <Flex gap={3} cursor="pointer" align="center">
-          <Avatar size="xs" name="John Doe" />
-          {responsiveIsExpanded && (
-            <Text color="gray.600" fontSize={"16px"} fontFamily={"Inter"}>
-              John Doe
-            </Text>
-          )}
-        </Flex>
-        {responsiveIsExpanded && <Image src={SettingsIcon} />}
-      </Box>
+      <UserMenu
+        responsiveIsExpanded={responsiveIsExpanded}
+        User={User}
+        isLoading={isLoading}
+      />
     </Box>
   );
 };
 
 export default DashboardSidebar;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const UserMenu = ({ responsiveIsExpanded, User, isLoading }: any) => {
+  const logout = useLogout();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout.mutate(undefined, {
+      onSuccess: () => {
+        window.location.reload();
+      },
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <Flex mx={2} mt={4} align="center" gap={3}>
+        <SkeletonCircle size="8" />
+        {responsiveIsExpanded && <SkeletonText noOfLines={1} width="80px" />}
+      </Flex>
+    );
+  }
+
+  if (!User) {
+    return (
+      <Button
+        colorScheme="whiteAlpha"
+        variant="solid"
+        size="sm"
+        mx={2}
+        mt={4}
+        onClick={() => navigate("/signin")}
+      >
+        Login
+      </Button>
+    );
+  }
+
+  return (
+    <Menu placement="top-end">
+      <MenuButton
+        as={Box}
+        display="flex"
+        bg={responsiveIsExpanded ? "white" : "transparent"}
+        h={10}
+        rounded={responsiveIsExpanded ? "full" : "none"}
+        mx={2}
+        gap={3}
+        justifyContent={responsiveIsExpanded ? "space-between" : "center"}
+        px={responsiveIsExpanded ? 4 : 0}
+        alignItems="center"
+        mt={4}
+        boxShadow={responsiveIsExpanded ? "sm" : "none"}
+        cursor="pointer"
+      >
+        <Flex gap={3} align="center" justifyContent="space-between">
+          <Avatar
+            size="xs"
+            name={User.name}
+            sx={{
+              "& > div": {
+                transform: "translateY(2px)",
+              },
+            }}
+          />
+          {responsiveIsExpanded && (
+            <Text color="gray.600" fontSize="16px" fontFamily="Inter">
+              {User.name}
+            </Text>
+          )}
+          {responsiveIsExpanded && <Image src={SettingsIcon} />}
+        </Flex>
+      </MenuButton>
+
+      <MenuList zIndex={10}>
+        <MenuItem
+          icon={<FiLogOut color="red" />}
+          onClick={handleLogout}
+          color="red.500"
+        >
+          Logout
+        </MenuItem>
+      </MenuList>
+    </Menu>
+  );
+};

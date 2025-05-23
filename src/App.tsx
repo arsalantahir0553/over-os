@@ -11,6 +11,11 @@ import PrivacyPolicy from "./pages/privacy-policy";
 import EULA from "./pages/eula/EULA";
 import Chat from "./pages/over-os-ai/chat";
 import WorkflowLibrary from "./pages/over-os-ai/workflow-library";
+import Signin from "./pages/auth/Signin";
+import ResetPassword from "./pages/auth/ForgotPassword";
+import ResetPasswordPage from "./pages/auth/ResetPassword";
+import VerifyEmailPage from "./pages/auth/VerifiyEmail";
+import PleaseVerifyEmail from "./pages/auth/PleaseVerifyEmail";
 
 const App = () => {
   return (
@@ -32,6 +37,12 @@ const App = () => {
           <Route path="/chat" element={<Chat />} />
           <Route path="/explore" element={<WorkflowLibrary />} />
         </Route>
+
+        <Route path="signin" element={<Signin />} />
+        <Route path="request-reset" element={<ResetPassword />} />
+        <Route path="reset-password" element={<ResetPasswordPage />} />
+        <Route path="verify-email" element={<VerifyEmailPage />} />
+        <Route path="verify" element={<PleaseVerifyEmail />} />
       </Routes>
     </Router>
   );
