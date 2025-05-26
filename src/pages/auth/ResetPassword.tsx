@@ -1,9 +1,11 @@
 import { useResetPassword } from "@/utils/apis/auth.api";
 import {
+  Box,
   Button,
   Flex,
   FormControl,
   FormLabel,
+  Image,
   Input,
   Text,
   VStack,
@@ -11,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import OverOsLogo from "../../assets/svgs/overos-ai-beta-auth-logo.svg";
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -51,37 +54,42 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <Flex minH="100vh" align="center" justify="center" bg="white">
-      <VStack spacing={6} w="full" maxW="469px" px={6}>
-        <Text fontSize="30px" fontWeight={700}>
-          Set New Password
-        </Text>
+    <>
+      <Box pl={10} pt={10}>
+        <Image src={OverOsLogo} />
+      </Box>
+      <Flex minH="85vh" align="center" justify="center" bg="white">
+        <VStack spacing={6} w="full" maxW="469px" px={6}>
+          <Text fontSize="30px" fontWeight={700}>
+            Set New Password
+          </Text>
 
-        <FormControl id="new-password">
-          <FormLabel>New Password</FormLabel>
-          <Input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
+          <FormControl id="new-password">
+            <FormLabel>New Password</FormLabel>
+            <Input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              h="55px"
+              pl={4}
+              borderColor="blue.500"
+              focusBorderColor="blue.600"
+            />
+          </FormControl>
+
+          <Button
+            colorScheme="blue"
+            w="full"
             h="55px"
-            pl={4}
-            borderColor="blue.500"
-            focusBorderColor="blue.600"
-          />
-        </FormControl>
-
-        <Button
-          colorScheme="blue"
-          w="full"
-          h="55px"
-          onClick={handleReset}
-          isLoading={isPending}
-          isDisabled={!newPassword || !token}
-        >
-          Reset Password
-        </Button>
-      </VStack>
-    </Flex>
+            onClick={handleReset}
+            isLoading={isPending}
+            isDisabled={!newPassword || !token}
+          >
+            Reset Password
+          </Button>
+        </VStack>
+      </Flex>
+    </>
   );
 };
 
