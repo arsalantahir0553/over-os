@@ -14,6 +14,7 @@ import { animate, motion, useMotionValue } from "framer-motion";
 import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FaBrain, FaCogs, FaRobot, FaSearch, FaSpinner } from "react-icons/fa";
+import { LoginRequiredModal } from "./LoginRequiredModal"; // Adjust path if needed
 
 const icons = [FaRobot, FaSearch, FaSpinner, FaBrain, FaCogs];
 const ICON_SIZE = 60;
@@ -51,8 +52,9 @@ const Chat = () => {
 
   const [messages, setMessages] = useState(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoginRequired, setIsLoginRequired] = useState(true);
+  const [hasLoggedIn, setHasLoggedIn] = useState(false);
 
-  // Delay transition into actual chat interface
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(true);
@@ -60,7 +62,6 @@ const Chat = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Animated icon carousel setup
   const x = useMotionValue(0);
   const iconRef = useRef([icons[icons.length - 1], ...icons.slice(0, 3)]);
   const [tick, setTick] = useState(0);
@@ -75,7 +76,6 @@ const Chat = () => {
           const first = updated.shift();
           if (first) updated.push(first);
           iconRef.current = updated;
-
           x.set(0);
           setTick((prev) => prev + 1);
         },
@@ -99,6 +99,93 @@ const Chat = () => {
     }
   };
 
+  // Conditional rendering starts here
+  if (!isLoading) {
+    return (
+      <Flex
+        direction="column"
+        h="81.5vh"
+        maxW={"90%"}
+        mx={"auto"}
+        px={4}
+        pt={2}
+        bg="gray.50"
+      >
+        <VStack flex={1} spacing={3} w="full">
+          <Flex
+            key={messages[0].id}
+            w="100%"
+            justify={messages[0].from === "me" ? "flex-end" : "flex-start"}
+          >
+            <Box
+              maxW="70%"
+              px={4}
+              py={2}
+              borderRadius="20px"
+              bg={messages[0].from === "me" ? "white" : "transparent"}
+              color={messages[0].from === "me" ? "gray.800" : "white"}
+              border={messages[0].from === "me" ? "1px solid #D9D9D9" : "none"}
+            >
+              <Text fontFamily={"Inter"} fontSize={"17px"}>
+                {messages[0].text}
+              </Text>
+            </Box>
+          </Flex>
+          <Box w="100%" textAlign="center" py={6} flex={1}>
+            <Text
+              fontFamily={"Inter"}
+              mb={6}
+              fontWeight={400}
+              color={"gray.500"}
+            >
+              Searching for the best LLM for your goal
+            </Text>
+            <Box
+              maxW="240px"
+              mx="auto"
+              overflow="hidden"
+              height="60px"
+              position="relative"
+            >
+              <motion.div
+                style={{
+                  display: "flex",
+                  gap: `${GAP}px`,
+                  x,
+                }}
+              >
+                {iconRef.current.map((IconComp, idx) => (
+                  <Box
+                    key={tick + "-" + idx}
+                    fontSize="36px"
+                    color="gray.400"
+                    minW={`${ICON_SIZE}px`}
+                    textAlign="center"
+                  >
+                    <IconComp />
+                  </Box>
+                ))}
+              </motion.div>
+            </Box>
+          </Box>
+        </VStack>
+      </Flex>
+    );
+  }
+
+  if (isLoginRequired && !hasLoggedIn) {
+    return (
+      <LoginRequiredModal
+        isOpen={true}
+        onClose={() => setIsLoginRequired(false)}
+        onLogin={() => {
+          setHasLoggedIn(true);
+          setIsLoginRequired(false);
+        }}
+      />
+    );
+  }
+
   return (
     <Flex
       direction="column"
@@ -110,177 +197,107 @@ const Chat = () => {
       pt={2}
       bg="gray.50"
     >
-      {!isLoading ? (
-        <>
-          <VStack flex={1} spacing={3} w="full">
-            <Flex
-              key={messages[0].id}
-              w="100%"
-              justify={messages[0].from === "me" ? "flex-end" : "flex-start"}
+      <VStack flex={1} spacing={3} w="full" overflowY="auto" pb={4}>
+        {messages.map((msg) => (
+          <Flex
+            key={msg.id}
+            w="100%"
+            justify={msg.from === "me" ? "flex-end" : "flex-start"}
+          >
+            <Box
+              maxW="70%"
+              px={4}
+              py={2}
+              borderRadius="20px"
+              bg={msg.from === "me" ? "white" : "transparent"}
+              color={msg.from === "me" ? "gray.800" : "gray.800"}
+              border={msg.from === "me" ? "1px solid #D9D9D9" : "none"}
             >
-              <Box
-                maxW="70%"
-                px={4}
-                py={2}
-                borderRadius="20px"
-                bg={messages[0].from === "me" ? "white" : "transparent"}
-                color={messages[0].from === "me" ? "gray.800" : "white"}
-                border={
-                  messages[0].from === "me" ? "1px solid #D9D9D9" : "none"
-                }
-              >
-                <Text fontFamily={"Inter"} fontSize={"17px"}>
-                  {messages[0].text}
-                </Text>
-              </Box>
-            </Flex>
-            <Box w="100%" textAlign="center" py={6} flex={1}>
               <Text
-                fontFamily={"Inter"}
-                mb={6}
-                fontWeight={400}
-                color={"gray.500"}
+                fontFamily={msg.from === "me" ? "Inter" : ""}
+                fontSize={msg.from === "me" ? "17px" : "19px"}
               >
-                Searching for the best LLM for your goal
+                {msg.text}
               </Text>
-              <Box
-                maxW="240px"
-                mx="auto"
-                overflow="hidden"
-                height="60px"
-                position="relative"
-              >
-                <motion.div
-                  style={{
-                    display: "flex",
-                    gap: `${GAP}px`,
-                    x,
-                  }}
-                >
-                  {iconRef.current.map((IconComp, idx) => (
-                    <Box
-                      key={tick + "-" + idx}
-                      fontSize="36px"
-                      color="gray.400"
-                      minW={`${ICON_SIZE}px`}
-                      textAlign="center"
-                    >
-                      <IconComp />
-                    </Box>
-                  ))}
-                </motion.div>
-              </Box>
             </Box>
-          </VStack>
-        </>
-      ) : (
-        // CHAT VIEW
-        <>
-          <VStack flex={1} spacing={3} w="full" overflowY="auto" pb={4}>
-            {messages.map((msg) => (
-              <Flex
-                key={msg.id}
-                w="100%"
-                justify={msg.from === "me" ? "flex-end" : "flex-start"}
-              >
-                <Box
-                  maxW="70%"
-                  px={4}
-                  py={2}
-                  borderRadius="20px"
-                  bg={msg.from === "me" ? "white" : "transparent"}
-                  color={msg.from === "me" ? "gray.800" : "gray.800"}
-                  border={msg.from === "me" ? "1px solid #D9D9D9" : "none"}
-                >
-                  <Text
-                    fontFamily={msg.from === "me" ? "Inter" : ""}
-                    fontSize={msg.from === "me" ? "17px" : "19px"}
-                  >
-                    {msg.text}
-                  </Text>
-                </Box>
-              </Flex>
-            ))}
-          </VStack>
-
-          <Flex align="center" justify="space-between" mb={2}>
-            {/* Input Field with Right Icon */}
-            <InputGroup flex="1" mt={6}>
-              <Textarea
-                placeholder="Ask Anything"
-                _placeholder={{
-                  color: "gray.400",
-                  fontsize: "16px",
-                  fontFamily: "Inter",
-                  fontWeight: "400",
-                }}
-                size="lg"
-                h="50px"
-                borderRadius="2xl"
-                bg="white"
-                pr="3rem"
-                fontSize={"16px"}
-                fontFamily={"Inter"}
-                pl={4}
-                pt={4}
-                color={"gray.600"}
-                resize={"none"}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-              <InputRightElement top="36px" right="10px">
-                <Tooltip
-                  label="Upload"
-                  aria-label="Upload Tooltip"
-                  rounded={"8px"}
-                  placement="top"
-                >
-                  <IconButton
-                    icon={<Upload width="16px" />}
-                    aria-label="Add"
-                    variant="ghost"
-                    borderRadius="full"
-                    size="sm"
-                    bg="blue.50"
-                    colorScheme="blue"
-                  />
-                </Tooltip>
-              </InputRightElement>
-            </InputGroup>
-
-            {/* Schedule Link */}
           </Flex>
-          <Flex w={"full"} justifyContent={"space-between"}>
-            <IconButton
-              icon={<PlusIcon color="gray" />}
-              aria-label="Add"
-              variant="ghost"
-              borderRadius="full"
-              size="sm"
-              bg={"blue.50"}
-              colorScheme="blue"
-            />
+        ))}
+      </VStack>
+
+      <Flex align="center" justify="space-between" mb={2}>
+        <InputGroup flex="1" mt={6}>
+          <Textarea
+            placeholder="Ask Anything"
+            _placeholder={{
+              color: "gray.400",
+              fontsize: "16px",
+              fontFamily: "Inter",
+              fontWeight: "400",
+            }}
+            size="lg"
+            h="50px"
+            borderRadius="2xl"
+            bg="white"
+            pr="3rem"
+            fontSize={"16px"}
+            fontFamily={"Inter"}
+            pl={4}
+            pt={4}
+            color={"gray.600"}
+            resize={"none"}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <InputRightElement top="36px" right="10px">
             <Tooltip
-              label="Schedule"
-              aria-label="Schedule Tooltip"
+              label="Upload"
+              aria-label="Upload Tooltip"
               rounded={"8px"}
               placement="top"
             >
               <IconButton
-                icon={<Clock10Icon width="16px" />}
+                icon={<Upload width="16px" />}
                 aria-label="Add"
                 variant="ghost"
                 borderRadius="full"
                 size="sm"
                 bg="blue.50"
-                mr={3}
                 colorScheme="blue"
               />
             </Tooltip>
-          </Flex>
-        </>
-      )}
+          </InputRightElement>
+        </InputGroup>
+      </Flex>
+
+      <Flex w={"full"} justifyContent={"space-between"}>
+        <IconButton
+          icon={<PlusIcon color="gray" />}
+          aria-label="Add"
+          variant="ghost"
+          borderRadius="full"
+          size="sm"
+          bg={"blue.50"}
+          colorScheme="blue"
+        />
+        <Tooltip
+          label="Schedule"
+          aria-label="Schedule Tooltip"
+          rounded={"8px"}
+          placement="top"
+        >
+          <IconButton
+            icon={<Clock10Icon width="16px" />}
+            aria-label="Add"
+            variant="ghost"
+            borderRadius="full"
+            size="sm"
+            bg="blue.50"
+            mr={3}
+            colorScheme="blue"
+          />
+        </Tooltip>
+      </Flex>
     </Flex>
   );
 };

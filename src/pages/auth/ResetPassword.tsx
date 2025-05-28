@@ -4,7 +4,7 @@ import {
   Button,
   Flex,
   FormControl,
-  FormLabel,
+  FormErrorMessage,
   Image,
   Input,
   Text,
@@ -19,12 +19,17 @@ const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const toast = useToast();
   const navigate = useNavigate();
 
   const { mutate: resetPassword, isPending } = useResetPassword();
 
+  const passwordsMatch = newPassword === confirmPassword;
+
   const handleReset = () => {
+    if (!passwordsMatch) return;
+
     resetPassword(
       { token, newPassword },
       {
@@ -36,7 +41,7 @@ const ResetPasswordPage = () => {
             duration: 3000,
             isClosable: true,
           });
-          navigate("/signin"); // redirect after success
+          navigate("/signin");
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (error: any) => {
@@ -55,26 +60,63 @@ const ResetPasswordPage = () => {
 
   return (
     <>
-      <Box pl={10} pt={10}>
-        <Image src={OverOsLogo} />
+      <Box pl={10} pt={10} bg="#f5f5f5">
+        <Image
+          src={OverOsLogo}
+          onClick={() => navigate("/dashboard")}
+          cursor={"pointer"}
+        />
       </Box>
-      <Flex minH="85vh" align="center" justify="center" bg="white">
+
+      <Flex minH="85vh" align="center" justify="center" bg="#f5f5f5">
         <VStack spacing={6} w="full" maxW="469px" px={6}>
           <Text fontSize="30px" fontWeight={700}>
             Set New Password
           </Text>
 
-          <FormControl id="new-password">
-            <FormLabel>New Password</FormLabel>
+          <FormControl isInvalid={!passwordsMatch && confirmPassword !== ""}>
             <Input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              h="55px"
-              pl={4}
-              borderColor="blue.500"
-              focusBorderColor="blue.600"
+              placeholder="New Password"
+              h="50px"
+              px={4}
+              borderRadius="10px"
+              border="1px solid"
+              borderColor="gray.300"
+              bg="white"
+              fontSize="sm"
+              boxShadow="sm"
+              _placeholder={{ color: "gray.400" }}
+              _focus={{
+                borderColor: "blue.500",
+                boxShadow: "0 0 0 1px var(--chakra-colors-blue-500)",
+              }}
             />
+          </FormControl>
+
+          <FormControl isInvalid={!passwordsMatch && confirmPassword !== ""}>
+            <Input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm Password"
+              h="50px"
+              px={4}
+              borderRadius="10px"
+              border="1px solid"
+              borderColor="gray.300"
+              bg="white"
+              fontSize="sm"
+              boxShadow="sm"
+              _placeholder={{ color: "gray.400" }}
+              _focus={{
+                borderColor: "blue.500",
+                boxShadow: "0 0 0 1px var(--chakra-colors-blue-500)",
+              }}
+            />
+            <FormErrorMessage>Passwords do not match.</FormErrorMessage>
           </FormControl>
 
           <Button
@@ -83,7 +125,8 @@ const ResetPasswordPage = () => {
             h="55px"
             onClick={handleReset}
             isLoading={isPending}
-            isDisabled={!newPassword || !token}
+            isDisabled={!newPassword || !confirmPassword || !token}
+            borderRadius="md"
           >
             Reset Password
           </Button>

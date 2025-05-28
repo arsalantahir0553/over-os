@@ -62,7 +62,7 @@ const VerifyEmailPage = () => {
 
   return (
     <Flex minH="100vh" align="center" justify="center" bg="white" px={6}>
-      <VStack spacing={6} maxW="469px" w="full" textAlign="center">
+      <VStack spacing={6} maxW="450px" w="full" textAlign="center">
         {isPending ? (
           <>
             <Spinner size="xl" />

@@ -22,7 +22,7 @@ import {
   ChevronUpIcon,
 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ExploreWorkflowsIcon from "../../assets/svgs/explore-workflows.svg";
 import Logo from "../../assets/svgs/logo-beta.svg";
 import LogoCollapsed from "../../assets/svgs/logo-collapsed.svg";
@@ -31,7 +31,54 @@ import NewMessageIcon from "../../assets/svgs/new-message.svg";
 import SettingsIcon from "../../assets/svgs/settings.svg";
 import { useLoggedInUser, useLogout } from "@/utils/apis/auth.api";
 import { FiLogOut } from "react-icons/fi";
+import SoftwareEngineers from "../../assets/svgs/workflows/software-engineers.svg";
+import Accountants from "../../assets/svgs/workflows/accountants.svg";
+import ContentCreators from "../../assets/svgs/workflows/content-creators.svg";
+import CustomerSupportAgents from "../../assets/svgs/workflows/customer-support-agents.svg";
+import GradResearchers from "../../assets/svgs/workflows/grad-researchers.svg";
+import LegalAnalysts from "../../assets/svgs/workflows/legal-analysts.svg";
+import Recruiters from "../../assets/svgs/workflows/recruiters.svg";
+import Researchers from "../../assets/svgs/workflows/researchers.svg";
+import StartupOperators from "../../assets/svgs/workflows/startup-operators.svg";
 
+const Workflows = [
+  {
+    title: "Software Engineers",
+    icon: SoftwareEngineers,
+  },
+  {
+    title: "Accountants & Bookkeepers",
+    icon: Accountants,
+  },
+  {
+    title: "Content Creators",
+    icon: ContentCreators,
+  },
+  {
+    title: "Researchers",
+    icon: Researchers,
+  },
+  {
+    title: "Customer Support Agents",
+    icon: CustomerSupportAgents,
+  },
+  {
+    title: "Startup Operators",
+    icon: StartupOperators,
+  },
+  {
+    title: "Recruiters",
+    icon: Recruiters,
+  },
+  {
+    title: "Legal Analysts",
+    icon: LegalAnalysts,
+  },
+  {
+    title: "Grad Researchers",
+    icon: GradResearchers,
+  },
+];
 const DashboardSidebar = () => {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(true);
@@ -42,11 +89,20 @@ const DashboardSidebar = () => {
     base: false, // small screens (mobile)
     md: isExpanded, // medium and up, respect toggle
   });
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const activeTitleRaw = searchParams.get("title");
+  const activeTitle = activeTitleRaw
+    ? decodeURIComponent(activeTitleRaw)
+    : null;
+
+  console.log("active title", activeTitle);
+  console.log("active title aw", activeTitleRaw);
 
   const { data: User, isLoading } = useLoggedInUser();
 
-  const handleNavigate = () => {
-    navigate("/explore");
+  const handleNavigate = (title: string) => {
+    navigate(`/explore?title=${encodeURIComponent(title)}`);
   };
   const handleNewChat = () => {
     navigate("/dashboard");
@@ -54,7 +110,7 @@ const DashboardSidebar = () => {
 
   return (
     <Box
-      w={responsiveIsExpanded ? "260px" : "80px"}
+      w={responsiveIsExpanded ? "275px" : "80px"}
       transition="width 0.3s ease"
       display="flex"
       flexDirection="column"
@@ -150,30 +206,34 @@ const DashboardSidebar = () => {
 
         {showExplore && responsiveIsExpanded && (
           <VStack align="start" spacing={1} pl={6}>
-            {[
-              "Software Engineers",
-              "Accountants & Bookkeepers",
-              "Content Creators",
-              "Researchers",
-              "Customer Support Agents",
-              "Startup Operators",
-              "Recruiters",
-              "Legal Analysts",
-              "Grad Researchers",
-            ].map((item) => (
-              <Text
-                key={item}
-                py={1}
-                px={2}
-                fontSize="14px"
-                rounded="md"
-                cursor="pointer"
-                _hover={{ bg: "whiteAlpha.200" }}
-                onClick={handleNavigate}
-              >
-                {item}
-              </Text>
-            ))}
+            {Workflows.map((item, index) => {
+              const isActive = item.title === activeTitle;
+              return (
+                <Flex
+                  key={index}
+                  px={0.5}
+                  ml={item.title === "Accountants & Bookkeepers" ? "1px" : 0}
+                  _hover={{ bg: "whiteAlpha.200" }}
+                  bg={isActive ? "whiteAlpha.300" : "transparent"} // Active background
+                  rounded="md"
+                  cursor="pointer"
+                  onClick={() => handleNavigate(item.title)}
+                  align="center"
+                  gap={2}
+                >
+                  <Image src={item.icon} />
+                  <Text
+                    whiteSpace={"nowrap"}
+                    py={1}
+                    ml={item.title === "Accountants & Bookkeepers" ? 1 : 0}
+                    px={2}
+                    fontSize="14px"
+                  >
+                    {item.title}
+                  </Text>
+                </Flex>
+              );
+            })}
           </VStack>
         )}
 

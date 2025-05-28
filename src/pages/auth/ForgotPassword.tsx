@@ -4,26 +4,23 @@ import {
   Button,
   Flex,
   FormControl,
-  FormLabel,
   Image,
   Input,
   Text,
   VStack,
   useToast,
 } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import OverOsLogo from "../../assets/svgs/overos-ai-beta-auth-logo.svg";
 
 const ResetPasswordRequestPage = () => {
   const [searchParams] = useSearchParams();
-  // Initialize email state with the value from URL ?email=... or empty string if none
   const [email, setEmail] = useState(() => searchParams.get("email") || "");
   const toast = useToast();
-
+  const navigate = useNavigate();
   const { mutate: sendResetEmail, isPending } = useRequestPasswordReset();
 
-  // Optional: If URL changes, update email input too (only if you want that)
   useEffect(() => {
     const emailFromUrl = searchParams.get("email") || "";
     setEmail(emailFromUrl);
@@ -56,25 +53,43 @@ const ResetPasswordRequestPage = () => {
 
   return (
     <>
-      <Box pl={10} pt={10}>
-        <Image src={OverOsLogo} />
+      <Box pl={10} pt={10} bg="#f5f5f5">
+        <Image
+          src={OverOsLogo}
+          onClick={() => navigate("/dashboard")}
+          cursor={"pointer"}
+        />
       </Box>
-      <Flex minH="85vh" align="center" justify="center" bg="white">
-        <VStack spacing={6} w="full" maxW="469px" px={6}>
-          <Text fontSize="30px" fontWeight={700}>
-            Reset Password
-          </Text>
 
+      <Flex minH="85vh" align="center" justify="center" bg="#f5f5f5">
+        <VStack spacing={6} w="full" maxW="469px" px={6}>
+          <Text
+            fontSize="30px"
+            fontWeight={400}
+            letterSpacing={"8%"}
+            fontFamily={"Joan"}
+          >
+            Reset Your Password
+          </Text>
           <FormControl id="email">
-            <FormLabel>Email address</FormLabel>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              h="55px"
-              pl={4}
-              borderColor="blue.500"
-              focusBorderColor="blue.600"
+              placeholder="name@gmail.com"
+              h="50px"
+              px={4}
+              borderRadius="10px"
+              border="1px solid"
+              borderColor="gray.300"
+              bg="white"
+              fontSize="sm"
+              boxShadow="sm"
+              _placeholder={{ color: "gray.400" }}
+              _focus={{
+                borderColor: "blue.500",
+                boxShadow: "0 0 0 1px var(--chakra-colors-blue-500)",
+              }}
             />
           </FormControl>
 
@@ -85,6 +100,7 @@ const ResetPasswordRequestPage = () => {
             onClick={handleReset}
             isLoading={isPending}
             isDisabled={!email}
+            borderRadius="md"
           >
             Send Reset Link
           </Button>

@@ -4,29 +4,27 @@ import {
   Grid,
   Image,
   Input,
-  InputGroup,
   Tag,
   Text,
   VStack,
-  Wrap,
-  WrapItem,
 } from "@chakra-ui/react";
+import AllWorkflowsIcon from "../../../assets/svgs/all-workflows.svg";
+import RecommendedIcon from "../../../assets/svgs/recomennded-workflow-icon.svg";
 import Recommended1 from "../../../assets/svgs/recommended-1.svg";
 import Recommended2 from "../../../assets/svgs/recommended-2.svg";
 import Recommended3 from "../../../assets/svgs/recommended-3.svg";
 import Recommended4 from "../../../assets/svgs/recommended-4.svg";
 import Recommended5 from "../../../assets/svgs/recommended-5.svg";
 import Recommended6 from "../../../assets/svgs/recommended-6.svg";
+import RightArrowOrange from "../../../assets/svgs/right-arrow-orange.svg";
+import Trending from "../../../assets/svgs/trending.svg";
 import Treding1 from "../../../assets/svgs/workflow-1.svg";
 import Treding2 from "../../../assets/svgs/workflow-2.svg";
 import Treding3 from "../../../assets/svgs/workflow-3.svg";
 import Treding4 from "../../../assets/svgs/workflow-4.svg";
 import Treding5 from "../../../assets/svgs/workflow-5.svg";
 import Treding6 from "../../../assets/svgs/workflow-6.svg";
-import RightArrowOrange from "../../../assets/svgs/right-arrow-orange.svg";
-import Trending from "../../../assets/svgs/trending.svg";
-import RecommendedIcon from "../../../assets/svgs/recomennded-workflow-icon.svg";
-import AllWorkflowsIcon from "../../../assets/svgs/all-workflows.svg";
+import { useSearchParams } from "react-router-dom";
 
 interface WorkflowCardProps {
   icon: string;
@@ -169,6 +167,10 @@ const WorkflowCard = ({ icon, title, desc }: WorkflowCardProps) => (
 );
 
 const WorkflowLibrary = () => {
+  const [searchParams] = useSearchParams();
+
+  const title = searchParams.get("title");
+  console.log(title);
   return (
     <Box px={{ base: 4, md: 12 }} py={10} bg="gray.50" minH="100vh">
       <Text
@@ -177,52 +179,47 @@ const WorkflowLibrary = () => {
         fontFamily="Joan"
         mb={4}
       >
-        Research Workflows
+        {title || "Research Workflows"}
       </Text>
       {/* <Text fontSize="md" color="gray.500" mb={6}>
         Automate tasks, save hours, and scale your team’s productivity.
       </Text> */}
 
-      <InputGroup mb={6}>
+      <Flex align="center" gap={4} mb={10}>
         <Input
-          placeholder="Search workflows here"
-          h="64px"
-          fontSize="18px"
-          borderRadius="10px"
-          borderColor="gray.300"
-          _placeholder={{ color: "gray.400", fontsize: "18px" }}
+          placeholder={
+            title ? `Search workflow related to ${title}` : "Search workflows"
+          }
+          fontSize="16px"
+          borderRadius="20px"
+          pl={10}
+          borderColor="gray.200"
+          bg={"white"}
+          h={"49px"}
+          _placeholder={{ color: "gray.300", fontSize: "16px" }}
           _focusVisible={{ borderColor: "blue.400", boxShadow: "sm" }}
         />
-      </InputGroup>
 
-      <Wrap spacing={3} mb={10}>
-        {[
-          "Client",
-          "Research",
-          "Professional",
-          "Medical",
-          "Personal Use",
-          "Search",
-        ].map((tag, idx) => (
-          <WrapItem key={idx}>
-            <Tag
-              size="lg"
-              px={4}
-              py={1}
-              fontSize="15px"
-              fontWeight={500}
-              color={"white"}
-              bg={"primary.500"}
-              variant="solid"
-              borderRadius="full"
-              cursor="pointer"
-              _hover={{ bg: "brand.500" }}
-            >
-              {tag}
-            </Tag>
-          </WrapItem>
+        {["Development", "Deployment", "WPS", "Wordpress"].map((tag, idx) => (
+          <Tag
+            key={idx}
+            size="md"
+            fontSize="15px"
+            fontWeight={700}
+            color="white"
+            bg="primary.500"
+            variant="solid"
+            h={"44px"}
+            px={"25px"}
+            borderRadius="20px"
+            cursor="pointer"
+            _hover={{ bg: "brand.500" }}
+            flexShrink={0}
+          >
+            {tag}
+          </Tag>
         ))}
-      </Wrap>
+      </Flex>
 
       <VStack align="start" spacing={10}>
         <Box w="full">
