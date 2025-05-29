@@ -1,10 +1,15 @@
 import { createContext } from "react";
 
-interface UserInputContextType {
+export interface UserInputContextType {
   userInput: string;
-  setUserInput: (input: string) => void;
+  setUserInput: React.Dispatch<React.SetStateAction<string>>;
+  selectedImages: File[];
+  setSelectedImages: React.Dispatch<React.SetStateAction<File[]>>;
 }
 
-export const UserInputContext = createContext<UserInputContextType | undefined>(
-  undefined
-);
+export const UserInputContext = createContext<UserInputContextType>({
+  userInput: "",
+  setUserInput: () => {},
+  selectedImages: [],
+  setSelectedImages: () => {},
+});
