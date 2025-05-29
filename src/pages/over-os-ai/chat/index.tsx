@@ -54,7 +54,7 @@ const Chat = () => {
   const [messages, setMessages] = useState(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoginRequired, setIsLoginRequired] = useState(true);
-  const [hasLoggedIn] = useState(false);
+  const [hasLoggedIn, setHasLoggedIn] = useState(false);
   const { mutate: triggerLogin } = useQBLogin();
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -63,14 +63,19 @@ const Chat = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const userId = localStorage.getItem("user_id");
+    if (userId) {
+      setHasLoggedIn(true);
+      setIsLoginRequired(false);
+    }
+  }, []);
+
   const x = useMotionValue(0);
   const iconRef = useRef([icons[icons.length - 1], ...icons.slice(0, 3)]);
   const [tick, setTick] = useState(0);
 
-  const handleLogin = () => {
-    // setHasLoggedIn(true);
-    // setIsLoginRequired(false);
-
+  const handleLogin = async () => {
     // Call the login API and log the response
     triggerLogin(undefined, {
       onSuccess: (data) => {
