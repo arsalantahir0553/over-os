@@ -1,41 +1,39 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useGetUserId } from "@/utils/apis/overos.api";
+import { useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 const Callback = () => {
   const [searchParams] = useSearchParams();
-
-  const [code, setCode] = useState<string | null>(null);
-  const [state, setState] = useState<string | null>(null);
-  const [realmId, setRealmId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { mutate: getUserId } = useGetUserId();
 
   useEffect(() => {
-    const codeParam = searchParams.get("code");
-    const stateParam = searchParams.get("state");
-    const realmIdParam = searchParams.get("realmId");
+    const code = searchParams.get("code");
+    const state = searchParams.get("state");
+    const realmId = searchParams.get("realmId");
 
-    setCode(codeParam);
-    setState(stateParam);
-    setRealmId(realmIdParam);
-
-    console.log("Code:", codeParam);
-    console.log("State:", stateParam);
-    console.log("Realm ID:", realmIdParam);
-  }, [searchParams]);
+    if (code && state && realmId) {
+      getUserId(
+        { code, state, realmId }, // optional
+        {
+          onSuccess: (data) => {
+            localStorage.setItem("user_id", data.user_id);
+            localStorage.setItem("realm_id", data.realm_id);
+            navigate("/chat");
+          },
+          onError: (error) => {
+            console.error("OAuth callback failed:", error);
+            alert("Authentication failed. Please try again.");
+          },
+        }
+      );
+    }
+  }, [searchParams, getUserId, navigate]);
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h2>OAuth Callback Parameters</h2>
-      <ul>
-        <li>
-          <strong>Code:</strong> {code || "Not found"}
-        </li>
-        <li>
-          <strong>State:</strong> {state || "Not found"}
-        </li>
-        <li>
-          <strong>Realm ID:</strong> {realmId || "Not found"}
-        </li>
-      </ul>
+      <h2>Authenticating...</h2>
+      <p>Please wait while we process your login.</p>
     </div>
   );
 };
