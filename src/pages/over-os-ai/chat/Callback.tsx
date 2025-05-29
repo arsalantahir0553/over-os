@@ -1,4 +1,5 @@
 import { useGetUserId } from "@/utils/apis/overos.api";
+import { Box, Center, Heading, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
@@ -31,10 +32,25 @@ const Callback = () => {
   }, [searchParams, getUserId, navigate]);
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h2>Authenticating...</h2>
-      <p>Please wait while we process your login.</p>
-    </div>
+    <Center minH="100vh" bg="gray.50" px={4}>
+      <Box
+        maxW="md"
+        w="full"
+        p={8}
+        bg="white"
+        boxShadow="lg"
+        rounded="xl"
+        textAlign="center"
+      >
+        <VStack spacing={6}>
+          <Spinner size="xl" color="blue.500" />
+          <Heading size="md">Authenticating with QuickBooks...</Heading>
+          <Text color="gray.600" fontSize="sm">
+            Please wait while we finalize your login.
+          </Text>
+        </VStack>
+      </Box>
+    </Center>
   );
 };
 
