@@ -8,6 +8,7 @@ import {
   IconButton,
   Image,
   InputGroup,
+  InputRightElement,
   SimpleGrid,
   Text,
   Textarea,
@@ -17,12 +18,11 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
-import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import RightArrowOrange from "../../assets/svgs/right-arrow-orange.svg";
 import Workflow1 from "../../assets/svgs/workflow-1.svg";
 import Workflow2 from "../../assets/svgs/workflow-2.svg";
 import Workflow3 from "../../assets/svgs/workflow-3.svg";
+import RightArrowOrange from "../../assets/svgs/right-arrow-orange.svg";
 
 const trendingWorkflows = [
   {
@@ -51,29 +51,15 @@ const trendingWorkflows = [
 const DashboardHome = () => {
   const cardBg = useColorModeValue("white", "gray.800");
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { userInput, setUserInput, selectedImages, setSelectedImages } =
-    useUserInput();
+  const { userInput, setUserInput } = useUserInput();
   const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+      e.preventDefault(); // prevent newline on enter without shift
       if (userInput.trim() !== "") {
-        localStorage.setItem("runWorkflow", "true");
         navigate("/chat");
       }
     }
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const filesArray = Array.from(e.target.files);
-    setSelectedImages((prev) => [...prev, ...filesArray]);
-  };
-
-  const removeImage = (index: number) => {
-    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -92,115 +78,56 @@ const DashboardHome = () => {
           I’ll plan it out and take care of the work.
         </Text>
 
-        <Flex
-          align="center"
-          justify="space-between"
-          p={0}
-          mt={10}
-          position="relative"
-        >
-          <Box flex="1" mt={6}>
-            {/* Image Previews */}
-            {selectedImages.length > 0 && (
-              <Flex gap={4} flexWrap="wrap" mb={4}>
-                {selectedImages.map((file, index) => (
-                  <Box
-                    key={index}
-                    position="relative"
-                    width="40px"
-                    height="40px"
-                    borderRadius="md"
-                  >
-                    <Image
-                      src={URL.createObjectURL(file)}
-                      alt={`upload-${index}`}
-                      boxSize="100%"
-                      objectFit="cover"
-                      border="1px solid"
-                      borderColor="gray.200"
-                      borderRadius="md"
-                    />
-                    <IconButton
-                      icon={<PlusIcon style={{ transform: "rotate(45deg)" }} />}
-                      size="xs"
-                      position="absolute"
-                      top="-6px"
-                      right="-6px"
-                      aria-label="Remove image"
-                      onClick={() => removeImage(index)}
-                      bg="red.500"
-                      color="white"
-                      borderRadius="full"
-                      height="16px"
-                      width="16px"
-                      minW="16px"
-                      fontSize="10px"
-                      zIndex="1"
-                    />
-                  </Box>
-                ))}
-              </Flex>
-            )}
+        <Flex align="center" justify="space-between" p={0} mt={10}>
+          {/* Input Field with Right Icon */}
+          <InputGroup flex="1" mt={6}>
+            <Textarea
+              placeholder="Ask Anything"
+              _placeholder={{
+                color: "gray.400",
+                fontsize: "16px",
+                fontFamily: "Inter",
+                fontWeight: "400",
+              }}
+              size="lg"
+              h="50px"
+              borderRadius="2xl"
+              bg="white"
+              pr="3rem"
+              fontSize={"16px"}
+              shadow={"md"}
+              fontFamily={"Inter"}
+              pl={4}
+              pt={4}
+              color={"gray.600"}
+              resize={"none"}
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <InputRightElement top="36px" right="10px">
+              <Tooltip
+                label="Upload"
+                aria-label="Upload Tooltip"
+                rounded={"8px"}
+                placement="top"
+              >
+                <IconButton
+                  icon={<Upload width="16px" />}
+                  aria-label="Add"
+                  variant="ghost"
+                  borderRadius="full"
+                  size="sm"
+                  bg="blue.50"
+                  colorScheme="blue"
+                />
+              </Tooltip>
+            </InputRightElement>
+          </InputGroup>
 
-            {/* Textarea Input */}
-            <InputGroup>
-              <Textarea
-                placeholder="Ask Anything"
-                _placeholder={{
-                  color: "gray.400",
-                  fontsize: "16px",
-                  fontFamily: "Inter",
-                  fontWeight: "400",
-                }}
-                size="lg"
-                h="50px"
-                borderRadius="2xl"
-                bg="white"
-                pr="3rem"
-                fontSize={"16px"}
-                shadow={"md"}
-                fontFamily={"Inter"}
-                pl={4}
-                pt={4}
-                color={"gray.600"}
-                resize={"none"}
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-
-              {/* Upload Button (fixed position) */}
-              <Box position="absolute" right="10px" top="36px">
-                <Tooltip
-                  label="Upload"
-                  aria-label="Upload Tooltip"
-                  rounded={"8px"}
-                  placement="top"
-                >
-                  <IconButton
-                    icon={<Upload width="16px" />}
-                    aria-label="Add"
-                    variant="ghost"
-                    borderRadius="full"
-                    size="sm"
-                    bg="blue.50"
-                    colorScheme="blue"
-                    onClick={() => fileInputRef.current?.click()}
-                  />
-                </Tooltip>
-              </Box>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                style={{ display: "none" }}
-              />
-            </InputGroup>
-          </Box>
+          {/* Schedule Link */}
         </Flex>
-
+        {/* Left Icon Button */}
         <Flex w={"full"} justifyContent={"space-between"}>
           <IconButton
             icon={<PlusIcon color="gray" />}
@@ -229,7 +156,6 @@ const DashboardHome = () => {
             />
           </Tooltip>
         </Flex>
-
         <Box pt={10} mt={4} w="full">
           <Text fontSize="22px" fontFamily={"Joan"} mb={4} fontWeight="400">
             Trending Workflows

@@ -3,7 +3,6 @@ import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_OVEROS_URL;
 const REDIRECT_URL = import.meta.env.VITE_REDIRECT_URL;
-const WORKFLOW_API_URL = import.meta.env.VITE_API_WORKFLOW_URL;
 
 type AuthUrlResponse = {
   auth_url: string;
@@ -55,42 +54,4 @@ const getCallbackData = async ({
 export const useGetUserId = () =>
   useMutation<CallbackResponse, Error, CallbackParams>({
     mutationFn: getCallbackData,
-  });
-
-type CreateWorkflowFormData = {
-  userPrompt: string;
-  images: File[];
-  userId: string;
-};
-
-const createWorkflow = async ({
-  userPrompt,
-  images,
-  userId,
-}: CreateWorkflowFormData) => {
-  const formData = new FormData();
-  formData.append("user_prompt", userPrompt);
-
-  images.forEach((file) => {
-    formData.append("images", file);
-  });
-
-  const response = await axios.post(
-    `${WORKFLOW_API_URL}/run-workflow`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        "X-User-ID": userId,
-      },
-    }
-  );
-
-  return response.data;
-};
-
-export const useCreateWorkflow = () =>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useMutation<any, Error, CreateWorkflowFormData>({
-    mutationFn: createWorkflow,
   });

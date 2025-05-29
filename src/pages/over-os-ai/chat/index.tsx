@@ -15,7 +15,7 @@ import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FaBrain, FaCogs, FaRobot, FaSearch, FaSpinner } from "react-icons/fa";
 import { LoginRequiredModal } from "./LoginRequiredModal"; // Adjust path if needed
-import { useCreateWorkflow, useQBLogin } from "@/utils/apis/overos.api";
+import { useQBLogin } from "@/utils/apis/overos.api";
 
 const icons = [FaRobot, FaSearch, FaSpinner, FaBrain, FaCogs];
 const ICON_SIZE = 60;
@@ -24,7 +24,7 @@ const STEP = ICON_SIZE + GAP;
 
 const Chat = () => {
   const [input, setInput] = useState("");
-  const { userInput, selectedImages } = useUserInput();
+  const { userInput } = useUserInput();
 
   const initialMessages = [
     {
@@ -34,44 +34,34 @@ const Chat = () => {
         "Analyse these receipts from the last month for my client Alex Dan, categorize each expense correctly and upload them to my quickbooks account.",
       from: "me",
     },
+    {
+      id: 2,
+      text: "To process Alex Dan’s receipts from the last month, the system first gathers all receipt data and prepares the images for accurate text recognition. Using OCR, it extracts key details like vendor names, dates, and amounts.",
+      from: "other",
+    },
+    {
+      id: 3,
+      text: "The data is then cleaned and standardized to ensure consistency. Each expense is automatically categorized based on accounting rules, followed by a validation step to confirm alignment with Alex Dan’s financial structure.",
+      from: "other",
+    },
+    {
+      id: 4,
+      text: "Finally, the verified and categorized expenses are seamlessly uploaded into the appropriate sections of his QuickBooks account.",
+      from: "other",
+    },
   ];
 
   const [messages, setMessages] = useState(initialMessages);
+  const [isLoading, setIsLoading] = useState(false);
   const [isLoginRequired, setIsLoginRequired] = useState(true);
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
   const { mutate: triggerLogin } = useQBLogin();
-  const { mutate: createWorkflow, isPending } = useCreateWorkflow();
-
   useEffect(() => {
-    const userId = localStorage.getItem("user_id");
-    console.log("user_id", userId);
-    if (userId) {
-      createWorkflow(
-        {
-          userPrompt: userInput || "Default prompt",
-          images: selectedImages, // pass real images here if available
-          userId,
-        },
-        {
-          onSuccess: (data) => {
-            console.log("✅ Workflow API response:", data);
-            console.log("✅ Workflow API response summary:", data.summary);
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: 2,
-                text: data.summary || "No summary available",
-                from: "other",
-              },
-            ]);
-          },
-          onError: (error) => {
-            console.error("❌ Workflow API error:", error);
-          },
-        }
-      );
-    }
-  }, [createWorkflow, userInput, selectedImages]);
+    const timer = setTimeout(() => {
+      setIsLoading(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const userId = localStorage.getItem("user_id");
@@ -133,7 +123,7 @@ const Chat = () => {
   };
 
   // Conditional rendering starts here
-  if (isPending) {
+  if (!isLoading) {
     return (
       <Flex
         direction="column"
