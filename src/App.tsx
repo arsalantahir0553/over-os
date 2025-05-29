@@ -16,6 +16,7 @@ import ResetPassword from "./pages/auth/ForgotPassword";
 import ResetPasswordPage from "./pages/auth/ResetPassword";
 import VerifyEmailPage from "./pages/auth/VerifiyEmail";
 import PleaseVerifyEmail from "./pages/auth/PleaseVerifyEmail";
+import Callback from "./pages/over-os-ai/chat/Callback";
 
 const App = () => {
   return (
@@ -35,6 +36,7 @@ const App = () => {
         <Route element={<OverOsLayout />}>
           <Route path="/dashboard" element={<DashboardHome />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/callback" element={<Callback />} />
           <Route path="/explore" element={<WorkflowLibrary />} />
         </Route>
 

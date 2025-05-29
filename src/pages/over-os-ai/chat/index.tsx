@@ -15,6 +15,7 @@ import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FaBrain, FaCogs, FaRobot, FaSearch, FaSpinner } from "react-icons/fa";
 import { LoginRequiredModal } from "./LoginRequiredModal"; // Adjust path if needed
+import { useQBLogin } from "@/utils/apis/overos.api";
 
 const icons = [FaRobot, FaSearch, FaSpinner, FaBrain, FaCogs];
 const ICON_SIZE = 60;
@@ -54,7 +55,7 @@ const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoginRequired, setIsLoginRequired] = useState(true);
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
-
+  const { mutate: triggerLogin } = useQBLogin();
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(true);
@@ -65,6 +66,23 @@ const Chat = () => {
   const x = useMotionValue(0);
   const iconRef = useRef([icons[icons.length - 1], ...icons.slice(0, 3)]);
   const [tick, setTick] = useState(0);
+
+  const handleLogin = () => {
+    // setHasLoggedIn(true);
+    // setIsLoginRequired(false);
+
+    // Call the login API and log the response
+    triggerLogin(undefined, {
+      onSuccess: (data) => {
+        console.log("✅ QuickBooks Auth URL response:", data);
+        // Optionally redirect:
+        // window.location.href = data.auth_url;
+      },
+      onError: (error) => {
+        console.error("❌ Login API call failed:", error);
+      },
+    });
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -178,10 +196,7 @@ const Chat = () => {
       <LoginRequiredModal
         isOpen={true}
         onClose={() => setIsLoginRequired(false)}
-        onLogin={() => {
-          setHasLoggedIn(true);
-          setIsLoginRequired(false);
-        }}
+        onLogin={handleLogin}
       />
     );
   }
