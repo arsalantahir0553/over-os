@@ -67,16 +67,16 @@ const Chat = () => {
   const iconRef = useRef([icons[icons.length - 1], ...icons.slice(0, 3)]);
   const [tick, setTick] = useState(0);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // setHasLoggedIn(true);
     // setIsLoginRequired(false);
 
     // Call the login API and log the response
-    triggerLogin(undefined, {
+    await triggerLogin(undefined, {
       onSuccess: (data) => {
         console.log("✅ QuickBooks Auth URL response:", data);
         // Optionally redirect:
-        // window.location.href = data.auth_url;
+        window.location.href = data.auth_url;
       },
       onError: (error) => {
         console.error("❌ Login API call failed:", error);
