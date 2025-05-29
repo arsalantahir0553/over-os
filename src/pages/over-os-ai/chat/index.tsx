@@ -54,7 +54,7 @@ const Chat = () => {
   const [messages, setMessages] = useState(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoginRequired, setIsLoginRequired] = useState(true);
-  const [hasLoggedIn, setHasLoggedIn] = useState(false);
+  const [hasLoggedIn] = useState(false);
   const { mutate: triggerLogin } = useQBLogin();
   useEffect(() => {
     const timer = setTimeout(() => {
