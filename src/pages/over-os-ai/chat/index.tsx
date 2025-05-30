@@ -54,35 +54,45 @@ const Chat = () => {
 
   useEffect(() => {
     const storedPrompt = localStorage.getItem("temp_user_prompt");
-    const storedImages = localStorage.getItem("temp_selected_images");
-
-    if (!userInput && storedPrompt) {
-      setInput(storedPrompt);
-    }
-
-    // Trigger API if logged in and both prompt and images are present
+    const storedBase64Images = localStorage.getItem("temp_selected_images");
     const userId = localStorage.getItem("user_id");
-    if (userId && storedPrompt && storedImages) {
-      const parsedImages = JSON.parse(storedImages);
+
+    if (storedPrompt && storedBase64Images && userId) {
+      const base64List: string[] = JSON.parse(storedBase64Images);
+
+      const dataURLtoFile = (dataurl: string, filename: string): File => {
+        const arr = dataurl.split(",");
+        const mimeMatch = arr[0].match(/:(.*?);/);
+        const mime = mimeMatch ? mimeMatch[1] : "";
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], filename, { type: mime });
+      };
+
+      const files = base64List.map((b64, i) =>
+        dataURLtoFile(b64, `image${i}.jpg`)
+      );
 
       createWorkflow(
         {
           userPrompt: storedPrompt,
-          images: parsedImages,
+          images: files,
           userId,
         },
         {
           onSuccess: (data) => {
-            console.log("✅ Workflow API response:", data);
             setMessages((prev) => [
               ...prev,
               {
-                id: 2,
+                id: Date.now(),
                 text: data.summary || "No summary available",
                 from: "other",
               },
             ]);
-            // Clear temp data
             localStorage.removeItem("temp_user_prompt");
             localStorage.removeItem("temp_selected_images");
           },
@@ -107,16 +117,27 @@ const Chat = () => {
   const [tick, setTick] = useState(0);
 
   const handleLogin = async () => {
-    // Call the login API and log the response
+    // Save user input
     localStorage.setItem("temp_user_prompt", userInput);
-    localStorage.setItem(
-      "temp_selected_images",
-      JSON.stringify(selectedImages)
+
+    // Convert images to base64
+    const convertToBase64 = (file: File) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+    const base64Images = await Promise.all(
+      selectedImages.map((img) => convertToBase64(img))
     );
+
+    localStorage.setItem("temp_selected_images", JSON.stringify(base64Images));
+
+    // Redirect to login
     await triggerLogin(undefined, {
       onSuccess: (data) => {
-        console.log("✅ QuickBooks Auth URL response:", data);
-        // Optionally redirect:
         window.location.href = data.auth_url;
       },
       onError: (error) => {
