@@ -1,0 +1,46 @@
+const GptIcon = () => {
+  return (
+    <svg
+      width="30"
+      height="30"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g opacity="0.4">
+        <path
+          d="M11.7017 18.4417V8.39602L19.6435 3.8894C24.0438 1.39192 31.9217 7.5519 28.6144 13.1887"
+          stroke="black"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M11.7017 13.5584L20.5519 8.53552L28.4938 13.0421C32.8941 15.5396 31.4036 25.3272 24.7819 25.3272"
+          stroke="black"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M16.0032 11.1169L24.8534 16.1398V25.16C24.8534 30.155 15.4851 33.7826 12.1777 28.1458"
+          stroke="black"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M20.3038 13.7397V23.6041L12.362 28.1107C7.96165 30.6082 0.0836955 24.4482 3.39102 18.8114"
+          stroke="black"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M20.3038 18.4417L11.4536 23.4645L3.51173 18.9579C-0.89567 16.4535 0.594754 6.67285 7.2165 6.67285"
+          stroke="black"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M16.0026 20.883L7.15234 15.8602V6.83998C7.15234 1.84503 16.5207 -1.78259 19.828 3.85417"
+          stroke="black"
+          stroke-linejoin="round"
+        />
+      </g>
+    </svg>
+  );
+};
+
+export default GptIcon;

@@ -1,4 +1,10 @@
+import ClaudeIcon from "@/assets/svgs/ClaudeIcon";
+import GeminiIcon from "@/assets/svgs/GeminiIcon";
+import GptIcon from "@/assets/svgs/GptIcon";
+import LlmIcon from "@/assets/svgs/LlmIcon";
+import MidJourneyIcon from "@/assets/svgs/MidJourneyIcon";
 import { useUserInput } from "@/context/useChatContext";
+import { useCreateWorkflow, useQBLogin } from "@/utils/apis/overos.api";
 import {
   Box,
   Flex,
@@ -13,12 +19,16 @@ import {
 import { animate, motion, useMotionValue } from "framer-motion";
 import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { FaBrain, FaCogs, FaRobot, FaSearch, FaSpinner } from "react-icons/fa";
 import { LoginRequiredModal } from "./LoginRequiredModal"; // Adjust path if needed
-import { useCreateWorkflow, useQBLogin } from "@/utils/apis/overos.api";
 
-const icons = [FaRobot, FaSearch, FaSpinner, FaBrain, FaCogs];
-const ICON_SIZE = 60;
+const icons = [
+  <GptIcon />,
+  <ClaudeIcon />,
+  <LlmIcon />,
+  <MidJourneyIcon />,
+  <GeminiIcon />,
+];
+const ICON_SIZE = 20;
 const GAP = 40;
 const STEP = ICON_SIZE + GAP;
 
@@ -40,22 +50,31 @@ const Chat = () => {
   const [isLoginRequired, setIsLoginRequired] = useState(true);
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
   const { mutate: triggerLogin } = useQBLogin();
-  const { mutate: createWorkflow, isPending } = useCreateWorkflow();
+  const { mutate: createWorkflow } = useCreateWorkflow();
+  const isPending = true;
 
   useEffect(() => {
+    const storedPrompt = localStorage.getItem("temp_user_prompt");
+    const storedImages = localStorage.getItem("temp_selected_images");
+
+    if (!userInput && storedPrompt) {
+      setInput(storedPrompt);
+    }
+
+    // Trigger API if logged in and both prompt and images are present
     const userId = localStorage.getItem("user_id");
-    console.log("user_id", userId);
-    if (userId) {
+    if (userId && storedPrompt && storedImages) {
+      const parsedImages = JSON.parse(storedImages);
+
       createWorkflow(
         {
-          userPrompt: userInput || "Default prompt",
-          images: selectedImages, // pass real images here if available
+          userPrompt: storedPrompt,
+          images: parsedImages,
           userId,
         },
         {
           onSuccess: (data) => {
             console.log("✅ Workflow API response:", data);
-            console.log("✅ Workflow API response summary:", data.summary);
             setMessages((prev) => [
               ...prev,
               {
@@ -64,6 +83,9 @@ const Chat = () => {
                 from: "other",
               },
             ]);
+            // Clear temp data
+            localStorage.removeItem("temp_user_prompt");
+            localStorage.removeItem("temp_selected_images");
           },
           onError: (error) => {
             console.error("❌ Workflow API error:", error);
@@ -87,6 +109,11 @@ const Chat = () => {
 
   const handleLogin = async () => {
     // Call the login API and log the response
+    localStorage.setItem("temp_user_prompt", userInput);
+    localStorage.setItem(
+      "temp_selected_images",
+      JSON.stringify(selectedImages)
+    );
     await triggerLogin(undefined, {
       onSuccess: (data) => {
         console.log("✅ QuickBooks Auth URL response:", data);
@@ -192,10 +219,10 @@ const Chat = () => {
                     key={tick + "-" + idx}
                     fontSize="36px"
                     color="gray.400"
-                    minW={`${ICON_SIZE}px`}
                     textAlign="center"
+                    boxSize={"20px"}
                   >
-                    <IconComp />
+                    {IconComp}
                   </Box>
                 ))}
               </motion.div>
