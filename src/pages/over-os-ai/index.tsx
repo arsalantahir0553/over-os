@@ -170,7 +170,7 @@ const DashboardHome = () => {
               />
 
               {/* Upload Button (fixed position) */}
-              <Box position="absolute" right="10px" top="36px">
+              <Box position="absolute" right="10px" top="36px" zIndex={5}>
                 <Tooltip
                   label="Upload"
                   aria-label="Upload Tooltip"
