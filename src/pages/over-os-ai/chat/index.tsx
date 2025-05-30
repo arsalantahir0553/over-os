@@ -50,8 +50,7 @@ const Chat = () => {
   const [isLoginRequired, setIsLoginRequired] = useState(true);
   const [hasLoggedIn, setHasLoggedIn] = useState(false);
   const { mutate: triggerLogin } = useQBLogin();
-  const { mutate: createWorkflow } = useCreateWorkflow();
-  const isPending = true;
+  const { mutate: createWorkflow, isPending } = useCreateWorkflow();
 
   useEffect(() => {
     const storedPrompt = localStorage.getItem("temp_user_prompt");
