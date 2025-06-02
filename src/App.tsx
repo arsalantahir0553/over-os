@@ -17,8 +17,14 @@ import ResetPasswordPage from "./pages/auth/ResetPassword";
 import VerifyEmailPage from "./pages/auth/VerifiyEmail";
 import PleaseVerifyEmail from "./pages/auth/PleaseVerifyEmail";
 import Callback from "./pages/over-os-ai/chat/Callback";
+import PrivateRoute from "./components/PrivateRoute";
+import { cleanExpiredUserMeta } from "./utils/helpers/auth.helper";
+import { useEffect } from "react";
 
 const App = () => {
+  useEffect(() => {
+    cleanExpiredUserMeta();
+  }, []);
   return (
     <Router>
       <Toaster position="top-center" />
@@ -33,10 +39,14 @@ const App = () => {
         </Route>
 
         {/* Dashboard pages with OverOs layout */}
+        <Route element={<PrivateRoute />}>
+          <Route element={<OverOsLayout />}>
+            <Route path="/dashboard" element={<DashboardHome />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/callback" element={<Callback />} />
+          </Route>
+        </Route>
         <Route element={<OverOsLayout />}>
-          <Route path="/dashboard" element={<DashboardHome />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/callback" element={<Callback />} />
           <Route path="/explore" element={<WorkflowLibrary />} />
         </Route>
 

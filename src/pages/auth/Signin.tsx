@@ -17,7 +17,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import OverOsLogo from "../../assets/svgs/overos-ai-beta-auth-logo.svg";
@@ -47,6 +47,13 @@ const Signin = () => {
   const login = useLogin();
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

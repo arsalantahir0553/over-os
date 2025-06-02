@@ -18,8 +18,10 @@ const Callback = () => {
         { code, state, realmId }, // optional
         {
           onSuccess: (data) => {
+            const expiresAt = Date.now() + 30 * 60 * 1000; // 30 minutes from now
             localStorage.setItem("user_id", data.user_id);
             localStorage.setItem("realm_id", data.realm_id);
+            localStorage.setItem("user_meta_expiry", expiresAt.toString());
             navigate("/chat");
           },
           onError: (error) => {
