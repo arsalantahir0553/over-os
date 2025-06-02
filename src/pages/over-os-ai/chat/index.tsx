@@ -35,13 +35,11 @@ const STEP = ICON_SIZE + GAP;
 const Chat = () => {
   const [input, setInput] = useState("");
   const { userInput, selectedImages } = useUserInput();
-
+  const storedPrompt = localStorage.getItem("temp_user_prompt");
   const initialMessages = [
     {
       id: 1,
-      text:
-        userInput ||
-        "Analyse these receipts from the last month for my client Alex Dan, categorize each expense correctly and upload them to my quickbooks account.",
+      text: storedPrompt || userInput,
       from: "me",
     },
   ];
@@ -53,34 +51,13 @@ const Chat = () => {
   const { mutate: createWorkflow, isPending } = useCreateWorkflow();
 
   useEffect(() => {
-    const storedPrompt = localStorage.getItem("temp_user_prompt");
-    const storedBase64Images = localStorage.getItem("temp_selected_images");
     const userId = localStorage.getItem("user_id");
 
-    if (storedPrompt && storedBase64Images && userId) {
-      const base64List: string[] = JSON.parse(storedBase64Images);
-
-      const dataURLtoFile = (dataurl: string, filename: string): File => {
-        const arr = dataurl.split(",");
-        const mimeMatch = arr[0].match(/:(.*?);/);
-        const mime = mimeMatch ? mimeMatch[1] : "";
-        const bstr = atob(arr[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        while (n--) {
-          u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new File([u8arr], filename, { type: mime });
-      };
-
-      const files = base64List.map((b64, i) =>
-        dataURLtoFile(b64, `image${i}.jpg`)
-      );
-
+    if (userId) {
       createWorkflow(
         {
-          userPrompt: storedPrompt,
-          images: files,
+          userPrompt: userInput,
+          images: selectedImages,
           userId,
         },
         {
@@ -101,6 +78,55 @@ const Chat = () => {
           },
         }
       );
+    } else {
+      const storedPrompt = localStorage.getItem("temp_user_prompt");
+      const storedBase64Images = localStorage.getItem("temp_selected_images");
+
+      if (storedPrompt && storedBase64Images && userId) {
+        const base64List: string[] = JSON.parse(storedBase64Images);
+
+        const dataURLtoFile = (dataurl: string, filename: string): File => {
+          const arr = dataurl.split(",");
+          const mimeMatch = arr[0].match(/:(.*?);/);
+          const mime = mimeMatch ? mimeMatch[1] : "";
+          const bstr = atob(arr[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          return new File([u8arr], filename, { type: mime });
+        };
+
+        const files = base64List.map((b64, i) =>
+          dataURLtoFile(b64, `image${i}.jpg`)
+        );
+
+        createWorkflow(
+          {
+            userPrompt: storedPrompt,
+            images: files,
+            userId,
+          },
+          {
+            onSuccess: (data) => {
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: Date.now(),
+                  text: data.summary || "No summary available",
+                  from: "other",
+                },
+              ]);
+              localStorage.removeItem("temp_user_prompt");
+              localStorage.removeItem("temp_selected_images");
+            },
+            onError: (error) => {
+              console.error("❌ Workflow API error:", error);
+            },
+          }
+        );
+      }
     }
   }, [createWorkflow, userInput, selectedImages]);
   //test
