@@ -18,6 +18,7 @@ import { FaStar } from "react-icons/fa";
 import graphImage from "../../assets/images/graph.png";
 import TestimonialImage from "../../assets/images/testimonial.png";
 import { CheckCircleIcon, StarIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   isOpen: boolean;
@@ -38,6 +39,7 @@ const benefitsList = [
 ];
 
 const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
+  const navigate = useNavigate();
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl" isCentered>
       <ModalOverlay />
@@ -81,6 +83,9 @@ const SmartInvoiceModal = ({ isOpen, onClose }: Props) => {
               fontFamily={"Inter"}
               _hover={{
                 bg: "brand.500",
+              }}
+              onClick={() => {
+                navigate("/demo");
               }}
             >
               Try Now

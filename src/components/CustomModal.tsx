@@ -19,8 +19,9 @@ interface CustomModalProps {
   submitButtonText?: string;
   cancelButtonText?: string;
   submitButtonColor?: string;
+  width?: string | number;
+  isLoading?: boolean;
 }
-
 export const CustomModal = ({
   isOpen,
   onClose,
@@ -30,11 +31,13 @@ export const CustomModal = ({
   submitButtonText = "Submit",
   cancelButtonText = "Cancel",
   submitButtonColor = "brand.900",
+  width = "400px",
+  isLoading,
 }: CustomModalProps) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent maxW={width}>
         <ModalHeader>{headerText}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>{children}</ModalBody>
@@ -42,7 +45,12 @@ export const CustomModal = ({
           <Button variant="ghost" mr={3} onClick={onClose}>
             {cancelButtonText}
           </Button>
-          <Button colorScheme="brand" bg={submitButtonColor} onClick={onSubmit}>
+          <Button
+            isLoading={isLoading}
+            colorScheme="brand"
+            bg={submitButtonColor}
+            onClick={onSubmit}
+          >
             {submitButtonText}
           </Button>
         </ModalFooter>

@@ -27,9 +27,9 @@ import Workflow3 from "../../assets/svgs/workflow-3.svg";
 const trendingWorkflows = [
   {
     icon: Workflow1,
-    title: "Send a file from your desktop via Email or Slack",
+    title: "Smart Invoice Processing into Quickbooks",
     description:
-      "Agent finds a doc (e.g., resume, NDA, PDF invoice), drafts a message, and sends it through Gmail or Slack.",
+      "This workflow uses AI to automate invoice extraction, categorization, and integration with accounting software",
     coming_soon: false,
   },
   {
@@ -238,7 +238,12 @@ const DashboardHome = () => {
             {trendingWorkflows.map((workflow, index) => (
               <Card key={index} bg={cardBg} minH="180px">
                 <CardBody>
-                  <Flex align="start" gap={4} cursor="pointer" onClick={onOpen}>
+                  <Flex
+                    align="start"
+                    gap={4}
+                    cursor={index === 0 ? "pointer" : ""}
+                    onClick={index === 0 ? onOpen : () => {}}
+                  >
                     <Image src={workflow.icon} w="44px" h="44px" />
 
                     <Flex

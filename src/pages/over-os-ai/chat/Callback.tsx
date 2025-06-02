@@ -12,17 +12,22 @@ const Callback = () => {
     const code = searchParams.get("code");
     const state = searchParams.get("state");
     const realmId = searchParams.get("realmId");
-
+    const fromDemo = localStorage.getItem("from_demo");
     if (code && state && realmId) {
       getUserId(
         { code, state, realmId }, // optional
         {
           onSuccess: (data) => {
-            const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+            const expiresAt = Date.now() + 30 * 60 * 1000; // 10 minutes from now
             localStorage.setItem("user_id", data.user_id);
             localStorage.setItem("realm_id", data.realm_id);
             localStorage.setItem("user_meta_expiry", expiresAt.toString());
-            navigate("/chat");
+            if (fromDemo) {
+              localStorage.removeItem("from_demo");
+              navigate("/dashboard");
+            } else {
+              navigate("/chat");
+            }
           },
           onError: (error) => {
             console.error("OAuth callback failed:", error);

@@ -20,6 +20,7 @@ import Callback from "./pages/over-os-ai/chat/Callback";
 import PrivateRoute from "./components/PrivateRoute";
 import { cleanExpiredUserMeta } from "./utils/helpers/auth.helper";
 import { useEffect } from "react";
+import DemoChat from "./pages/over-os-ai/chat/DemoChat";
 
 const App = () => {
   useEffect(() => {
@@ -43,6 +44,7 @@ const App = () => {
           <Route element={<OverOsLayout />}>
             <Route path="/dashboard" element={<DashboardHome />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/demo" element={<DemoChat />} />
             <Route path="/callback" element={<Callback />} />
           </Route>
         </Route>
