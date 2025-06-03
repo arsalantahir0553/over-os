@@ -8,43 +8,19 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import { keyframes } from "@emotion/react";
 import { useEffect, useState } from "react";
 import Demo1 from "../../../assets/images/demo1.jpeg";
 import Demo2 from "../../../assets/images/demo2.jpeg";
 import { LoginRequiredModal } from "./LoginRequiredModal";
-
-// Keyframe animation for bouncing dots
-const bounce = keyframes`
-  0%, 80%, 100% {
-    transform: scale(0);
-    opacity: 0.3;
-  } 
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
-`;
-
-const LoadingDots = () => (
-  <Flex align="center" gap={1} px={2}>
-    {[0, 1, 2].map((i) => (
-      <Box
-        key={i}
-        w="6px"
-        h="6px"
-        bg="gray.500"
-        borderRadius="full"
-        animation={`${bounce} 1.4s infinite`}
-      />
-    ))}
-  </Flex>
-);
+import { useUserInput } from "@/context/useChatContext";
+import { useNavigate } from "react-router-dom";
+import ChatLoadingDots from "@/components/DotsLoading";
 
 const DemoChat = () => {
   const images = [Demo1, Demo2];
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { mutate: triggerLogin, isPending } = useQBLogin();
+  const { setUserInput } = useUserInput();
 
   const [messages, setMessages] = useState([
     {
@@ -56,14 +32,14 @@ const DemoChat = () => {
   ]);
   const [isLoading, setIsLoading] = useState(true);
   const [showButton, setShowButton] = useState(false);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const timeout = setTimeout(() => {
       setMessages((prev) => [
         ...prev,
         {
           id: 2,
-          text: "Sure. I've categorized these transactions and uploaded them to QuickBooks under the appropriate expense categories.",
+          text: "The QuickBooks API confirms a purchase transaction from June 3, 2025, with a total amount of $23.52, categorized under Meals and Entertainment, and paid by credit card.",
           images: [],
           from: "other",
         },
@@ -74,6 +50,18 @@ const DemoChat = () => {
 
     return () => clearTimeout(timeout);
   }, []);
+
+  const handleTryWorkflow = () => {
+    const userId = localStorage.getItem("user_id");
+    if (userId) {
+      setUserInput(
+        "Upload the following expenses into my QuickBooks. Categorize them correctly."
+      );
+      navigate("/dashboard");
+    } else {
+      onOpen();
+    }
+  };
 
   const handleLogin = async () => {
     await triggerLogin(undefined, {
@@ -143,15 +131,8 @@ const DemoChat = () => {
 
         {isLoading && (
           <Flex w="100%" justify="flex-start" pl={2}>
-            <Box
-              px={4}
-              py={2}
-              borderRadius="20px"
-              bg="gray.100"
-              color="gray.600"
-              fontSize="20px"
-            >
-              <LoadingDots />
+            <Box px={4} borderRadius="20px" bg="gray.100" color="gray.600">
+              <ChatLoadingDots />
             </Box>
           </Flex>
         )}
@@ -170,7 +151,7 @@ const DemoChat = () => {
               _hover={{
                 bg: "brand.900",
               }}
-              onClick={onOpen}
+              onClick={handleTryWorkflow}
             >
               Try This Workflow
             </Button>

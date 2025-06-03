@@ -94,3 +94,40 @@ export const useCreateWorkflow = () =>
   useMutation<any, Error, CreateWorkflowFormData>({
     mutationFn: createWorkflow,
   });
+
+const intent = async ({ prompt }: { prompt: string }) => {
+  const params = new URLSearchParams();
+  params.append("prompt", prompt);
+  console.log(params.get("prompt"));
+  const response = await axios.post("/api/intent", params, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+
+  return response.data;
+};
+
+export const useIntent = () =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useMutation<any, Error, { prompt: string }>({
+    mutationFn: intent,
+  });
+
+const chat = async ({ prompt }: { prompt: string }) => {
+  const params = new URLSearchParams();
+  params.append("prompt", prompt);
+  const response = await axios.post("/api/chat", params, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+
+  return response.data;
+};
+
+export const useChat = () =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useMutation<any, Error, { prompt: string }>({
+    mutationFn: chat,
+  });

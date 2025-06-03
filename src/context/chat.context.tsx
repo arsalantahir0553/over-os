@@ -5,6 +5,8 @@ export interface UserInputContextType {
   setUserInput: React.Dispatch<React.SetStateAction<string>>;
   selectedImages: File[];
   setSelectedImages: React.Dispatch<React.SetStateAction<File[]>>;
+  isChat: boolean;
+  setIsChat: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const UserInputContext = createContext<UserInputContextType>({
@@ -12,4 +14,6 @@ export const UserInputContext = createContext<UserInputContextType>({
   setUserInput: () => {},
   selectedImages: [],
   setSelectedImages: () => {},
+  isChat: false,
+  setIsChat: () => {},
 });

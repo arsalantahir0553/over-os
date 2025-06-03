@@ -5,7 +5,7 @@ import { UserInputContext } from "./chat.context";
 export const UserInputProvider = ({ children }: { children: ReactNode }) => {
   const [userInput, setUserInput] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-
+  const [isChat, setIsChat] = useState<boolean>(false);
   return (
     <UserInputContext.Provider
       value={{
@@ -13,6 +13,8 @@ export const UserInputProvider = ({ children }: { children: ReactNode }) => {
         setUserInput,
         selectedImages,
         setSelectedImages,
+        isChat,
+        setIsChat,
       }}
     >
       {children}

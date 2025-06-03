@@ -4,7 +4,12 @@ import GptIcon from "@/assets/svgs/GptIcon";
 import LlmIcon from "@/assets/svgs/LlmIcon";
 import MidJourneyIcon from "@/assets/svgs/MidJourneyIcon";
 import { useUserInput } from "@/context/useChatContext";
-import { useCreateWorkflow, useQBLogin } from "@/utils/apis/overos.api";
+import {
+  useChat,
+  useCreateWorkflow,
+  useIntent,
+  useQBLogin,
+} from "@/utils/apis/overos.api";
 import {
   Box,
   Flex,
@@ -34,7 +39,7 @@ const STEP = ICON_SIZE + GAP;
 
 const Chat = () => {
   const [input, setInput] = useState("");
-  const { userInput, selectedImages } = useUserInput();
+  const { userInput, selectedImages, isChat, setIsChat } = useUserInput();
   const storedPrompt = localStorage.getItem("temp_user_prompt");
   const initialMessages = [
     {
@@ -45,67 +50,56 @@ const Chat = () => {
   ];
 
   const [messages, setMessages] = useState(initialMessages);
-  const [isLoginRequired, setIsLoginRequired] = useState(true);
-  const [hasLoggedIn, setHasLoggedIn] = useState(false);
+  const [isLoginRequired, setIsLoginRequired] = useState(false);
   const { mutate: triggerLogin } = useQBLogin();
   const { mutate: createWorkflow, isPending } = useCreateWorkflow();
+  const { mutateAsync: sendChat } = useChat();
+  const { mutateAsync: detectIntent } = useIntent();
 
   useEffect(() => {
-    const userId = localStorage.getItem("user_id");
+    const runChatOrWorkflow = async () => {
+      if (!userInput.trim()) return;
 
-    if (userId) {
-      createWorkflow(
-        {
-          userPrompt: userInput,
-          images: selectedImages,
-          userId,
-        },
-        {
-          onSuccess: (data) => {
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: Date.now(),
-                text: data.summary || "No summary available",
-                from: "other",
-              },
-            ]);
-            localStorage.removeItem("temp_user_prompt");
-            localStorage.removeItem("temp_selected_images");
-          },
-          onError: (error) => {
-            console.error("❌ Workflow API error:", error);
-          },
+      try {
+        const intentResponse = await detectIntent({ prompt: userInput });
+        const { intent } = intentResponse;
+        const userId = localStorage.getItem("user_id");
+
+        if (intent === "chat") {
+          setIsChat(true);
+          return;
         }
-      );
-    } else {
-      const storedPrompt = localStorage.getItem("temp_user_prompt");
-      const storedBase64Images = localStorage.getItem("temp_selected_images");
 
-      if (storedPrompt && storedBase64Images && userId) {
-        const base64List: string[] = JSON.parse(storedBase64Images);
+        // Only proceed to workflow if intent is NOT 'chat'
+        if (!userId) {
+          setIsLoginRequired(true);
+          return;
+        }
 
-        const dataURLtoFile = (dataurl: string, filename: string): File => {
-          const arr = dataurl.split(",");
-          const mimeMatch = arr[0].match(/:(.*?);/);
-          const mime = mimeMatch ? mimeMatch[1] : "";
-          const bstr = atob(arr[1]);
-          let n = bstr.length;
-          const u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          return new File([u8arr], filename, { type: mime });
-        };
+        // Save input & images for later
+        localStorage.setItem("temp_user_prompt", userInput);
+        const convertToBase64 = (file: File) =>
+          new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
 
-        const files = base64List.map((b64, i) =>
-          dataURLtoFile(b64, `image${i}.jpg`)
+        const base64Images = await Promise.all(
+          selectedImages.map((img) => convertToBase64(img))
         );
 
+        localStorage.setItem(
+          "temp_selected_images",
+          JSON.stringify(base64Images)
+        );
+
+        // Trigger workflow
         createWorkflow(
           {
-            userPrompt: storedPrompt,
-            images: files,
+            userPrompt: userInput,
+            images: selectedImages,
             userId,
           },
           {
@@ -126,27 +120,94 @@ const Chat = () => {
             },
           }
         );
+      } catch (err) {
+        console.error("❌ Error determining intent:", err);
       }
-    }
-  }, [createWorkflow, userInput, selectedImages]);
-  //test
+    };
+
+    runChatOrWorkflow();
+  }, []); // Run once when component loads
+
+  // Watch for chat trigger
   useEffect(() => {
     const userId = localStorage.getItem("user_id");
-    if (userId) {
-      setHasLoggedIn(true);
-      setIsLoginRequired(false);
+    if (isChat && userInput && userId) {
+      sendChat(
+        { prompt: userInput },
+        {
+          onSuccess: (data) => {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: Date.now(),
+                text: data.response || "No summary available",
+                from: "other",
+              },
+            ]);
+          },
+        }
+      );
+      setIsChat(false);
     }
-  }, []);
+  }, [isChat, userInput]);
 
-  const x = useMotionValue(0);
-  const iconRef = useRef([icons[icons.length - 1], ...icons.slice(0, 3)]);
-  const [tick, setTick] = useState(0);
+  // After login success, run workflow again
+  useEffect(() => {
+    if (!isLoginRequired) return;
 
+    const storedPrompt = localStorage.getItem("temp_user_prompt");
+    const storedBase64Images = localStorage.getItem("temp_selected_images");
+    const userId = localStorage.getItem("user_id");
+
+    if (storedPrompt && storedBase64Images && userId) {
+      const base64List: string[] = JSON.parse(storedBase64Images);
+      const dataURLtoFile = (dataurl: string, filename: string): File => {
+        const arr = dataurl.split(",");
+        const mimeMatch = arr[0].match(/:(.*?);/);
+        const mime = mimeMatch ? mimeMatch[1] : "";
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], filename, { type: mime });
+      };
+
+      const files = base64List.map((b64, i) =>
+        dataURLtoFile(b64, `image${i}.jpg`)
+      );
+
+      createWorkflow(
+        {
+          userPrompt: storedPrompt,
+          images: files,
+          userId,
+        },
+        {
+          onSuccess: (data) => {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: Date.now(),
+                text: data.summary || "No summary available",
+                from: "other",
+              },
+            ]);
+            localStorage.removeItem("temp_user_prompt");
+            localStorage.removeItem("temp_selected_images");
+          },
+          onError: (error) => {
+            console.error("❌ Workflow API error:", error);
+          },
+        }
+      );
+    }
+  }, [createWorkflow, isLoginRequired]);
+
+  // Handle login redirect trigger
   const handleLogin = async () => {
-    // Save user input
-    localStorage.setItem("temp_user_prompt", userInput);
-
-    // Convert images to base64
+    const storedPrompt = userInput;
     const convertToBase64 = (file: File) =>
       new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -159,9 +220,9 @@ const Chat = () => {
       selectedImages.map((img) => convertToBase64(img))
     );
 
+    localStorage.setItem("temp_user_prompt", storedPrompt);
     localStorage.setItem("temp_selected_images", JSON.stringify(base64Images));
 
-    // Redirect to login
     await triggerLogin(undefined, {
       onSuccess: (data) => {
         window.location.href = data.auth_url;
@@ -171,6 +232,10 @@ const Chat = () => {
       },
     });
   };
+
+  const x = useMotionValue(0);
+  const iconRef = useRef([icons[icons.length - 1], ...icons.slice(0, 3)]);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -279,7 +344,7 @@ const Chat = () => {
     );
   }
 
-  if (isLoginRequired && !hasLoggedIn) {
+  if (isLoginRequired) {
     return (
       <LoginRequiredModal
         isOpen={true}
@@ -320,7 +385,19 @@ const Chat = () => {
                 fontFamily={msg.from === "me" ? "Inter" : ""}
                 fontSize={msg.from === "me" ? "17px" : "19px"}
               >
-                {msg.text}
+                {msg.text
+                  .split("\n")
+                  .filter((line) => line.trim() !== "")
+                  .map((line, idx) => (
+                    <Text
+                      key={idx}
+                      fontFamily={msg.from === "me" ? "Inter" : ""}
+                      fontSize={msg.from === "me" ? "17px" : "19px"}
+                      mb={2}
+                    >
+                      {line}
+                    </Text>
+                  ))}
               </Text>
             </Box>
           </Flex>
