@@ -2,37 +2,43 @@ import { useQBLogin } from "@/utils/apis/overos.api";
 import {
   Box,
   Button,
+  Center,
   Flex,
   Image,
+  Spinner,
   Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import Demo1 from "../../../assets/images/demo1.jpeg";
-import Demo2 from "../../../assets/images/demo2.jpeg";
 import { LoginRequiredModal } from "./LoginRequiredModal";
 import { useUserInput } from "@/context/useChatContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ChatLoadingDots from "@/components/DotsLoading";
+import { useGetWorkflowById } from "@/utils/apis/workflow.api";
 
 const DemoChat = () => {
-  const images = [Demo1, Demo2];
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { mutate: triggerLogin, isPending } = useQBLogin();
   const { setUserInput } = useUserInput();
+  const { id } = useParams<{ id: string }>();
+  const {
+    data: workflow,
+    isLoading: isApiLoading,
+    isError,
+  } = useGetWorkflowById(id!);
 
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Upload the following expenses into my QuickBooks. Categorize them correctly.",
-      images,
-      from: "me",
-    },
-  ]);
   const [isLoading, setIsLoading] = useState(true);
   const [showButton, setShowButton] = useState(false);
   const navigate = useNavigate();
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      text: workflow?.prompt,
+      images: workflow?.sampleImages,
+      from: "me",
+    },
+  ]);
   useEffect(() => {
     const timeout = setTimeout(() => {
       setMessages((prev) => [
@@ -50,6 +56,22 @@ const DemoChat = () => {
 
     return () => clearTimeout(timeout);
   }, []);
+
+  if (isApiLoading) {
+    return (
+      <Center py={20}>
+        <Spinner size="xl" />
+      </Center>
+    );
+  }
+
+  if (isError || !workflow) {
+    return (
+      <Center py={20}>
+        <Text color="red.500">Failed to load workflow details.</Text>
+      </Center>
+    );
+  }
 
   const handleTryWorkflow = () => {
     const userId = localStorage.getItem("user_id");

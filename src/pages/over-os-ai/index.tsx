@@ -1,5 +1,5 @@
-import SmartInvoiceModal from "@/components/over-os-ai/SmartInvoiceModal";
 import { useUserInput } from "@/context/useChatContext";
+import { useGetAllWorkflows } from "@/utils/apis/workflow.api";
 import {
   Box,
   Card,
@@ -13,7 +13,6 @@ import {
   Textarea,
   Tooltip,
   useColorModeValue,
-  useDisclosure,
   VStack,
 } from "@chakra-ui/react";
 import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
@@ -24,37 +23,15 @@ import Workflow1 from "../../assets/svgs/workflow-1.svg";
 import Workflow2 from "../../assets/svgs/workflow-2.svg";
 import Workflow3 from "../../assets/svgs/workflow-3.svg";
 
-const trendingWorkflows = [
-  {
-    icon: Workflow1,
-    title: "Smart Invoice Processing into Quickbooks",
-    description:
-      "This workflow uses AI to automate invoice extraction, categorization, and integration with accounting software",
-    coming_soon: false,
-  },
-  {
-    icon: Workflow2,
-    title: "Auto-fill complex forms using your documents",
-    description:
-      "Reads local files (e.g., resume, tax data), extracts key info, fills out web forms like job applications.",
-    coming_soon: false,
-  },
-  {
-    icon: Workflow3,
-    title: "Summarize meetings, articles, or documents",
-    description:
-      "Ingests transcripts, long PDFs, or multiple web articles and outputs a clean summary with headings.",
-    coming_soon: true,
-  },
-];
-
 const DashboardHome = () => {
   const cardBg = useColorModeValue("white", "gray.800");
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const { userInput, setUserInput, selectedImages, setSelectedImages } =
     useUserInput();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: Workflows } = useGetAllWorkflows();
+
+  console.log("workflows", Workflows);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -235,16 +212,32 @@ const DashboardHome = () => {
             Trending Workflows
           </Text>
           <SimpleGrid columns={[1, null, 3]} spacing={6}>
-            {trendingWorkflows.map((workflow, index) => (
+            {Workflows?.slice(0, 3).map((workflow, index) => (
               <Card key={index} bg={cardBg} minH="180px">
                 <CardBody>
                   <Flex
                     align="start"
                     gap={4}
                     cursor={index === 0 ? "pointer" : ""}
-                    onClick={index === 0 ? onOpen : () => {}}
+                    onClick={
+                      index === 0
+                        ? () => {
+                            navigate(`/workflow/details/${workflow.id}`);
+                          }
+                        : () => {}
+                    }
                   >
-                    <Image src={workflow.icon} w="44px" h="44px" />
+                    <Image
+                      src={
+                        index === 0
+                          ? Workflow1
+                          : index === 1
+                          ? Workflow2
+                          : Workflow3
+                      }
+                      w="44px"
+                      h="44px"
+                    />
 
                     <Flex
                       direction="column"
@@ -275,14 +268,14 @@ const DashboardHome = () => {
                       <Box mt="auto" pt={2}>
                         <Text
                           fontSize="14px"
-                          color={workflow.coming_soon ? "#D97757" : "#D97757"}
+                          color={workflow.isActive ? "#D97757" : "#D97757"}
                           fontWeight="400"
                           fontFamily="Inter"
                           display="inline-flex"
                           alignItems="center"
                           gap={1}
                         >
-                          {workflow.coming_soon ? "Coming soon" : "Get started"}
+                          {workflow.isActive ? "Get started" : "Coming soon"}
                           <Image src={RightArrowOrange} />
                         </Text>
                       </Box>
@@ -294,7 +287,6 @@ const DashboardHome = () => {
           </SimpleGrid>
         </Box>
       </VStack>
-      <SmartInvoiceModal isOpen={isOpen} onClose={onClose} />
     </Box>
   );
 };
