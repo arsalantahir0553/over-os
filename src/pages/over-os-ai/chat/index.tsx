@@ -66,7 +66,15 @@ const Chat = () => {
         const userId = localStorage.getItem("user_id");
 
         if (intent === "chat") {
-          setIsChat(true);
+          const chatResponse = await sendChat({ prompt: userInput });
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now(),
+              text: chatResponse.response || "No summary available",
+              from: "other",
+            },
+          ]);
           return;
         }
 
