@@ -99,7 +99,7 @@ const intent = async ({ prompt }: { prompt: string }) => {
   const params = new URLSearchParams();
   params.append("prompt", prompt);
   console.log(params.get("prompt"));
-  const response = await axios.post("/api/intent", params, {
+  const response = await axios.post(`${API_BASE_URL}/intent`, params, {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
@@ -117,7 +117,7 @@ export const useIntent = () =>
 const chat = async ({ prompt }: { prompt: string }) => {
   const params = new URLSearchParams();
   params.append("prompt", prompt);
-  const response = await axios.post("/api/chat", params, {
+  const response = await axios.post(`${API_BASE_URL}/chat`, params, {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
