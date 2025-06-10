@@ -16,7 +16,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import RightArrowOrange from "../../assets/svgs/right-arrow-orange.svg";
 import Workflow1 from "../../assets/svgs/workflow-1.svg";
@@ -30,7 +30,7 @@ const DashboardHome = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: Workflows } = useGetAllWorkflows();
-
+  const chatPrompt = localStorage.getItem("chat_prompt");
   console.log("workflows", Workflows);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -42,6 +42,13 @@ const DashboardHome = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (chatPrompt) {
+      setUserInput(chatPrompt);
+      localStorage.removeItem("chat_prompt");
+    }
+  }, [chatPrompt, setUserInput]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;

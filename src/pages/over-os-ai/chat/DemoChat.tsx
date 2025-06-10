@@ -82,6 +82,7 @@ const DemoChat = () => {
       navigate("/dashboard");
     } else {
       onOpen();
+      localStorage.setItem("chat_prompt", workflow.prompt);
     }
   };
 

@@ -25,6 +25,7 @@ import { animate, motion, useMotionValue } from "framer-motion";
 import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LoginRequiredModal } from "./LoginRequiredModal"; // Adjust path if needed
+import ChatLoadingDots from "@/components/DotsLoading";
 
 const icons = [
   <GptIcon />,
@@ -53,8 +54,8 @@ const Chat = () => {
   const [isLoginRequired, setIsLoginRequired] = useState(false);
   const { mutate: triggerLogin } = useQBLogin();
   const { mutate: createWorkflow, isPending } = useCreateWorkflow();
-  const { mutateAsync: sendChat } = useChat();
-  const { mutateAsync: detectIntent } = useIntent();
+  const { mutateAsync: sendChat, isPending: isChatPending } = useChat();
+  const { mutateAsync: detectIntent, isPending: isIntentPending } = useIntent();
 
   useEffect(() => {
     const runChatOrWorkflow = async () => {
@@ -347,6 +348,49 @@ const Chat = () => {
               </motion.div>
             </Box>
           </Box>
+        </VStack>
+      </Flex>
+    );
+  }
+
+  if (isIntentPending || isChatPending) {
+    return (
+      <Flex
+        direction="column"
+        h="81.5vh"
+        maxW="90%"
+        mx="auto"
+        px={4}
+        pt={2}
+        bg="gray.50"
+      >
+        <VStack flex={1} spacing={3} w="full">
+          <Flex
+            key={messages[0].id}
+            w="100%"
+            justify={messages[0].from === "me" ? "flex-end" : "flex-start"}
+          >
+            <Box
+              maxW="70%"
+              px={4}
+              py={2}
+              borderRadius="20px"
+              bg={messages[0].from === "me" ? "white" : "transparent"}
+              color={messages[0].from === "me" ? "gray.800" : "white"}
+              border={messages[0].from === "me" ? "1px solid #D9D9D9" : "none"}
+            >
+              <Text fontFamily="Inter" fontSize="17px">
+                {messages[0].text}
+              </Text>
+            </Box>
+          </Flex>
+
+          {/* Loading dots aligned like a bot message */}
+          <Flex w="100%" justify="flex-start">
+            <Box maxW="70%">
+              <ChatLoadingDots />
+            </Box>
+          </Flex>
         </VStack>
       </Flex>
     );
