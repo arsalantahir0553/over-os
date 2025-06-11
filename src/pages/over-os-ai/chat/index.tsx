@@ -280,7 +280,7 @@ const Chat = () => {
   };
 
   // Conditional rendering starts here
-  if (isPending) {
+  if (isIntentPending) {
     return (
       <Flex
         direction="column"
@@ -353,7 +353,7 @@ const Chat = () => {
     );
   }
 
-  if (isIntentPending || isChatPending) {
+  if (isPending || isChatPending) {
     return (
       <Flex
         direction="column"
