@@ -1,24 +1,38 @@
-// src/theme/index.ts
-import { extendTheme, theme as base } from "@chakra-ui/react";
+import { extendTheme, theme as base, type ThemeConfig } from "@chakra-ui/react";
+
+const config: ThemeConfig = {
+  initialColorMode: "dark",
+  useSystemColorMode: false,
+};
 
 const customTheme = extendTheme({
+  config,
   colors: {
     brand: {
-      50: "#e6e9f0",
-      100: "#c1c8da",
-      200: "#98a4c1",
-      300: "#6f80a8",
-      400: "#495f91",
-      500: "#2f4677",
-      600: "#22355d",
-      700: "#162542",
-      800: "#0a1528",
-      900: "#000E39", // your primary
+      1000: "#0F162B",
+      900: "#0F122B", // GitHub dark background
+      800: "#161B22", // Dark section cards
+      700: "#1F2937", // Sidebar/nav
+      600: "#2D3748",
+      500: "#3B82F6", // Soft bright blue
+      400: "#60A5FA",
     },
-    primary: {
-      500: "#2368C4",
-      300: "#D9D9D9",
-      400: "#5C5C5C",
+    neon: {
+      green: "#6374a5", // Use for accents only
+      cyan: "#00FFF7", // Alt accent (avoid using both at once)
+    },
+    gray: {
+      50: "#F9FAFB",
+      100: "#F3F4F6",
+      200: "#E5E7EB",
+      300: "#D1D5DB",
+      400: "#9CA3AF",
+      500: "#6B7280",
+      600: "#4B5563",
+      700: "#141b30",
+      800: "#1F2937",
+      900: "#111827",
+      1000: "#1B2236",
     },
   },
   fonts: {
@@ -26,16 +40,57 @@ const customTheme = extendTheme({
     body: `'Segoe UI', ${base.fonts?.body}`,
   },
   styles: {
-    global: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    global: (props: any) => ({
       body: {
-        bg: "white",
-        color: "gray.800",
+        bg: props.colorMode === "dark" ? "brand.900" : "white",
+        color: props.colorMode === "dark" ? "gray.100" : "gray.900",
+        fontFamily: "body",
       },
-    },
+    }),
   },
   semanticTokens: {
     colors: {
-      primary: "brand.900",
+      text: {
+        default: "gray.800",
+        _dark: "gray.100",
+      },
+      surface: {
+        default: "white",
+        _dark: "brand.1000",
+      },
+      surfaceSidebar: {
+        default: "brand.900",
+        _dark: "brand.1000",
+      },
+      surface2: {
+        default: "white",
+        _dark: "gray.1000",
+      },
+      surfaceButton: {
+        default: "brand.500",
+        _dark: "gray.1000",
+      },
+      bg: {
+        default: "white",
+        _dark: "brand.900",
+      },
+      primary: {
+        default: "brand.500",
+        _dark: "brand.400",
+      },
+      accent: {
+        default: "neon.green",
+        _dark: "neon.green",
+      },
+      cardBg: {
+        default: "gray.50",
+        _dark: "brand.800",
+      },
+      border: {
+        default: "gray.200",
+        _dark: "gray.700",
+      },
     },
   },
 });

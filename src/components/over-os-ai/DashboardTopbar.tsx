@@ -1,7 +1,15 @@
-import { Button, Flex, IconButton } from "@chakra-ui/react";
-import { FiSearch } from "react-icons/fi";
+import {
+  Button,
+  Flex,
+  IconButton,
+  useColorMode,
+  Tooltip,
+} from "@chakra-ui/react";
+import { FiSearch, FiSun, FiMoon } from "react-icons/fi";
 
 const DashboardTopbar = () => {
+  const { colorMode, toggleColorMode } = useColorMode();
+
   return (
     <Flex
       as="header"
@@ -9,58 +17,54 @@ const DashboardTopbar = () => {
       justify="flex-end"
       px={6}
       py={4}
-      bg="gray.50"
-      boxShadow="sm"
+      bg="surface"
+      borderBottom="1px"
+      borderColor="border"
       gap={3}
-      borderBottomColor={"gray.200"}
-      borderBottomWidth={"1px"}
     >
-      {/* Search Icon - right side */}
-      <IconButton
-        icon={<FiSearch color="gray" />}
-        aria-label="Search"
-        variant="ghost"
-        fontSize="23px"
-      />
+      {/* Search Button */}
+      <Tooltip label="Search" hasArrow>
+        <IconButton
+          icon={<FiSearch />}
+          aria-label="Search"
+          variant="ghost"
+          fontSize="23px"
+          color="text"
+        />
+      </Tooltip>
 
-      {/* Menu Button */}
-      {/* <Menu>
-        <MenuButton
-          as={Button}
-          rounded={"full"}
-          variant="solid"
-          fontSize={"22px"}
-          fontWeight={400}
-          fontFamily={"Inter"}
-          px={6}
-          bg={"primary.500"}
-          color={"white"}
-          _hover={{ bg: "#1E5AAB" }}
-          _active={{ bg: "#184A8F" }}
-          rightIcon={<ChevronDownIcon />}
-        >
-          Workflows
-        </MenuButton>
-        <MenuList>
-          <MenuItem>View Logs</MenuItem>
-          <MenuItem>Settings</MenuItem>
-        </MenuList>
-      </Menu> */}
-
-      {/* Share button with text and icon */}
-      <Button
-        rounded={"full"}
-        variant="solid"
-        fontSize={"22px"}
-        fontWeight={400}
-        fontFamily={"Inter"}
-        px={6}
-        bg={"primary.500"}
-        color={"white"}
-        _hover={{ bg: "#1E5AAB" }}
-        _active={{ bg: "#184A8F" }}
+      {/* Theme Toggle Button */}
+      <Tooltip
+        label={
+          colorMode === "light" ? "Switch to dark mode" : "Switch to light mode"
+        }
+        hasArrow
       >
-        Ai Screen Share
+        <IconButton
+          icon={colorMode === "light" ? <FiMoon /> : <FiSun />}
+          aria-label="Toggle theme"
+          variant="ghost"
+          fontSize="22px"
+          color="text"
+          onClick={toggleColorMode}
+        />
+      </Tooltip>
+
+      {/* Screen Share Button */}
+      <Button
+        rounded="8px"
+        variant="solid"
+        fontSize="16px"
+        fontWeight="500"
+        fontFamily="Inter"
+        size={"md"}
+        px={6}
+        bg="surfaceButton"
+        color="white"
+        _hover={{ bg: "primary", opacity: 0.9 }}
+        _active={{ bg: "primary", opacity: 0.8 }}
+      >
+        AI Screen Share
       </Button>
     </Flex>
   );

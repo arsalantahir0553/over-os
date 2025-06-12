@@ -5,32 +5,29 @@ import { Outlet } from "react-router-dom";
 
 const DashboardLayout = () => {
   return (
-    <Flex h="100vh" bg="brand.900">
-      {/* Inner box with border and rounded corners */}
-      <Box
-        flex="1"
-        border="8px solid"
-        borderColor="brand.900"
-        overflow="hidden"
-        display="flex"
-      >
+    <Flex h="100vh" bg="bg">
+      {/* Inner box with semantic border color */}
+      <Box flex="1" overflow="hidden" display="flex">
         {/* Sidebar */}
         <DashboardSidebar />
 
-        {/* Main area */}
-        <Flex
-          flex="1"
-          direction="column"
-          overflow="hidden"
-          borderRadius={"10px"}
-        >
+        {/* Main content area */}
+        <Flex flex="1" direction="column" overflow="hidden">
           {/* Topbar */}
           <Box flexShrink={0}>
             <DashboardTopbar />
           </Box>
 
-          {/* Content */}
-          <Box flex="1" overflowY="auto" p={6} bg="gray.50">
+          {/* Page content */}
+          <Box
+            flex="1"
+            overflowY="auto"
+            p={6}
+            bg="surface"
+            mx={3}
+            mt={3}
+            borderRadius={"8px"}
+          >
             <Outlet />
           </Box>
         </Flex>

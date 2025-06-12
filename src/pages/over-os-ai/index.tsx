@@ -1,5 +1,3 @@
-import { useUserInput } from "@/context/useChatContext";
-import { useGetAllWorkflows } from "@/utils/apis/workflow.api";
 import {
   Box,
   Card,
@@ -7,33 +5,50 @@ import {
   Flex,
   IconButton,
   Image,
+  Input,
   InputGroup,
   SimpleGrid,
   Text,
-  Textarea,
   Tooltip,
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
 import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUserInput } from "@/context/useChatContext";
+import { useGetAllWorkflows } from "@/utils/apis/workflow.api";
 import RightArrowOrange from "../../assets/svgs/right-arrow-orange.svg";
-import Workflow1 from "../../assets/svgs/workflow-1.svg";
-import Workflow2 from "../../assets/svgs/workflow-2.svg";
-import Workflow3 from "../../assets/svgs/workflow-3.svg";
+// import Workflow1 from "../../assets/svgs/workflow-1.svg";
+// import Workflow2 from "../../assets/svgs/workflow-2.svg";
+// import Workflow3 from "../../assets/svgs/workflow-3.svg";
+import { useTypewriter, Cursor } from "react-simple-typewriter";
+import { motion } from "framer-motion";
 
 const DashboardHome = () => {
-  const cardBg = useColorModeValue("white", "gray.800");
   const { userInput, setUserInput, selectedImages, setSelectedImages } =
     useUserInput();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: Workflows } = useGetAllWorkflows();
   const chatPrompt = localStorage.getItem("chat_prompt");
-  console.log("workflows", Workflows);
+  const [isDone, setIsDone] = useState(false);
+  const [text] = useTypewriter({
+    words: ["Cursor For Growth Marketing", "Vibe Coding", "Vibe Marketing"],
+    delaySpeed: 2000,
+    typeSpeed: 10,
+    deleteSpeed: 10,
+    onLoopDone: () => setIsDone(true),
+  });
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  useEffect(() => {
+    if (chatPrompt) {
+      setUserInput(chatPrompt);
+      localStorage.removeItem("chat_prompt");
+    }
+  }, [chatPrompt, setUserInput]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (userInput.trim() !== "") {
@@ -42,13 +57,6 @@ const DashboardHome = () => {
       }
     }
   };
-
-  useEffect(() => {
-    if (chatPrompt) {
-      setUserInput(chatPrompt);
-      localStorage.removeItem("chat_prompt");
-    }
-  }, [chatPrompt, setUserInput]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -60,233 +68,224 @@ const DashboardHome = () => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const MotionText = motion(Text);
+  const iconBg = useColorModeValue("gray.100", "gray.700");
+  const iconHoverBg = useColorModeValue("gray.200", "gray.600");
+  const iconColor = useColorModeValue("gray.700", "accent");
+
   return (
-    <Box maxW="950px" mx="auto" py={6}>
-      <VStack spacing={2} align="left">
-        <Text fontSize="48px" fontWeight={400} fontFamily="Joan">
-          What is your goal?
-        </Text>
-        <Text
-          fontSize="32px"
-          fontWeight={400}
-          color="primary.500"
-          fontFamily="Joan"
-          lineHeight={"24px"}
-        >
-          I’ll plan it out and take care of the work.
-        </Text>
-
-        <Flex
-          align="center"
-          justify="space-between"
-          p={0}
-          mt={10}
-          position="relative"
-        >
-          <Box flex="1" mt={6}>
-            {/* Image Previews */}
-            {selectedImages.length > 0 && (
-              <Flex gap={4} flexWrap="wrap" mb={4}>
-                {selectedImages.map((file, index) => (
-                  <Box
-                    key={index}
-                    position="relative"
-                    width="40px"
-                    height="40px"
-                    borderRadius="md"
-                  >
-                    <Image
-                      src={URL.createObjectURL(file)}
-                      alt={`upload-${index}`}
-                      boxSize="100%"
-                      objectFit="cover"
-                      border="1px solid"
-                      borderColor="gray.200"
-                      borderRadius="md"
-                    />
-                    <IconButton
-                      icon={<PlusIcon style={{ transform: "rotate(45deg)" }} />}
-                      size="xs"
-                      position="absolute"
-                      top="-6px"
-                      right="-6px"
-                      aria-label="Remove image"
-                      onClick={() => removeImage(index)}
-                      bg="red.500"
-                      color="white"
-                      borderRadius="full"
-                      height="16px"
-                      width="16px"
-                      minW="16px"
-                      fontSize="10px"
-                      zIndex="1"
-                    />
-                  </Box>
-                ))}
-              </Flex>
-            )}
-
-            {/* Textarea Input */}
-            <InputGroup>
-              <Textarea
-                placeholder="Ask Anything"
-                _placeholder={{
-                  color: "gray.400",
-                  fontsize: "16px",
-                  fontFamily: "Inter",
-                  fontWeight: "400",
-                }}
-                size="lg"
-                h="50px"
-                borderRadius="2xl"
-                bg="white"
-                pr="3rem"
-                fontSize={"16px"}
-                shadow={"md"}
-                fontFamily={"Inter"}
-                pl={4}
-                pt={4}
-                color={"gray.600"}
-                resize={"none"}
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-
-              {/* Upload Button (fixed position) */}
-              <Box position="absolute" right="10px" top="36px" zIndex={5}>
-                <Tooltip
-                  label="Upload"
-                  aria-label="Upload Tooltip"
-                  rounded={"8px"}
-                  placement="top"
-                >
-                  <IconButton
-                    icon={<Upload width="16px" />}
-                    aria-label="Add"
-                    variant="ghost"
-                    borderRadius="full"
-                    size="sm"
-                    bg="blue.50"
-                    colorScheme="blue"
-                    onClick={() => fileInputRef.current?.click()}
-                  />
-                </Tooltip>
-              </Box>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                style={{ display: "none" }}
-              />
-            </InputGroup>
-          </Box>
-        </Flex>
-
-        <Flex w={"full"} justifyContent={"space-between"}>
-          <IconButton
-            icon={<PlusIcon color="gray" />}
-            aria-label="Add"
-            variant="ghost"
-            borderRadius="full"
-            size="sm"
-            bg={"blue.50"}
-            colorScheme="blue"
-          />
-          <Tooltip
-            label="Schedule"
-            aria-label="Schedule Tooltip"
-            rounded={"8px"}
-            placement="top"
+    <Box
+      maxW="1260px"
+      mx="auto"
+      py={10}
+      px={[4, 6]}
+      backdropFilter="blur(16px)"
+      borderRadius="xl"
+    >
+      <VStack spacing={8} align="stretch">
+        {/* Heading */}
+        <Box textAlign="center">
+          <MotionText
+            fontSize={["4xl", "5xl"]}
+            fontWeight="extrabold"
+            fontFamily="Joan"
+            letterSpacing="wide"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
           >
+            <Box
+              as="span"
+              bgGradient="linear(to-r, primary, accent)"
+              bgClip="text"
+            >
+              {text}
+            </Box>
+            <Box as="span" color="white">
+              {isDone ? <Cursor cursorStyle="." /> : <Cursor cursorStyle="|" />}
+            </Box>
+          </MotionText>
+        </Box>
+
+        {/* Input + Upload */}
+        <Box position="relative">
+          <InputGroup>
+            <Input
+              placeholder="Tell me about your marketing goal..."
+              variant="unstyled"
+              fontSize="lg"
+              borderRadius={"none"}
+              fontWeight="medium"
+              pb={1.5}
+              borderBottom="2px"
+              borderColor="accent"
+              _placeholder={{ color: "gray.600" }}
+              _focus={{
+                borderColor: "primary",
+                boxShadow: "0 1px 0 0 var(--chakra-colors-primary)",
+              }}
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              pr="2.5rem"
+              color="text"
+            />
+            <Box
+              position="absolute"
+              right="0"
+              top="30%"
+              transform="translateY(-50%)"
+            >
+              <Tooltip label="Upload images" rounded="md">
+                <IconButton
+                  icon={<Upload size={16} />}
+                  aria-label="Upload"
+                  size="sm"
+                  bg={iconBg}
+                  color={iconColor}
+                  _hover={{ bg: iconHoverBg }}
+                  onClick={() => fileInputRef.current?.click()}
+                />
+              </Tooltip>
+            </Box>
+          </InputGroup>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+            style={{ display: "none" }}
+          />
+        </Box>
+
+        {/* Image Previews */}
+        {selectedImages.length > 0 && (
+          <Flex mt={2} gap={3} flexWrap="wrap">
+            {selectedImages.map((file, index) => (
+              <Box
+                key={index}
+                position="relative"
+                w="50px"
+                h="50px"
+                borderRadius="md"
+                overflow="hidden"
+                boxShadow="0 0 0 1px var(--chakra-colors-accent)"
+              >
+                <Image
+                  src={URL.createObjectURL(file)}
+                  alt={`upload-${index}`}
+                  boxSize="100%"
+                  objectFit="cover"
+                  border="1px solid"
+                  borderColor="border"
+                />
+                <IconButton
+                  icon={<PlusIcon style={{ transform: "rotate(45deg)" }} />}
+                  size="xs"
+                  position="absolute"
+                  top="-6px"
+                  right="-6px"
+                  aria-label="Remove image"
+                  onClick={() => removeImage(index)}
+                  bg="red.500"
+                  color="white"
+                  borderRadius="full"
+                  h="16px"
+                  w="16px"
+                  minW="16px"
+                  zIndex={1}
+                />
+              </Box>
+            ))}
+          </Flex>
+        )}
+
+        {/* Icon Buttons */}
+        <Flex justify="space-between" align="center" mt={-5}>
+          <Tooltip label="Add New" rounded="md">
             <IconButton
-              icon={<Clock10Icon width="16px" />}
+              icon={<PlusIcon size={16} />}
               aria-label="Add"
-              variant="ghost"
-              borderRadius="full"
               size="sm"
-              bg="blue.50"
-              mr={3}
-              colorScheme="blue"
+              bg={iconBg}
+              color={iconColor}
+              _hover={{ bg: iconHoverBg }}
+            />
+          </Tooltip>
+
+          <Tooltip label="Schedule" rounded="md">
+            <IconButton
+              icon={<Clock10Icon size={16} />}
+              aria-label="Schedule"
+              size="sm"
+              bg={iconBg}
+              color={iconColor}
+              _hover={{ bg: iconHoverBg }}
             />
           </Tooltip>
         </Flex>
 
-        <Box pt={10} mt={4} w="full">
-          <Text fontSize="22px" fontFamily={"Joan"} mb={4} fontWeight="400">
+        {/* Trending Workflows */}
+        <Box pt={6}>
+          <Text fontSize="2xl" fontWeight="semibold" color="text" mb={4}>
             Trending Workflows
           </Text>
           <SimpleGrid columns={[1, null, 3]} spacing={6}>
             {Workflows?.slice(0, 3).map((workflow, index) => (
-              <Card key={index} bg={cardBg} minH="180px">
+              <Card
+                key={index}
+                bg="rgba(255, 255, 255, 0.05)"
+                backdropFilter="blur(10px)"
+                border="1px solid"
+                borderColor="whiteAlpha.200"
+                _hover={{ shadow: "lg", transform: "scale(1.01)" }}
+                transition="all 0.2s ease"
+                cursor="pointer"
+                borderRadius="xl"
+                position="relative"
+                py={3}
+                overflow="hidden"
+                h="180px" // ensures all cards are same height
+              >
+                {/* Floating Pill Badge */}
+                <Box
+                  position="absolute"
+                  top="-2px"
+                  right="-7px"
+                  bgGradient={
+                    workflow.isActive
+                      ? "linear(to-br, teal.400, green.400)"
+                      : "linear(to-br, orange.300, red.400)"
+                  }
+                  color="white"
+                  px={4}
+                  py={1}
+                  fontSize="xs"
+                  fontWeight="bold"
+                  borderBottomRadius="12px"
+                  boxShadow="0 4px 8px rgba(0,0,0,0.2)"
+                  zIndex={10}
+                >
+                  {workflow.isActive ? "✅ LIVE" : "⏳ COMING SOON"}
+                </Box>
+
                 <CardBody>
                   <Flex
-                    align="start"
-                    gap={4}
-                    cursor={index === 0 ? "pointer" : ""}
-                    onClick={
-                      index === 0
-                        ? () => {
-                            navigate(`/workflow/details/${workflow.id}`);
-                          }
-                        : () => {}
-                    }
+                    direction="column"
+                    flex="1"
+                    justify="center"
+                    gap={2}
+                    h="100%"
                   >
-                    <Image
-                      src={
-                        index === 0
-                          ? Workflow1
-                          : index === 1
-                          ? Workflow2
-                          : Workflow3
-                      }
-                      w="44px"
-                      h="44px"
-                    />
-
-                    <Flex
-                      direction="column"
-                      justify="space-between"
-                      h="100%"
-                      flex={1}
-                      minH="175px"
-                    >
-                      <Box>
-                        <Text
-                          fontWeight="400"
-                          fontSize="17px"
-                          fontFamily="Joan"
-                          mb={1}
-                        >
-                          {workflow.title}
-                        </Text>
-                        <Text
-                          mt={4}
-                          fontSize="12px"
-                          fontFamily="Inter"
-                          color="gray.600"
-                        >
-                          {workflow.description}
-                        </Text>
-                      </Box>
-
-                      <Box mt="auto" pt={2}>
-                        <Text
-                          fontSize="14px"
-                          color={workflow.isActive ? "#D97757" : "#D97757"}
-                          fontWeight="400"
-                          fontFamily="Inter"
-                          display="inline-flex"
-                          alignItems="center"
-                          gap={1}
-                        >
-                          {workflow.isActive ? "Get started" : "Coming soon"}
-                          <Image src={RightArrowOrange} />
-                        </Text>
-                      </Box>
-                    </Flex>
+                    <Text fontWeight="bold" fontSize="md" color="text" mb={1}>
+                      {workflow.title}
+                    </Text>
+                    <Box h="48px" overflow="hidden">
+                      <Text fontSize="sm" color="gray.400" noOfLines={2}>
+                        {workflow.description}
+                      </Text>
+                    </Box>
                   </Flex>
                 </CardBody>
               </Card>

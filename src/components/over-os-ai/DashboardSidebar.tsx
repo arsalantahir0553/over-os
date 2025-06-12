@@ -16,21 +16,24 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import {
-  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ChevronDownIcon,
   ChevronUpIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import ExploreWorkflowsIcon from "../../assets/svgs/explore-workflows.svg";
+import { FiLogOut } from "react-icons/fi";
+
 import Logo from "../../assets/svgs/logo-beta.svg";
 import LogoCollapsed from "../../assets/svgs/logo-collapsed.svg";
+import ExploreIcon from "../../assets/svgs/explore-workflows.svg";
 import MyWorkflowsIcon from "../../assets/svgs/my-workflows.svg";
 import NewMessageIcon from "../../assets/svgs/new-message.svg";
 import SettingsIcon from "../../assets/svgs/settings.svg";
+
 import { useLoggedInUser, useLogout } from "@/utils/apis/auth.api";
-import { FiLogOut } from "react-icons/fi";
+
 import SoftwareEngineers from "../../assets/svgs/workflows/software-engineers.svg";
 import Accountants from "../../assets/svgs/workflows/accountants.svg";
 import ContentCreators from "../../assets/svgs/workflows/content-creators.svg";
@@ -41,292 +44,169 @@ import Recruiters from "../../assets/svgs/workflows/recruiters.svg";
 import Researchers from "../../assets/svgs/workflows/researchers.svg";
 import StartupOperators from "../../assets/svgs/workflows/startup-operators.svg";
 
-const Workflows = [
-  {
-    title: "Software Engineers",
-    icon: SoftwareEngineers,
-  },
-  {
-    title: "Accountants & Bookkeepers",
-    icon: Accountants,
-  },
-  {
-    title: "Content Creators",
-    icon: ContentCreators,
-  },
-  {
-    title: "Researchers",
-    icon: Researchers,
-  },
-  {
-    title: "Customer Support Agents",
-    icon: CustomerSupportAgents,
-  },
-  {
-    title: "Startup Operators",
-    icon: StartupOperators,
-  },
-  {
-    title: "Recruiters",
-    icon: Recruiters,
-  },
-  {
-    title: "Legal Analysts",
-    icon: LegalAnalysts,
-  },
-  {
-    title: "Grad Researchers",
-    icon: GradResearchers,
-  },
+const workflowsList = [
+  { title: "Software Engineers", icon: SoftwareEngineers },
+  { title: "Accountants & Bookkeepers", icon: Accountants },
+  { title: "Content Creators", icon: ContentCreators },
+  { title: "Researchers", icon: Researchers },
+  { title: "Customer Support Agents", icon: CustomerSupportAgents },
+  { title: "Startup Operators", icon: StartupOperators },
+  { title: "Recruiters", icon: Recruiters },
+  { title: "Legal Analysts", icon: LegalAnalysts },
+  { title: "Grad Researchers", icon: GradResearchers },
 ];
+
 const DashboardSidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const activeTitle = decodeURIComponent(searchParams.get("title") || "");
+
   const [isExpanded, setIsExpanded] = useState(true);
   const [showExplore, setShowExplore] = useState(false);
   const [showMyWorkflows, setShowMyWorkflows] = useState(false);
-  // Automatically collapse sidebar on small screens
-  const responsiveIsExpanded = useBreakpointValue({
-    base: false, // small screens (mobile)
-    md: isExpanded, // medium and up, respect toggle
-  });
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const activeTitleRaw = searchParams.get("title");
-  const activeTitle = activeTitleRaw
-    ? decodeURIComponent(activeTitleRaw)
-    : null;
 
-  console.log("active title", activeTitle);
-  console.log("active title aw", activeTitleRaw);
+  const responsiveIsExpanded = useBreakpointValue({
+    base: false,
+    md: isExpanded,
+  });
 
   const { data: User, isLoading } = useLoggedInUser();
 
   const handleNavigate = (title: string) => {
     navigate(`/explore?title=${encodeURIComponent(title)}`);
   };
-  const handleNewChat = () => {
-    navigate("/dashboard");
-  };
+
+  const handleNewChat = () => navigate("/dashboard");
 
   return (
     <Box
-      w={responsiveIsExpanded ? "275px" : "80px"}
-      transition="width 0.3s ease"
-      display="flex"
-      flexDirection="column"
-      justifyContent="space-between"
-      bg="brand.900"
+      w={responsiveIsExpanded ? "270px" : "80px"}
+      transition="width 0.3s"
+      bg="surfaceSidebar"
       color="white"
       p={4}
+      display="flex"
+      flexDirection="column"
+      borderRadius={"8px"}
+      justifyContent="space-between"
+      borderRight={"1px solid"}
+      borderColor={"border"}
     >
-      {/* Logo & Toggle */}
-      <Flex justify="space-between" align="center" mb={6} position={"relative"}>
+      {/* Header */}
+      <Flex
+        justify="space-between"
+        align="center"
+        pb={"21px"}
+        position="relative"
+      >
         <Image
           src={responsiveIsExpanded ? Logo : LogoCollapsed}
-          maxH="59px"
+          maxH="50px"
           cursor="pointer"
-          onClick={() => navigate("/dashboard")}
           mx={responsiveIsExpanded ? 0 : "auto"}
+          onClick={() => navigate("/dashboard")}
         />
-        {/* Show toggle only on md and larger */}
         <IconButton
           size="sm"
-          position={"absolute"}
-          aria-label="Toggle sidebar"
           icon={
             responsiveIsExpanded ? <ChevronLeftIcon /> : <ChevronRightIcon />
           }
+          aria-label="Toggle sidebar"
           onClick={() => setIsExpanded(!isExpanded)}
+          position="absolute"
+          right={-6}
           bg="transparent"
           color="whiteAlpha.700"
           _hover={{ bg: "whiteAlpha.200" }}
-          ml={responsiveIsExpanded ? 0 : "auto"}
-          right={-6}
-          zIndex={4}
           display={{ base: "none", md: "block" }}
+          zIndex={5}
         />
       </Flex>
 
-      {/* The rest remains the same but replace all isExpanded with responsiveIsExpanded */}
-      {/* Menu */}
+      {/* Menu Section */}
       <VStack
         align={responsiveIsExpanded ? "start" : "center"}
-        spacing={4}
-        mt={0}
+        spacing={3}
         pl={responsiveIsExpanded ? 2 : 0}
-        mb={4}
+        pr={1}
         overflowY="auto"
         flex={1}
+        mt={12}
         sx={{
           "&::-webkit-scrollbar": { display: "none" },
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}
       >
-        <Box
-          as="button"
-          display="flex"
-          alignItems="center"
-          gap={2}
-          w={isExpanded ? "full" : ""}
-          px={responsiveIsExpanded ? 2 : 2}
-          py={2}
-          mt={16}
-          rounded="md"
-          _hover={{ bg: "whiteAlpha.200" }}
+        <SidebarButton
+          icon={NewMessageIcon}
+          label="New Chat"
           onClick={handleNewChat}
+          isExpanded={responsiveIsExpanded}
+        />
+
+        <SidebarDropdown
+          label="Explore Workflows"
+          icon={ExploreIcon}
+          isExpanded={responsiveIsExpanded}
+          isOpen={showExplore}
+          toggle={() => setShowExplore((prev) => !prev)}
         >
-          <Image src={NewMessageIcon} alt="New Chat" w={5} h={5} />
-          {responsiveIsExpanded && <Text>New Chat</Text>}
-        </Box>
-
-        <Box
-          as="button"
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          w={isExpanded ? "full" : ""}
-          px={responsiveIsExpanded ? 2 : 2}
-          py={2}
-          rounded="md"
-          _hover={{ bg: "whiteAlpha.200" }}
-          onClick={() => setShowExplore(!showExplore)}
-        >
-          <Flex align="center" gap={2}>
-            <Image src={ExploreWorkflowsIcon} alt="Explore" w={5} h={5} />
-            {responsiveIsExpanded && <Text>Explore Workflows</Text>}
-          </Flex>
-          {responsiveIsExpanded &&
-            (showExplore ? (
-              <ChevronUpIcon size={16} />
-            ) : (
-              <ChevronDownIcon size={16} />
-            ))}
-        </Box>
-
-        {showExplore && responsiveIsExpanded && (
-          <VStack align="start" spacing={1} pl={6}>
-            {Workflows.map((item, index) => {
-              const isActive = item.title === activeTitle;
-              return (
-                <Flex
-                  key={index}
-                  px={0.5}
-                  ml={item.title === "Accountants & Bookkeepers" ? "1px" : 0}
-                  _hover={{ bg: "whiteAlpha.200" }}
-                  bg={isActive ? "whiteAlpha.300" : "transparent"} // Active background
-                  rounded="md"
-                  cursor="pointer"
-                  onClick={() => handleNavigate(item.title)}
-                  align="center"
-                  gap={2}
-                >
-                  <Image src={item.icon} />
-                  <Text
-                    whiteSpace={"nowrap"}
-                    py={1}
-                    ml={item.title === "Accountants & Bookkeepers" ? 1 : 0}
-                    px={2}
-                    fontSize="14px"
-                  >
-                    {item.title}
-                  </Text>
-                </Flex>
-              );
-            })}
-          </VStack>
-        )}
-
-        {/* My Workflows Dropdown */}
-        <Box
-          as="button"
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          w={isExpanded ? "full" : ""}
-          px={responsiveIsExpanded ? 2 : 2}
-          py={2}
-          rounded="md"
-          _hover={{ bg: "whiteAlpha.200" }}
-          onClick={() => setShowMyWorkflows(!showMyWorkflows)}
-        >
-          <Flex align="center" gap={2}>
-            <Image src={MyWorkflowsIcon} alt="My Workflows" w={5} h={5} />
-            {responsiveIsExpanded && <Text>My Workflows</Text>}
-          </Flex>
-          {responsiveIsExpanded &&
-            (showMyWorkflows ? (
-              <ChevronUpIcon size={16} />
-            ) : (
-              <ChevronDownIcon size={16} />
-            ))}
-        </Box>
-
-        {showMyWorkflows && responsiveIsExpanded && (
-          <VStack align="start" spacing={2} pl={6}>
-            <Text
-              ml={2}
-              fontSize="20px"
-              fontWeight={400}
-              fontFamily={"Joan"}
-              mt={2}
+          {workflowsList.map((item) => (
+            <Flex
+              key={item.title}
+              px={2}
+              py={1}
+              rounded="md"
+              bg={item.title === activeTitle ? "whiteAlpha.300" : "transparent"}
+              _hover={{ bg: "whiteAlpha.200" }}
+              cursor="pointer"
+              align="center"
+              gap={2}
+              onClick={() => handleNavigate(item.title)}
             >
-              Today
-            </Text>
+              <Image src={item.icon} w={4} h={4} />
+              <Text fontSize="sm" noOfLines={1}>
+                {item.title}
+              </Text>
+            </Flex>
+          ))}
+        </SidebarDropdown>
+
+        <SidebarDropdown
+          label="My Workflows"
+          icon={MyWorkflowsIcon}
+          isExpanded={responsiveIsExpanded}
+          isOpen={showMyWorkflows}
+          toggle={() => setShowMyWorkflows((prev) => !prev)}
+        >
+          <SidebarSection title="Today">
             {[
               "Climate Change News",
               "Workout plan for beginners",
               "Tools for remote teams",
             ].map((item) => (
-              <Text
-                key={item}
-                py={1}
-                px={2}
-                fontSize="14px"
-                rounded="md"
-                cursor="pointer"
-                _hover={{ bg: "whiteAlpha.200" }}
-              >
-                {item}
-              </Text>
+              <SidebarSubItem key={item} label={item} />
             ))}
-
-            <Text
-              ml={2}
-              fontSize="20px"
-              fontWeight={400}
-              fontFamily={"Joan"}
-              mt={4}
-            >
-              Yesterday
-            </Text>
+          </SidebarSection>
+          <SidebarSection title="Yesterday" mt={3}>
             {[
-              "Climate Change News",
               "Tools for remote teams",
               "Workout plan for beginners",
               "Climate Change News",
             ].map((item, idx) => (
-              <Text
-                key={idx}
-                py={1}
-                px={2}
-                fontSize="14px"
-                rounded="md"
-                cursor="pointer"
-                _hover={{ bg: "whiteAlpha.200" }}
-              >
-                {item}
-              </Text>
+              <SidebarSubItem key={idx} label={item} />
             ))}
-          </VStack>
-        )}
+          </SidebarSection>
+        </SidebarDropdown>
       </VStack>
 
-      {/* Footer Profile */}
+      {/* User Footer */}
       <UserMenu
-        responsiveIsExpanded={responsiveIsExpanded}
         User={User}
         isLoading={isLoading}
+        isExpanded={responsiveIsExpanded}
       />
     </Box>
   );
@@ -335,23 +215,96 @@ const DashboardSidebar = () => {
 export default DashboardSidebar;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const UserMenu = ({ responsiveIsExpanded, User, isLoading }: any) => {
+const SidebarButton = ({ icon, label, onClick, isExpanded }: any) => (
+  <Box
+    as="button"
+    display="flex"
+    alignItems="center"
+    gap={2}
+    w="full"
+    px={2}
+    py={2}
+    rounded="md"
+    _hover={{ bg: "whiteAlpha.200" }}
+    onClick={onClick}
+  >
+    <Image src={icon} w={5} h={5} />
+    {isExpanded && <Text fontSize="sm">{label}</Text>}
+  </Box>
+);
+
+const SidebarDropdown = ({
+  label,
+  icon,
+  children,
+  isExpanded,
+  isOpen,
+  toggle,
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+any) => (
+  <>
+    <Flex
+      as="button"
+      align="center"
+      justify="space-between"
+      w="full"
+      px={2}
+      py={2}
+      rounded="md"
+      _hover={{ bg: "whiteAlpha.200" }}
+      onClick={toggle}
+    >
+      <Flex align="center" gap={2}>
+        <Image src={icon} w={5} h={5} />
+        {isExpanded && <Text fontSize="sm">{label}</Text>}
+      </Flex>
+      {isExpanded &&
+        (isOpen ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />)}
+    </Flex>
+    {isOpen && isExpanded && (
+      <VStack align="start" spacing={1} pl={6} mt={1}>
+        {children}
+      </VStack>
+    )}
+  </>
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const SidebarSection = ({ title, children, mt = 2 }: any) => (
+  <Box mt={mt}>
+    <Text fontSize="sm" color="gray.300" fontWeight="semibold" mb={1}>
+      {title}
+    </Text>
+    <VStack align="start" spacing={1}>
+      {children}
+    </VStack>
+  </Box>
+);
+
+const SidebarSubItem = ({ label }: { label: string }) => (
+  <Text
+    fontSize="sm"
+    px={2}
+    py={1}
+    rounded="md"
+    cursor="pointer"
+    _hover={{ bg: "whiteAlpha.200" }}
+    noOfLines={1}
+  >
+    {label}
+  </Text>
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const UserMenu = ({ User, isLoading, isExpanded }: any) => {
   const logout = useLogout();
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout.mutate(undefined, {
-      onSuccess: () => {
-        window.location.reload();
-      },
-    });
-  };
 
   if (isLoading) {
     return (
       <Flex mx={2} mt={4} align="center" gap={3}>
         <SkeletonCircle size="8" />
-        {responsiveIsExpanded && <SkeletonText noOfLines={1} width="80px" />}
+        {isExpanded && <SkeletonText noOfLines={1} width="80px" />}
       </Flex>
     );
   }
@@ -359,9 +312,8 @@ const UserMenu = ({ responsiveIsExpanded, User, isLoading }: any) => {
   if (!User) {
     return (
       <Button
-        colorScheme="whiteAlpha"
-        variant="solid"
         size="sm"
+        bg={"surface"}
         mx={2}
         mt={4}
         onClick={() => navigate("/signin")}
@@ -376,41 +328,34 @@ const UserMenu = ({ responsiveIsExpanded, User, isLoading }: any) => {
       <MenuButton
         as={Box}
         display="flex"
-        bg={responsiveIsExpanded ? "white" : "transparent"}
-        h={10}
-        rounded={responsiveIsExpanded ? "full" : "none"}
-        mx={2}
-        gap={3}
-        justifyContent={responsiveIsExpanded ? "space-between" : "center"}
-        px={responsiveIsExpanded ? 4 : 0}
         alignItems="center"
+        justifyContent="space-between"
+        w="full"
+        px={isExpanded ? 4 : 0}
+        py={2}
         mt={4}
-        boxShadow={responsiveIsExpanded ? "sm" : "none"}
+        rounded="md"
         cursor="pointer"
+        bg={isExpanded ? "surface2" : "transparent"}
+        color={isExpanded ? "white" : "white"}
+        boxShadow={isExpanded ? "sm" : "none"}
       >
-        <Flex gap={3} align="center" justifyContent="space-between">
-          <Avatar
-            size="xs"
-            name={User.name}
-            sx={{
-              "& > div": {
-                transform: "translateY(2px)",
-              },
-            }}
-          />
-          {responsiveIsExpanded && (
-            <Text color="gray.600" fontSize="16px" fontFamily="Inter">
-              {User.name}
-            </Text>
-          )}
-          {responsiveIsExpanded && <Image src={SettingsIcon} />}
+        <Flex align="center" justifyContent={"space-between"}>
+          <Flex align="center" gap={2}>
+            <Avatar size="sm" name={User.name} />
+            {isExpanded && <Text fontSize="sm">{User.name}</Text>}
+          </Flex>
+          {isExpanded && <Image src={SettingsIcon} />}
         </Flex>
       </MenuButton>
-
-      <MenuList zIndex={10}>
+      <MenuList zIndex={10} p={0}>
         <MenuItem
           icon={<FiLogOut color="red" />}
-          onClick={handleLogout}
+          onClick={() =>
+            logout.mutate(undefined, {
+              onSuccess: () => window.location.reload(),
+            })
+          }
           color="red.500"
         >
           Logout
