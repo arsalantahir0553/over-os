@@ -91,6 +91,14 @@ const customTheme = extendTheme({
         default: "gray.200",
         _dark: "gray.700",
       },
+      cardShadow: {
+        default: "md",
+        _dark: "lg",
+      },
+      mutedText: {
+        default: "gray.600",
+        _dark: "gray.400",
+      },
     },
   },
 });

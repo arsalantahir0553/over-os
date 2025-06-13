@@ -104,3 +104,51 @@ export const useDeleteWorkflow = () => {
     },
   });
 };
+
+export const getTrendingWorkflows = async (): Promise<{
+  trendingWorkflows: Workflow[];
+  workflowsByCategory: Record<string, Workflow[]>;
+}> => {
+  const response = await axios.get(
+    `${API_BASE_URL}/workflow/trending-workflows`
+  );
+  return response.data;
+};
+
+// Hook to fetch dashboard workflows
+export const useTrendingWorkflows = () => {
+  return useQuery({
+    queryKey: ["trendingWorkflows"],
+    queryFn: getTrendingWorkflows,
+  });
+};
+
+export const getDashboardWorkflows = async (): Promise<{
+  trendingWorkflows: Workflow[];
+  workflowsByCategory: Record<string, Workflow[]>;
+}> => {
+  const response = await axios.get(
+    `${API_BASE_URL}/workflow/dashboard-workflows`
+  );
+  return response.data;
+};
+
+// Hook to fetch dashboard workflows
+export const useDashboardWorkflows = () => {
+  return useQuery({
+    queryKey: ["dashboardWorkflows"],
+    queryFn: getDashboardWorkflows,
+  });
+};
+
+export const getWorkflowCategories = async (): Promise<string[]> => {
+  const response = await axios.get(`${API_BASE_URL}/workflow/categories`);
+  return response.data;
+};
+
+export const useWorkflowCategories = () => {
+  return useQuery({
+    queryKey: ["workflowCategories"],
+    queryFn: getWorkflowCategories,
+  });
+};

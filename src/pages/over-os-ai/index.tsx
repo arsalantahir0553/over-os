@@ -1,13 +1,11 @@
+import { useUserInput } from "@/context/useChatContext";
 import {
   Box,
-  Card,
-  CardBody,
   Flex,
   IconButton,
   Image,
   Input,
   InputGroup,
-  SimpleGrid,
   Text,
   Tooltip,
   useColorModeValue,
@@ -16,21 +14,30 @@ import {
 import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUserInput } from "@/context/useChatContext";
-import { useGetAllWorkflows } from "@/utils/apis/workflow.api";
-import RightArrowOrange from "../../assets/svgs/right-arrow-orange.svg";
-// import Workflow1 from "../../assets/svgs/workflow-1.svg";
-// import Workflow2 from "../../assets/svgs/workflow-2.svg";
-// import Workflow3 from "../../assets/svgs/workflow-3.svg";
-import { useTypewriter, Cursor } from "react-simple-typewriter";
 import { motion } from "framer-motion";
+import { Cursor, useTypewriter } from "react-simple-typewriter";
+import DashboardWorkflows from "./DashboardWorkflows";
+
+import { PiRankingThin } from "react-icons/pi";
+import { AiOutlineProduct } from "react-icons/ai";
+import { FiBookOpen, FiMonitor, FiTarget, FiTrendingUp } from "react-icons/fi";
+import { useWorkflowCategories } from "@/utils/apis/workflow.api";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const categoryIcons: Record<string, any> = {
+  "Productivity Power Tools": AiOutlineProduct,
+  "Thought Leadership Engine": FiBookOpen,
+  "Instant Newsroom": FiMonitor,
+  "Superfan Activation Kit": FiTrendingUp,
+  "Founder's Starter Pack": FiTarget,
+  "Ranking Rocket Pack": PiRankingThin,
+};
 
 const DashboardHome = () => {
   const { userInput, setUserInput, selectedImages, setSelectedImages } =
     useUserInput();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { data: Workflows } = useGetAllWorkflows();
   const chatPrompt = localStorage.getItem("chat_prompt");
   const [isDone, setIsDone] = useState(false);
   const [text] = useTypewriter({
@@ -40,6 +47,9 @@ const DashboardHome = () => {
     deleteSpeed: 10,
     onLoopDone: () => setIsDone(true),
   });
+
+  const { data: categories = [], isLoading } = useWorkflowCategories();
+  const topCategories = categories.slice(0, 5);
 
   useEffect(() => {
     if (chatPrompt) {
@@ -77,7 +87,7 @@ const DashboardHome = () => {
     <Box
       maxW="1260px"
       mx="auto"
-      py={10}
+      py={16}
       px={[4, 6]}
       backdropFilter="blur(16px)"
       borderRadius="xl"
@@ -201,8 +211,7 @@ const DashboardHome = () => {
           </Flex>
         )}
 
-        {/* Icon Buttons */}
-        <Flex justify="space-between" align="center" mt={-5}>
+        <Flex justify="space-between" align="center" mt={-2}>
           <Tooltip label="Add New" rounded="md">
             <IconButton
               icon={<PlusIcon size={16} />}
@@ -213,6 +222,37 @@ const DashboardHome = () => {
               _hover={{ bg: iconHoverBg }}
             />
           </Tooltip>
+
+          <Flex gap={4} wrap="wrap" justifyContent="center">
+            {topCategories.map((cat, index) => {
+              const Icon = categoryIcons[cat] ?? FiMonitor;
+              return (
+                <Box
+                  key={index}
+                  role="group" // important for group-hover effect
+                  rounded="md"
+                  boxShadow="sm"
+                  bg={iconBg}
+                  px={3}
+                  py={2}
+                  cursor="pointer"
+                  _hover={{ bg: iconHoverBg }}
+                  transition="all 0.2s"
+                >
+                  <Flex align="center" gap={2} zIndex={2}>
+                    <Icon
+                      size={18}
+                      color="var(--chakra-colors-accent)"
+                      style={{ transition: "color 0.2s" }}
+                    />
+                    <Text fontSize="sm" color="text" fontWeight="medium">
+                      {cat}
+                    </Text>
+                  </Flex>
+                </Box>
+              );
+            })}
+          </Flex>
 
           <Tooltip label="Schedule" rounded="md">
             <IconButton
@@ -227,71 +267,7 @@ const DashboardHome = () => {
         </Flex>
 
         {/* Trending Workflows */}
-        <Box pt={6}>
-          <Text fontSize="2xl" fontWeight="semibold" color="text" mb={4}>
-            Trending Workflows
-          </Text>
-          <SimpleGrid columns={[1, null, 3]} spacing={6}>
-            {Workflows?.slice(0, 3).map((workflow, index) => (
-              <Card
-                key={index}
-                bg="rgba(255, 255, 255, 0.05)"
-                backdropFilter="blur(10px)"
-                border="1px solid"
-                borderColor="whiteAlpha.200"
-                _hover={{ shadow: "lg", transform: "scale(1.01)" }}
-                transition="all 0.2s ease"
-                cursor="pointer"
-                borderRadius="xl"
-                position="relative"
-                py={3}
-                overflow="hidden"
-                h="180px" // ensures all cards are same height
-              >
-                {/* Floating Pill Badge */}
-                <Box
-                  position="absolute"
-                  top="-2px"
-                  right="-7px"
-                  bgGradient={
-                    workflow.isActive
-                      ? "linear(to-br, teal.400, green.400)"
-                      : "linear(to-br, orange.300, red.400)"
-                  }
-                  color="white"
-                  px={4}
-                  py={1}
-                  fontSize="xs"
-                  fontWeight="bold"
-                  borderBottomRadius="12px"
-                  boxShadow="0 4px 8px rgba(0,0,0,0.2)"
-                  zIndex={10}
-                >
-                  {workflow.isActive ? "✅ LIVE" : "⏳ COMING SOON"}
-                </Box>
-
-                <CardBody>
-                  <Flex
-                    direction="column"
-                    flex="1"
-                    justify="center"
-                    gap={2}
-                    h="100%"
-                  >
-                    <Text fontWeight="bold" fontSize="md" color="text" mb={1}>
-                      {workflow.title}
-                    </Text>
-                    <Box h="48px" overflow="hidden">
-                      <Text fontSize="sm" color="gray.400" noOfLines={2}>
-                        {workflow.description}
-                      </Text>
-                    </Box>
-                  </Flex>
-                </CardBody>
-              </Card>
-            ))}
-          </SimpleGrid>
-        </Box>
+        <DashboardWorkflows />
       </VStack>
     </Box>
   );

@@ -313,7 +313,7 @@ const UserMenu = ({ User, isLoading, isExpanded }: any) => {
     return (
       <Button
         size="sm"
-        bg={"surface"}
+        bg={"surface2"}
         mx={2}
         mt={4}
         onClick={() => navigate("/signin")}

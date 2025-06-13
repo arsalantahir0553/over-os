@@ -9,6 +9,7 @@ import {
   Spinner,
   Tag,
   Text,
+  useColorMode,
   VStack,
 } from "@chakra-ui/react";
 import { FaStar } from "react-icons/fa";
@@ -22,7 +23,7 @@ const WorkflowDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { data: workflow, isLoading, isError } = useGetWorkflowById(id!);
-
+  const { colorMode } = useColorMode();
   if (isLoading) {
     return (
       <Center py={20}>
@@ -40,78 +41,75 @@ const WorkflowDetails = () => {
   }
 
   return (
-    <Box maxW="1062px" mx="auto" p={6} borderRadius="xl">
+    <Box maxW="1062px" mx="auto" p={6} borderRadius="xl" bg="surface">
       <Box pt={6}>
         <Text
           fontSize="36px"
           fontWeight="400"
-          fontFamily={"Joan"}
+          fontFamily="Joan"
           textAlign="center"
           mb={3}
+          color="text"
         >
           {workflow.title}
         </Text>
 
         <Text
           textAlign="center"
-          color="gray.600"
+          color="text"
+          opacity={0.75}
           mb={6}
           fontWeight={300}
           fontSize="15px"
-          maxW={"820px"}
-          mx={"auto"}
+          maxW="820px"
+          mx="auto"
         >
           {workflow.longDescription}
         </Text>
 
-        <Center mb={6} w={"full"}>
+        <Center mb={6} w="full">
           <Button
-            bg={"primary.500"}
+            bg="primary"
             borderRadius="full"
-            fontSize={"22px"}
-            size={"md"}
+            fontSize="22px"
+            size="md"
             fontWeight={400}
             px={16}
-            color={"white"}
-            fontFamily={"Inter"}
-            _hover={{
-              bg: "brand.500",
-            }}
-            onClick={() => {
-              navigate(`/workflow/demo/${workflow.id}`);
-            }}
+            color="white"
+            fontFamily="Inter"
+            _hover={{ bg: "brand.400" }}
+            onClick={() => navigate(`/workflow/demo/${workflow.id}`)}
           >
             Try Now
           </Button>
         </Center>
 
         <Flex justify="center" gap={2} mb={6} wrap="wrap">
-          {workflow.tags?.map((tag: string) => (
+          {workflow.tags?.map((tag) => (
             <Tag
               key={tag}
               size="lg"
               px={6}
               py={2}
-              variant={"ghost"}
-              borderWidth={"1px"}
-              borderColor={"gray.200"}
-              color={"gray.700"}
+              variant="outline"
+              borderColor="border"
+              color="text"
               borderRadius="full"
-              cursor={"pointer"}
-              _hover={{ bg: "gray.50" }}
+              cursor="pointer"
+              _hover={{ bg: "cardBg" }}
             >
               {tag}
             </Tag>
           ))}
         </Flex>
 
-        <Box position={"relative"} mt={32}>
+        <Box position="relative" mt={32}>
           <Box
-            bg={"brand.900"}
-            w={"980px"}
-            mx={"auto"}
-            borderRadius={"15px"}
-            h={"295px"}
+            bg={colorMode === "dark" ? "cardBg" : "surfaceSidebar"}
+            w="980px"
+            mx="auto"
+            borderRadius="15px"
+            h="295px"
           >
             <Image
               src={workflow.bannerImage || graphImage}
@@ -119,9 +117,9 @@ const WorkflowDetails = () => {
               borderRadius="lg"
               top={-12}
               mb={6}
-              left={"90px"}
-              w={"830px"}
-              position={"absolute"}
+              left="90px"
+              w="830px"
+              position="absolute"
             />
           </Box>
         </Box>
@@ -131,15 +129,10 @@ const WorkflowDetails = () => {
           benefitsList={workflow.keyBenefits || []}
         />
 
-        <Divider mb={6} />
+        <Divider mb={6} borderColor="border" />
 
         <VStack spacing={4} pb={10}>
-          <Text
-            fontWeight="400"
-            fontFamily={"Joan"}
-            fontSize="30px"
-            letterSpacing={"1%"}
-          >
+          <Text fontWeight="400" fontFamily="Joan" fontSize="30px" color="text">
             What users say
           </Text>
           <Image
@@ -149,14 +142,19 @@ const WorkflowDetails = () => {
             w="60px"
             h="60px"
           />
-          <Text fontWeight="400" fontSize={"21.8px"} lineHeight={"150%"}>
+          <Text
+            fontWeight="400"
+            fontSize="21.8px"
+            lineHeight="150%"
+            color="text"
+          >
             Arsalan Hanif
           </Text>
           <Text
             fontWeight="400"
-            fontSize={"16.35px"}
-            lineHeight={"150%"}
-            color={"primary.400"}
+            fontSize="16.35px"
+            lineHeight="150%"
+            color="primary"
           >
             Head of Automation @ InvoiceAI
           </Text>
@@ -167,9 +165,10 @@ const WorkflowDetails = () => {
           </Flex>
           <Text
             fontWeight="400"
-            fontSize={"15px"}
-            lineHeight={"144%"}
-            color={"primary.400"}
+            fontSize="15px"
+            lineHeight="144%"
+            color="text"
+            opacity={0.8}
             maxW="700px"
             textAlign="center"
           >
@@ -204,14 +203,13 @@ const InfoCard = ({
     minW="280px"
     borderRadius="2xl"
     p={6}
-    bgGradient={`linear(to-br, ${color}.50, white)`}
-    boxShadow="md"
-    border={`1px solid`}
-    borderColor={`${color}.200`}
+    bg="cardBg"
+    border="1px solid"
+    borderColor="border"
     transition="all 0.3s"
     _hover={{ boxShadow: "xl", transform: "translateY(-4px)" }}
   >
-    <Text fontSize="30px" fontWeight={40} fontFamily="Joan" mb={2}>
+    <Text fontSize="30px" fontWeight={40} fontFamily="Joan" mb={2} color="text">
       {title}
     </Text>
     {subtitle && (
@@ -222,8 +220,8 @@ const InfoCard = ({
     <VStack align="start" spacing={3}>
       {items.map((item, idx) => (
         <Flex key={idx}>
-          <Icon as={icon} mt={"5px"} color={`${color}.500`} mr={2} />
-          <Text fontSize="15" fontWeight={350} color="gray.700">
+          <Icon as={icon} mt="5px" color={`${color}.400`} mr={2} />
+          <Text fontSize="15" fontWeight={350} color="text">
             {item}
           </Text>
         </Flex>
