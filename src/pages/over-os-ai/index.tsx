@@ -12,7 +12,6 @@ import {
   Text,
   Textarea,
   Tooltip,
-  useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
 import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
@@ -24,7 +23,6 @@ import Workflow2 from "../../assets/svgs/workflow-2.svg";
 import Workflow3 from "../../assets/svgs/workflow-3.svg";
 
 const DashboardHome = () => {
-  const cardBg = useColorModeValue("white", "gray.800");
   const { userInput, setUserInput, selectedImages, setSelectedImages } =
     useUserInput();
   const navigate = useNavigate();
@@ -220,7 +218,7 @@ const DashboardHome = () => {
           </Text>
           <SimpleGrid columns={[1, null, 3]} spacing={6}>
             {Workflows?.slice(0, 3).map((workflow, index) => (
-              <Card key={index} bg={cardBg} minH="180px">
+              <Card key={index} bg={"white"} minH="180px">
                 <CardBody>
                   <Flex
                     align="start"
@@ -258,6 +256,7 @@ const DashboardHome = () => {
                           fontWeight="400"
                           fontSize="17px"
                           fontFamily="Joan"
+                          color={"black"}
                           mb={1}
                         >
                           {workflow.title}
