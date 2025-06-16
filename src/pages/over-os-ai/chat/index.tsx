@@ -3,6 +3,7 @@ import GeminiIcon from "@/assets/svgs/GeminiIcon";
 import GptIcon from "@/assets/svgs/GptIcon";
 import LlmIcon from "@/assets/svgs/LlmIcon";
 import MidJourneyIcon from "@/assets/svgs/MidJourneyIcon";
+import ChatLoadingDots from "@/components/DotsLoading";
 import { useUserInput } from "@/context/useChatContext";
 import {
   useChat,
@@ -19,13 +20,13 @@ import {
   Text,
   Textarea,
   Tooltip,
+  useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
 import { animate, motion, useMotionValue } from "framer-motion";
 import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LoginRequiredModal } from "./LoginRequiredModal"; // Adjust path if needed
-import ChatLoadingDots from "@/components/DotsLoading";
 
 const icons = [
   <GptIcon />,
@@ -56,7 +57,9 @@ const Chat = () => {
   const { mutate: createWorkflow, isPending } = useCreateWorkflow();
   const { mutateAsync: sendChat, isPending: isChatPending } = useChat();
   const { mutateAsync: detectIntent, isPending: isIntentPending } = useIntent();
-
+  const iconBg = useColorModeValue("gray.100", "gray.700");
+  const iconHoverBg = useColorModeValue("gray.200", "gray.600");
+  const iconColor = useColorModeValue("gray.700", "accent");
   useEffect(() => {
     const runChatOrWorkflow = async () => {
       if (!userInput.trim()) return;
@@ -279,17 +282,21 @@ const Chat = () => {
     }
   };
 
+  const MotionDiv = motion.div;
+
   // Conditional rendering starts here
+
   if (isIntentPending) {
     return (
       <Flex
         direction="column"
         h="81.5vh"
-        maxW={"90%"}
-        mx={"auto"}
+        maxW="90%"
+        mx="auto"
         px={4}
         pt={2}
-        bg="gray.50"
+        // bg="bg"
+        color="text"
       >
         <VStack flex={1} spacing={3} w="full">
           <Flex
@@ -302,24 +309,22 @@ const Chat = () => {
               px={4}
               py={2}
               borderRadius="20px"
-              bg={messages[0].from === "me" ? "white" : "transparent"}
-              color={messages[0].from === "me" ? "gray.800" : "white"}
-              border={messages[0].from === "me" ? "1px solid #D9D9D9" : "none"}
+              bg={messages[0].from === "me" ? "surface2" : "transparent"}
+              color="text"
+              border={messages[0].from === "me" ? "1px solid" : "none"}
+              borderColor={messages[0].from === "me" ? "border" : "transparent"}
             >
-              <Text fontFamily={"Inter"} fontSize={"17px"}>
+              <Text fontFamily="body" fontSize="17px">
                 {messages[0].text}
               </Text>
             </Box>
           </Flex>
+
           <Box w="100%" textAlign="center" py={6} flex={1}>
-            <Text
-              fontFamily={"Inter"}
-              mb={6}
-              fontWeight={400}
-              color={"gray.500"}
-            >
+            <Text fontFamily="body" mb={6} fontWeight={400} color="mutedText">
               Searching for the best LLM for your goal
             </Text>
+
             <Box
               maxW="240px"
               mx="auto"
@@ -327,7 +332,7 @@ const Chat = () => {
               height="60px"
               position="relative"
             >
-              <motion.div
+              <MotionDiv
                 style={{
                   display: "flex",
                   gap: `${GAP}px`,
@@ -336,16 +341,16 @@ const Chat = () => {
               >
                 {iconRef.current.map((IconComp, idx) => (
                   <Box
-                    key={tick + "-" + idx}
+                    key={`${tick}-${idx}`}
                     fontSize="36px"
-                    color="gray.400"
+                    color="mutedText"
                     textAlign="center"
-                    boxSize={"20px"}
+                    boxSize="20px"
                   >
                     {IconComp}
                   </Box>
                 ))}
-              </motion.div>
+              </MotionDiv>
             </Box>
           </Box>
         </VStack>
@@ -362,7 +367,8 @@ const Chat = () => {
         mx="auto"
         px={4}
         pt={2}
-        bg="gray.50"
+        // bg="bg"
+        color="text"
       >
         <VStack flex={1} spacing={3} w="full">
           <Flex
@@ -375,17 +381,18 @@ const Chat = () => {
               px={4}
               py={2}
               borderRadius="20px"
-              bg={messages[0].from === "me" ? "white" : "transparent"}
-              color={messages[0].from === "me" ? "gray.800" : "white"}
-              border={messages[0].from === "me" ? "1px solid #D9D9D9" : "none"}
+              bg={messages[0].from === "me" ? "surface2" : "transparent"}
+              color="text"
+              border={messages[0].from === "me" ? "1px solid" : "none"}
+              borderColor={messages[0].from === "me" ? "border" : "transparent"}
             >
-              <Text fontFamily="Inter" fontSize="17px">
+              <Text fontFamily="body" fontSize="17px">
                 {messages[0].text}
               </Text>
             </Box>
           </Flex>
 
-          {/* Loading dots aligned like a bot message */}
+          {/* Chat loading animation styled like bot message */}
           <Flex w="100%" justify="flex-start">
             <Box maxW="70%">
               <ChatLoadingDots />
@@ -409,15 +416,30 @@ const Chat = () => {
   return (
     <Flex
       direction="column"
-      h="81.5vh"
-      maxH="100vh"
-      maxW={"90%"}
-      mx={"auto"}
+      h="calc(100vh - 135px)"
+      maxW="90%"
+      mx="auto"
       px={4}
       pt={2}
-      bg="gray.50"
+      // bg="bg"
+      color="text"
     >
-      <VStack flex={1} spacing={3} w="full" overflowY="auto" pb={4}>
+      <VStack
+        flex={1}
+        spacing={3}
+        w="full"
+        overflowY="auto"
+        pb={4}
+        pr={1}
+        sx={{
+          "&::-webkit-scrollbar": {
+            width: "6px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            borderRadius: "8px",
+          },
+        }}
+      >
         {messages.map((msg) => (
           <Flex
             key={msg.id}
@@ -429,107 +451,92 @@ const Chat = () => {
               px={4}
               py={2}
               borderRadius="20px"
-              bg={msg.from === "me" ? "white" : "transparent"}
-              color={msg.from === "me" ? "gray.800" : "gray.800"}
-              border={msg.from === "me" ? "1px solid #D9D9D9" : "none"}
+              bg={msg.from === "me" ? "whiteAlpha.100" : "cardBg"}
+              color="text"
+              border="1px solid"
+              borderColor="border"
+              boxShadow="sm"
             >
-              <Text
-                fontFamily={msg.from === "me" ? "Inter" : ""}
-                fontSize={msg.from === "me" ? "17px" : "19px"}
-              >
-                {msg.text
-                  .split("\n")
-                  .filter((line) => line.trim() !== "")
-                  .map((line, idx) => (
-                    <Text
-                      key={idx}
-                      fontFamily={msg.from === "me" ? "Inter" : ""}
-                      fontSize={msg.from === "me" ? "17px" : "19px"}
-                      mb={2}
-                    >
-                      {line}
-                    </Text>
-                  ))}
-              </Text>
+              {msg.text
+                .split("\n")
+                .filter((line) => line.trim() !== "")
+                .map((line, idx) => (
+                  <Text key={idx} fontFamily="body" fontSize="16px" mb={1}>
+                    {line}
+                  </Text>
+                ))}
             </Box>
           </Flex>
         ))}
       </VStack>
 
-      <Flex align="center" justify="space-between" mb={2}>
-        <InputGroup flex="1" mt={6}>
+      <Box mt={4}>
+        <InputGroup>
           <Textarea
-            placeholder="Ask Anything"
-            _placeholder={{
-              color: "gray.400",
-              fontsize: "16px",
-              fontFamily: "Inter",
-              fontWeight: "400",
-            }}
-            size="lg"
-            h="50px"
-            borderRadius="2xl"
-            bg="white"
+            placeholder="Ask Anything..."
+            fontFamily="body"
+            fontSize="16px"
+            fontWeight="400"
+            h="52px"
+            resize="none"
+            px={4}
+            pt={3}
             pr="3rem"
-            fontSize={"16px"}
-            fontFamily={"Inter"}
-            pl={4}
-            pt={4}
-            color={"gray.600"}
-            resize={"none"}
+            borderRadius="xl"
+            bg="surface2"
+            color="text"
+            border="1px solid"
+            borderColor="border"
+            _placeholder={{ color: "mutedText" }}
+            _focus={{
+              borderColor: "primary",
+              boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
+            }}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <InputRightElement top="36px" right="10px">
-            <Tooltip
-              label="Upload"
-              aria-label="Upload Tooltip"
-              rounded={"8px"}
-              placement="top"
-            >
+          <InputRightElement top="28px" right="10px">
+            <Tooltip label="Upload" hasArrow placement="top">
               <IconButton
                 icon={<Upload width="16px" />}
-                aria-label="Add"
-                variant="ghost"
-                borderRadius="full"
+                aria-label="Upload"
                 size="sm"
-                bg="blue.50"
-                colorScheme="blue"
+                borderRadius="full"
+                bg={iconBg}
+                color={iconColor}
+                _hover={{ bg: iconHoverBg }}
               />
             </Tooltip>
           </InputRightElement>
         </InputGroup>
-      </Flex>
 
-      <Flex w={"full"} justifyContent={"space-between"}>
-        <IconButton
-          icon={<PlusIcon color="gray" />}
-          aria-label="Add"
-          variant="ghost"
-          borderRadius="full"
-          size="sm"
-          bg={"blue.50"}
-          colorScheme="blue"
-        />
-        <Tooltip
-          label="Schedule"
-          aria-label="Schedule Tooltip"
-          rounded={"8px"}
-          placement="top"
-        >
+        <Flex justify="space-between" mt={2}>
           <IconButton
-            icon={<Clock10Icon width="16px" />}
+            icon={<PlusIcon color="currentColor" size="16px" />}
             aria-label="Add"
             variant="ghost"
-            borderRadius="full"
             size="sm"
-            bg="blue.50"
-            mr={3}
-            colorScheme="blue"
+            borderRadius="full"
+            bg={iconBg}
+            color={iconColor}
+            _hover={{ bg: iconHoverBg }}
           />
-        </Tooltip>
-      </Flex>
+          <Tooltip label="Schedule" hasArrow placement="top">
+            <IconButton
+              icon={<Clock10Icon width="16px" />}
+              aria-label="Schedule"
+              variant="ghost"
+              size="sm"
+              borderRadius="full"
+              bg={iconBg}
+              color={iconColor}
+              _hover={{ bg: iconHoverBg }}
+              mr={2}
+            />
+          </Tooltip>
+        </Flex>
+      </Box>
     </Flex>
   );
 };
