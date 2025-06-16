@@ -48,7 +48,7 @@ const DashboardHome = () => {
     onLoopDone: () => setIsDone(true),
   });
 
-  const { data: categories = [], isLoading } = useWorkflowCategories();
+  const { data: categories = [] } = useWorkflowCategories();
   const topCategories = categories.slice(0, 5);
 
   useEffect(() => {

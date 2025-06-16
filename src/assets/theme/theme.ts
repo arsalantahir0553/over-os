@@ -63,6 +63,10 @@ const customTheme = extendTheme({
         default: "brand.900",
         _dark: "brand.1000",
       },
+      surfaceCardBg: {
+        default: "brand.900",
+        _dark: "gray.1000",
+      },
       surface2: {
         default: "white",
         _dark: "gray.1000",

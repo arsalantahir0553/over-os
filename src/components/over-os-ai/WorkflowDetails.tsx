@@ -1,3 +1,4 @@
+import { useGetWorkflowById } from "@/utils/apis/workflow.api";
 import {
   Box,
   Button,
@@ -9,21 +10,18 @@ import {
   Spinner,
   Tag,
   Text,
-  useColorMode,
   VStack,
 } from "@chakra-ui/react";
-import { FaStar } from "react-icons/fa";
 import { CheckCircleIcon, StarIcon } from "lucide-react";
+import { FaStar } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
-import TestimonialImage from "../../assets/images/testimonial.png";
 import graphImage from "../../assets/images/graph.png";
-import { useGetWorkflowById } from "@/utils/apis/workflow.api";
+import TestimonialImage from "../../assets/images/testimonial.png";
 
 const WorkflowDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { data: workflow, isLoading, isError } = useGetWorkflowById(id!);
-  const { colorMode } = useColorMode();
   if (isLoading) {
     return (
       <Center py={20}>
@@ -69,15 +67,16 @@ const WorkflowDetails = () => {
 
         <Center mb={6} w="full">
           <Button
-            bg="primary"
-            borderRadius="full"
+            bg="surfaceButton"
+            color="white"
+            _hover={{ bg: "primary", opacity: 0.9 }}
+            _active={{ bg: "primary", opacity: 0.8 }}
+            borderRadius="8px"
             fontSize="22px"
             size="md"
             fontWeight={400}
             px={16}
-            color="white"
             fontFamily="Inter"
-            _hover={{ bg: "brand.400" }}
             onClick={() => navigate(`/workflow/demo/${workflow.id}`)}
           >
             Try Now
@@ -105,7 +104,7 @@ const WorkflowDetails = () => {
 
         <Box position="relative" mt={32}>
           <Box
-            bg={colorMode === "dark" ? "cardBg" : "surfaceSidebar"}
+            bg={"surfaceCardBg"}
             w="980px"
             mx="auto"
             borderRadius="15px"
@@ -203,7 +202,7 @@ const InfoCard = ({
     minW="280px"
     borderRadius="2xl"
     p={6}
-    bg="cardBg"
+    bg="surface2"
     border="1px solid"
     borderColor="border"
     transition="all 0.3s"
@@ -213,7 +212,7 @@ const InfoCard = ({
       {title}
     </Text>
     {subtitle && (
-      <Text fontSize="sm" color="gray.500" mb={4}>
+      <Text fontSize="sm" color="gray.400" mb={4}>
         {subtitle}
       </Text>
     )}

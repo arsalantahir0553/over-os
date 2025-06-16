@@ -16,52 +16,50 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import {
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  ChevronDownIcon,
   ChevronUpIcon,
 } from "lucide-react";
 import { useState } from "react";
+import {
+  FiBookOpen,
+  FiLogOut,
+  FiMonitor,
+  FiTarget,
+  FiTrendingUp,
+} from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FiLogOut } from "react-icons/fi";
 
+import ExploreIcon from "../../assets/svgs/explore-workflows.svg";
 import Logo from "../../assets/svgs/logo-beta.svg";
 import LogoCollapsed from "../../assets/svgs/logo-collapsed.svg";
-import ExploreIcon from "../../assets/svgs/explore-workflows.svg";
 import MyWorkflowsIcon from "../../assets/svgs/my-workflows.svg";
 import NewMessageIcon from "../../assets/svgs/new-message.svg";
 import SettingsIcon from "../../assets/svgs/settings.svg";
 
 import { useLoggedInUser, useLogout } from "@/utils/apis/auth.api";
 
-import SoftwareEngineers from "../../assets/svgs/workflows/software-engineers.svg";
-import Accountants from "../../assets/svgs/workflows/accountants.svg";
-import ContentCreators from "../../assets/svgs/workflows/content-creators.svg";
-import CustomerSupportAgents from "../../assets/svgs/workflows/customer-support-agents.svg";
-import GradResearchers from "../../assets/svgs/workflows/grad-researchers.svg";
-import LegalAnalysts from "../../assets/svgs/workflows/legal-analysts.svg";
-import Recruiters from "../../assets/svgs/workflows/recruiters.svg";
-import Researchers from "../../assets/svgs/workflows/researchers.svg";
-import StartupOperators from "../../assets/svgs/workflows/startup-operators.svg";
+import { AiOutlineProduct } from "react-icons/ai";
+import { PiRankingThin } from "react-icons/pi";
+import { useWorkflowCategories } from "@/utils/apis/workflow.api";
 
-const workflowsList = [
-  { title: "Software Engineers", icon: SoftwareEngineers },
-  { title: "Accountants & Bookkeepers", icon: Accountants },
-  { title: "Content Creators", icon: ContentCreators },
-  { title: "Researchers", icon: Researchers },
-  { title: "Customer Support Agents", icon: CustomerSupportAgents },
-  { title: "Startup Operators", icon: StartupOperators },
-  { title: "Recruiters", icon: Recruiters },
-  { title: "Legal Analysts", icon: LegalAnalysts },
-  { title: "Grad Researchers", icon: GradResearchers },
-];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const categoryIcons: Record<string, any> = {
+  "Productivity Power Tools": AiOutlineProduct,
+  "Thought Leadership Engine": FiBookOpen,
+  "Instant Newsroom": FiMonitor,
+  "Superfan Activation Kit": FiTrendingUp,
+  "Founder's Starter Pack": FiTarget,
+  "Ranking Rocket Pack": PiRankingThin,
+};
 
 const DashboardSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const activeTitle = decodeURIComponent(searchParams.get("title") || "");
-
+  const { data: categories = [] } = useWorkflowCategories();
   const [isExpanded, setIsExpanded] = useState(true);
   const [showExplore, setShowExplore] = useState(false);
   const [showMyWorkflows, setShowMyWorkflows] = useState(false);
@@ -71,11 +69,11 @@ const DashboardSidebar = () => {
     md: isExpanded,
   });
 
-  const { data: User, isLoading } = useLoggedInUser();
+  const { data: User, isLoading: isUserLoading } = useLoggedInUser();
 
-  const handleNavigate = (title: string) => {
-    navigate(`/explore?title=${encodeURIComponent(title)}`);
-  };
+  // const handleNavigate = (title: string) => {
+  //   navigate(`/explore?title=${encodeURIComponent(title)}`);
+  // };
 
   const handleNewChat = () => navigate("/dashboard");
 
@@ -153,25 +151,28 @@ const DashboardSidebar = () => {
           isOpen={showExplore}
           toggle={() => setShowExplore((prev) => !prev)}
         >
-          {workflowsList.map((item) => (
-            <Flex
-              key={item.title}
-              px={2}
-              py={1}
-              rounded="md"
-              bg={item.title === activeTitle ? "whiteAlpha.300" : "transparent"}
-              _hover={{ bg: "whiteAlpha.200" }}
-              cursor="pointer"
-              align="center"
-              gap={2}
-              onClick={() => handleNavigate(item.title)}
-            >
-              <Image src={item.icon} w={4} h={4} />
-              <Text fontSize="sm" noOfLines={1}>
-                {item.title}
-              </Text>
-            </Flex>
-          ))}
+          {categories.map((item, index) => {
+            const Icon = categoryIcons[item] || FiBookOpen;
+            return (
+              <Flex
+                key={index}
+                px={2}
+                py={1}
+                rounded="md"
+                bg={item === activeTitle ? "whiteAlpha.300" : "transparent"}
+                _hover={{ bg: "whiteAlpha.200" }}
+                cursor="pointer"
+                align="center"
+                gap={2}
+                // onClick={() => handleNavigate(item)}
+              >
+                <Icon size={16} />
+                <Text fontSize="sm" noOfLines={1}>
+                  {item}
+                </Text>
+              </Flex>
+            );
+          })}
         </SidebarDropdown>
 
         <SidebarDropdown
@@ -205,7 +206,7 @@ const DashboardSidebar = () => {
       {/* User Footer */}
       <UserMenu
         User={User}
-        isLoading={isLoading}
+        isLoading={isUserLoading}
         isExpanded={responsiveIsExpanded}
       />
     </Box>
