@@ -6,6 +6,7 @@ import {
   Image,
   Input,
   InputGroup,
+  Spinner,
   Text,
   Tooltip,
   useColorModeValue,
@@ -21,7 +22,10 @@ import DashboardWorkflows from "./DashboardWorkflows";
 import { PiRankingThin } from "react-icons/pi";
 import { AiOutlineProduct } from "react-icons/ai";
 import { FiBookOpen, FiMonitor, FiTarget, FiTrendingUp } from "react-icons/fi";
-import { useWorkflowCategories } from "@/utils/apis/workflow.api";
+import {
+  useRandomPromptByCategory,
+  useWorkflowCategories,
+} from "@/utils/apis/workflow.api";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const categoryIcons: Record<string, any> = {
@@ -47,6 +51,18 @@ const DashboardHome = () => {
     deleteSpeed: 10,
     onLoopDone: () => setIsDone(true),
   });
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const {
+    data: promptData,
+    refetch: fetchRandomPrompt,
+    isLoading,
+  } = useRandomPromptByCategory(selectedCategory ?? "");
+
+  useEffect(() => {
+    if (promptData?.prompt) {
+      setUserInput(promptData.prompt);
+    }
+  }, [promptData, setUserInput]);
 
   const { data: categories = [] } = useWorkflowCategories();
   const topCategories = categories.slice(0, 5);
@@ -229,7 +245,7 @@ const DashboardHome = () => {
               return (
                 <Box
                   key={index}
-                  role="group" // important for group-hover effect
+                  role="group"
                   rounded="md"
                   boxShadow="sm"
                   bg={iconBg}
@@ -238,13 +254,21 @@ const DashboardHome = () => {
                   cursor="pointer"
                   _hover={{ bg: iconHoverBg }}
                   transition="all 0.2s"
+                  onClick={() => {
+                    setSelectedCategory(cat); // update category
+                    fetchRandomPrompt(); // trigger prompt fetch
+                  }}
                 >
                   <Flex align="center" gap={2} zIndex={2}>
-                    <Icon
-                      size={18}
-                      color="var(--chakra-colors-accent)"
-                      style={{ transition: "color 0.2s" }}
-                    />
+                    {selectedCategory === cat && isLoading ? (
+                      <Spinner size="xs" color="accent" />
+                    ) : (
+                      <Icon
+                        size={18}
+                        color="var(--chakra-colors-accent)"
+                        style={{ transition: "color 0.2s" }}
+                      />
+                    )}
                     <Text fontSize="sm" color="text" fontWeight="medium">
                       {cat}
                     </Text>

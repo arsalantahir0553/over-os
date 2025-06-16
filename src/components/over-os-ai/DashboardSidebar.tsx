@@ -71,9 +71,9 @@ const DashboardSidebar = () => {
 
   const { data: User, isLoading: isUserLoading } = useLoggedInUser();
 
-  // const handleNavigate = (title: string) => {
-  //   navigate(`/explore?title=${encodeURIComponent(title)}`);
-  // };
+  const handleNavigate = (category: string) => {
+    navigate(`/workflow/category/${encodeURIComponent(category)}`);
+  };
 
   const handleNewChat = () => navigate("/dashboard");
 
@@ -164,7 +164,7 @@ const DashboardSidebar = () => {
                 cursor="pointer"
                 align="center"
                 gap={2}
-                // onClick={() => handleNavigate(item)}
+                onClick={() => handleNavigate(item)}
               >
                 <Icon size={16} />
                 <Text fontSize="sm" noOfLines={1}>

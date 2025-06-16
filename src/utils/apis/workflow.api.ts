@@ -152,3 +152,41 @@ export const useWorkflowCategories = () => {
     queryFn: getWorkflowCategories,
   });
 };
+
+// Get random prompt by category
+export const getRandomPromptByCategory = async (
+  category: string
+): Promise<{ prompt: string }> => {
+  const response = await axios.post(`${API_BASE_URL}/workflow/random-prompt`, {
+    category,
+  });
+  return response.data;
+};
+
+export const useRandomPromptByCategory = (category: string) => {
+  return useQuery({
+    queryKey: ["randomPrompt", category],
+    queryFn: () => getRandomPromptByCategory(category),
+    enabled: !!category, // only run when category is provided
+  });
+};
+
+export const getWorkflowsByCategory = async (
+  category: string
+): Promise<{ workflows: Workflow[] }> => {
+  const response = await axios.post(
+    `${API_BASE_URL}/workflow/category-workflows`,
+    {
+      category,
+    }
+  );
+  return response.data;
+};
+
+export const useWorkflowsByCategory = (category: string) => {
+  return useQuery({
+    queryKey: ["workflowsByCategory", category],
+    queryFn: () => getWorkflowsByCategory(category),
+    enabled: !!category,
+  });
+};

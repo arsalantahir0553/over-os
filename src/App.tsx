@@ -22,6 +22,7 @@ import { cleanExpiredUserMeta } from "./utils/helpers/auth.helper";
 import { useEffect } from "react";
 import DemoChat from "./pages/over-os-ai/chat/DemoChat";
 import WorkflowDetails from "./components/over-os-ai/WorkflowDetails";
+import CategoryWorkflows from "./components/over-os-ai/CategoryWorkflows";
 
 const App = () => {
   useEffect(() => {
@@ -47,6 +48,10 @@ const App = () => {
             <Route path="/chat" element={<Chat />} />
             <Route path="/workflow/demo/:id" element={<DemoChat />} />
             <Route path="/workflow/details/:id" element={<WorkflowDetails />} />
+            <Route
+              path="/workflow/category/:category"
+              element={<CategoryWorkflows />}
+            />
             <Route path="/callback" element={<Callback />} />
           </Route>
         </Route>
