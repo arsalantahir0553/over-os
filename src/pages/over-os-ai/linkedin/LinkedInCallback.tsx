@@ -1,26 +1,39 @@
-import React, { useEffect, useState } from "react";
+import { useGetLinkedinDetails } from "@/utils/apis/linkedin.api";
+import React from "react";
 import { useLocation } from "react-router-dom";
 
 const LinkedInCallback = () => {
   const location = useLocation();
-  const [code, setCode] = useState("");
-  const [state, setState] = useState("");
+  const params = new URLSearchParams(location.search);
+  const code = params.get("code") || "";
+  const state = params.get("state") || "";
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    setCode(params.get("code") || "");
-    setState(params.get("state") || "");
-  }, [location.search]);
+  const { data, isLoading, error } = useGetLinkedinDetails(code, state);
+
+  React.useEffect(() => {
+    if (data) {
+      console.log("✅ LinkedIn Details:", data);
+    }
+    if (error) {
+      console.error("❌ Error fetching LinkedIn details:", error);
+    }
+  }, [data, error]);
 
   return (
     <div>
       <h2>LinkedIn Callback</h2>
-      <p>
-        <strong>Code:</strong> {code}
-      </p>
-      <p>
-        <strong>State:</strong> {state}
-      </p>
+      {isLoading && <p>Loading...</p>}
+      {!isLoading && !error && (
+        <>
+          <p>
+            <strong>Code:</strong> {code}
+          </p>
+          <p>
+            <strong>State:</strong> {state}
+          </p>
+        </>
+      )}
+      {error && <p>Something went wrong fetching LinkedIn data.</p>}
     </div>
   );
 };
