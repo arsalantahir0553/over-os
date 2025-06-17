@@ -1,23 +1,15 @@
-import { useGetLinkedinAuthUrl } from "@/utils/apis/linkedin.api";
-import { Button, Spinner } from "@chakra-ui/react";
-import { useEffect } from "react";
+import { buildLinkedinAuthUrl } from "@/utils/apis/linkedin.api";
+import { Button } from "@chakra-ui/react";
 
 const Test = () => {
-  const { data, refetch, isFetching } = useGetLinkedinAuthUrl();
-
-  useEffect(() => {
-    if (data?.url) {
-      window.location.href = data.url;
-    }
-  }, [data]);
+  const handleLogin = () => {
+    const authUrl = buildLinkedinAuthUrl();
+    window.location.href = authUrl;
+  };
 
   return (
-    <Button
-      colorScheme="linkedin"
-      onClick={() => refetch()}
-      isLoading={isFetching}
-    >
-      {isFetching ? <Spinner size="sm" /> : "Login with LinkedIn"}
+    <Button colorScheme="linkedin" onClick={handleLogin}>
+      Login with LinkedIn
     </Button>
   );
 };

@@ -23,6 +23,7 @@ import { useEffect } from "react";
 import DemoChat from "./pages/over-os-ai/chat/DemoChat";
 import WorkflowDetails from "./components/over-os-ai/WorkflowDetails";
 import Test from "./pages/over-os-ai/Test";
+import LinkedInCallback from "./pages/over-os-ai/linkedin/LinkedInCallback";
 
 const App = () => {
   useEffect(() => {
@@ -49,6 +50,7 @@ const App = () => {
             <Route path="/workflow/demo/:id" element={<DemoChat />} />
             <Route path="/workflow/details/:id" element={<WorkflowDetails />} />
             <Route path="/callback" element={<Callback />} />
+            <Route path="/linkedin/callback" element={<LinkedInCallback />} />
             <Route path="/test" element={<Test />} />
           </Route>
         </Route>
