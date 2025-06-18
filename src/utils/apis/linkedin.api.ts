@@ -18,7 +18,7 @@ export const buildLinkedinAuthUrl = (): string => {
 };
 
 export const getLinkedinAuthUrl = async () => {
-  const response = await axios.get(`${API_WORKFLOW_URL}/linkedin/api`);
+  const response = await axios.get(`${API_WORKFLOW_URL}/linkedin/api/`);
   return response.data;
 };
 
