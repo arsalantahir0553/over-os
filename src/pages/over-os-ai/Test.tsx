@@ -1,15 +1,34 @@
-import { buildLinkedinAuthUrl } from "@/utils/apis/linkedin.api";
+import { useGetLinkedinAuthUrl } from "@/utils/apis/linkedin.api";
 import { Button } from "@chakra-ui/react";
 
 const Test = () => {
-  const handleLogin = () => {
-    const authUrl = buildLinkedinAuthUrl();
-    window.location.href = authUrl;
+  const { refetch, isFetching } = useGetLinkedinAuthUrl();
+
+  const handleLogin = async () => {
+    try {
+      const { data } = await refetch(); // manually refetch the LinkedIn URL
+
+      const originalUrl = data?.linkedin_login_url || data?.url;
+      if (!originalUrl) {
+        console.error("LinkedIn login URL missing in API response");
+        return;
+      }
+
+      const url = new URL(originalUrl);
+      url.searchParams.set(
+        "redirect_uri",
+        "https://overos.xyz/linkedin/callback"
+      );
+
+      window.location.href = url.toString();
+    } catch (err) {
+      console.error("Failed to fetch LinkedIn auth URL:", err);
+    }
   };
 
   return (
-    <Button colorScheme="linkedin" onClick={handleLogin}>
-      Login with LinkedIn
+    <Button colorScheme="blue" onClick={handleLogin} isLoading={isFetching}>
+      {isFetching ? "Redirecting..." : "Login with LinkedIn"}
     </Button>
   );
 };
