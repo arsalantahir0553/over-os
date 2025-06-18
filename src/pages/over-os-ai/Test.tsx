@@ -14,13 +14,13 @@ const Test = () => {
         return;
       }
 
-      const url = new URL(originalUrl);
-      url.searchParams.set(
-        "redirect_uri",
-        "https://overos.xyz/linkedin/callback"
-      );
+      // const url = new URL(originalUrl);
+      // url.searchParams.set(
+      //   "redirect_uri",
+      //   "https://overos.xyz/linkedin/callback"
+      // );
 
-      window.location.href = url.toString();
+      window.location.href = originalUrl;
     } catch (err) {
       console.error("Failed to fetch LinkedIn auth URL:", err);
     }
