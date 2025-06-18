@@ -26,6 +26,7 @@ export const useGetLinkedinAuthUrl = () => {
   return useQuery({
     queryKey: ["linkedin-auth"],
     queryFn: () => getLinkedinAuthUrl(),
+    enabled: false,
   });
 };
 
