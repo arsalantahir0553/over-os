@@ -38,7 +38,7 @@ export const CustomModal = ({
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
       <ModalContent maxW={width}>
-        <ModalHeader>{headerText}</ModalHeader>
+        <ModalHeader color={"text"}>{headerText}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>{children}</ModalBody>
         <ModalFooter>
@@ -48,6 +48,7 @@ export const CustomModal = ({
           <Button
             isLoading={isLoading}
             colorScheme="brand"
+            color={"text"}
             bg={submitButtonColor}
             onClick={onSubmit}
           >

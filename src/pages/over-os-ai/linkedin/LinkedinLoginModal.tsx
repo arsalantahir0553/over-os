@@ -1,6 +1,6 @@
 import LinkedInLogo from "@/assets/svgs/LinkedLogo.svg"; // Replace with your actual SVG import
 import { CustomModal } from "@/components/CustomModal";
-import { Box, Flex, Text } from "@chakra-ui/react";
+import { Box, Flex, Image, Text } from "@chakra-ui/react";
 
 interface LoginRequiredModalProps {
   isOpen: boolean;
@@ -9,7 +9,7 @@ interface LoginRequiredModalProps {
   isPending?: boolean;
 }
 
-export const LoginRequiredModal = ({
+export const LinkedinLoginModal = ({
   isOpen,
   onClose,
   onLogin,
@@ -29,11 +29,11 @@ export const LoginRequiredModal = ({
     >
       <Flex direction="column" align="center" gap={4} textAlign="center">
         <Box boxSize="60px">
-          <LinkedInLogo />
+          <Image src={LinkedInLogo} />
           {/* Or use: <Image src="/path/to/linkedin-logo.svg" alt="LinkedIn" /> */}
         </Box>
 
-        <Text fontSize="lg" fontWeight="medium" color="gray.700">
+        <Text fontSize="lg" fontWeight="medium" color="text">
           This action requires you to log in with your LinkedIn account.
         </Text>
 

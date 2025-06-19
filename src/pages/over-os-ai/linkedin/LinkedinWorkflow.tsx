@@ -1,4 +1,3 @@
-import { useUserInput } from "@/context/useChatContext";
 import {
   Box,
   Flex,
@@ -6,95 +5,45 @@ import {
   Image,
   Input,
   InputGroup,
-  Spinner,
   Text,
   Tooltip,
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
-import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { PlusIcon, Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
-import DashboardWorkflows from "./DashboardWorkflows";
 
-import { PiRankingThin } from "react-icons/pi";
-import { AiOutlineProduct } from "react-icons/ai";
-import { FiBookOpen, FiMonitor, FiTarget, FiTrendingUp } from "react-icons/fi";
-import {
-  useGetWorkflowById,
-  useRandomPromptByCategory,
-  useWorkflowCategories,
-} from "@/utils/apis/workflow.api";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const categoryIcons: Record<string, any> = {
-  "Productivity Power Tools": AiOutlineProduct,
-  "Thought Leadership Engine": FiBookOpen,
-  "Instant Newsroom": FiMonitor,
-  "Superfan Activation Kit": FiTrendingUp,
-  "Founder's Starter Pack": FiTarget,
-  "Ranking Rocket Pack": PiRankingThin,
-};
-
-const DashboardHome = () => {
-  const { userInput, setUserInput, selectedImages, setSelectedImages } =
-    useUserInput();
-  const navigate = useNavigate();
+const LinkedinWorkflow = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const chatPrompt = localStorage.getItem("chat_prompt");
+  const [userInput, setUserInput] = useState("");
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [isDone, setIsDone] = useState(false);
+
   const [text] = useTypewriter({
-    words: ["Cursor For Growth Marketing", "Vibe Coding", "Vibe Marketing"],
+    words: [
+      "Boost your reach",
+      "AI for Thought Leadership",
+      "Post on LinkedIn",
+    ],
     delaySpeed: 2000,
     typeSpeed: 10,
     deleteSpeed: 10,
     onLoopDone: () => setIsDone(true),
   });
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const {
-    data: promptData,
-    refetch: fetchRandomPrompt,
-    isLoading,
-  } = useRandomPromptByCategory(selectedCategory ?? "");
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const workflowId = searchParams.get("id") || "";
 
-  const { data: workflowDetails } = useGetWorkflowById(workflowId);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (workflowDetails?.prompt) {
-      setUserInput(workflowDetails.prompt);
-    }
-  }, [workflowDetails, setUserInput]);
+    const linkedinUserId = localStorage.getItem("linkedin_user_id");
 
-  useEffect(() => {
-    if (promptData?.prompt) {
-      setUserInput(promptData.prompt);
+    if (!linkedinUserId) {
+      navigate("/dashboard"); // 👈 Redirect if linkedin_user_id is missing
     }
-  }, [promptData, setUserInput]);
-
-  const { data: categories = [] } = useWorkflowCategories();
-  const topCategories = categories.slice(0, 5);
-
-  useEffect(() => {
-    if (chatPrompt) {
-      setUserInput(chatPrompt);
-      localStorage.removeItem("chat_prompt");
-    }
-  }, [chatPrompt, setUserInput]);
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      if (userInput.trim() !== "") {
-        localStorage.setItem("runWorkflow", "true");
-        navigate("/chat");
-      }
-    }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -149,7 +98,7 @@ const DashboardHome = () => {
         <Box position="relative">
           <InputGroup>
             <Input
-              placeholder="Tell me about your marketing goal..."
+              placeholder="What would you like to post on LinkedIn?"
               variant="unstyled"
               fontSize="lg"
               borderRadius={"none"}
@@ -164,7 +113,6 @@ const DashboardHome = () => {
               }}
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
-              onKeyDown={handleKeyDown}
               pr="2.5rem"
               color="text"
             />
@@ -238,75 +186,31 @@ const DashboardHome = () => {
             ))}
           </Flex>
         )}
-
-        <Flex justify="space-between" align="center" mt={-2}>
-          <Tooltip label="Add New" rounded="md">
-            <IconButton
-              icon={<PlusIcon size={16} />}
-              aria-label="Add"
-              size="sm"
-              bg={iconBg}
-              color={iconColor}
-              _hover={{ bg: iconHoverBg }}
-            />
-          </Tooltip>
-
-          <Flex gap={4} wrap="wrap" justifyContent="center">
-            {topCategories.map((cat, index) => {
-              const Icon = categoryIcons[cat] ?? FiMonitor;
-              return (
-                <Box
-                  key={index}
-                  role="group"
-                  rounded="md"
-                  boxShadow="sm"
-                  bg={iconBg}
-                  px={3}
-                  py={2}
-                  cursor="pointer"
-                  _hover={{ bg: iconHoverBg }}
-                  transition="all 0.2s"
-                  onClick={() => {
-                    setSelectedCategory(cat); // update category
-                    fetchRandomPrompt(); // trigger prompt fetch
-                  }}
-                >
-                  <Flex align="center" gap={2} zIndex={2}>
-                    {selectedCategory === cat && isLoading ? (
-                      <Spinner size="xs" color="accent" />
-                    ) : (
-                      <Icon
-                        size={18}
-                        color="var(--chakra-colors-accent)"
-                        style={{ transition: "color 0.2s" }}
-                      />
-                    )}
-                    <Text fontSize="sm" color="text" fontWeight="medium">
-                      {cat}
-                    </Text>
-                  </Flex>
-                </Box>
-              );
-            })}
-          </Flex>
-
-          <Tooltip label="Schedule" rounded="md">
-            <IconButton
-              icon={<Clock10Icon size={16} />}
-              aria-label="Schedule"
-              size="sm"
-              bg={iconBg}
-              color={iconColor}
-              _hover={{ bg: iconHoverBg }}
-            />
-          </Tooltip>
-        </Flex>
-
-        {/* Trending Workflows */}
-        <DashboardWorkflows />
+        {/* Tips Section */}
+        <Box mt={6} px={2}>
+          <Text fontWeight="semibold" fontSize="md" color="text" mb={2}>
+            💡 Tips for Better LinkedIn Posts
+          </Text>
+          <VStack spacing={2} align="start" fontSize="sm" color="gray.400">
+            <Text as="li">
+              Start with a strong hook or question to grab attention.
+            </Text>
+            <Text as="li">
+              Add personal insights or real experiences for authenticity.
+            </Text>
+            <Text as="li">
+              Use 2–3 hashtags to increase visibility (e.g. <b>#AI</b>,{" "}
+              <b>#Productivity</b>).
+            </Text>
+            <Text as="li">
+              Include an image or infographic to boost engagement.
+            </Text>
+            <Text as="li">Keep it concise — ideally under 300 words.</Text>
+          </VStack>
+        </Box>
       </VStack>
     </Box>
   );
 };
 
-export default DashboardHome;
+export default LinkedinWorkflow;

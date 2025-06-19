@@ -10,6 +10,7 @@ import {
   Spinner,
   Tag,
   Text,
+  useDisclosure,
   VStack,
 } from "@chakra-ui/react";
 import { CheckCircleIcon, StarIcon } from "lucide-react";
@@ -17,11 +18,61 @@ import { FaStar } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import graphImage from "../../assets/images/graph.png";
 import TestimonialImage from "../../assets/images/testimonial.png";
+import { LinkedinLoginModal } from "@/pages/over-os-ai/linkedin/LinkedinLoginModal";
+import { useGetLinkedinAuthUrl } from "@/utils/apis/linkedin.api";
+import { LoginRequiredModal } from "@/pages/over-os-ai/chat/LoginRequiredModal";
+import { useQBLogin } from "@/utils/apis/overos.api";
 
 const WorkflowDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { data: workflow, isLoading, isError } = useGetWorkflowById(id!);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { mutate: triggerLogin, isPending } = useQBLogin();
+  const {
+    isOpen: isQuickbooksOpen,
+    onOpen: onQuickbooksOpen,
+    onClose: onQuickbooksClose,
+  } = useDisclosure();
+  const { refetch, isFetching } = useGetLinkedinAuthUrl();
+
+  const handleLogin = async () => {
+    try {
+      const { data } = await refetch(); // manually refetch the LinkedIn URL
+
+      const originalUrl = data?.linkedin_login_url || data?.url;
+      if (!originalUrl) {
+        console.error("LinkedIn login URL missing in API response");
+        return;
+      }
+      window.location.href = originalUrl;
+    } catch (err) {
+      console.error("Failed to fetch LinkedIn auth URL:", err);
+    }
+  };
+
+  const handleQBLogin = async () => {
+    await triggerLogin(undefined, {
+      onSuccess: (data) => {
+        localStorage.setItem("from_demo", "true");
+        window.location.href = data.auth_url;
+      },
+      onError: (error) => {
+        console.error("❌ Login API call failed:", error);
+      },
+    });
+  };
+
+  const handleTryNow = (workflowId: string) => {
+    if (workflowId === "30579017-12c7-4058-859b-54825547b345") {
+      onOpen();
+    } else if (workflowId === "9bfc211a-8b9c-47f1-b955-7312747ddf57") {
+      onQuickbooksOpen();
+    } else {
+      navigate(`/dashboard?id=${workflowId}`);
+    }
+  };
+
   if (isLoading) {
     return (
       <Center py={20}>
@@ -77,7 +128,7 @@ const WorkflowDetails = () => {
             fontWeight={400}
             px={16}
             fontFamily="Inter"
-            onClick={() => navigate(`/workflow/demo/${workflow.id}`)}
+            onClick={() => handleTryNow(workflow.id)}
           >
             Try Now
           </Button>
@@ -177,6 +228,18 @@ const WorkflowDetails = () => {
           </Text>
         </VStack>
       </Box>
+      <LinkedinLoginModal
+        isOpen={isOpen}
+        onClose={onClose}
+        onLogin={handleLogin}
+        isPending={isFetching}
+      />
+      <LoginRequiredModal
+        isOpen={isQuickbooksOpen}
+        onClose={onQuickbooksClose}
+        onLogin={handleQBLogin}
+        isPending={isPending}
+      />
     </Box>
   );
 };

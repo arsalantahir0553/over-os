@@ -85,7 +85,7 @@ const customTheme = extendTheme({
       },
       accent: {
         default: "neon.green",
-        _dark: "neon.green",
+        _dark: "neon.cyan",
       },
       cardBg: {
         default: "gray.50",
