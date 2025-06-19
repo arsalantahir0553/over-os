@@ -1,39 +1,33 @@
-import { useGetLinkedinDetails } from "@/utils/apis/linkedin.api";
-import React from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const LinkedInCallback = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  const code = params.get("code") || "";
-  const state = params.get("state") || "";
 
-  const { data, isLoading, error } = useGetLinkedinDetails(code, state);
+  const userId = params.get("user_id");
 
-  React.useEffect(() => {
-    if (data) {
-      console.log("✅ LinkedIn Details:", data);
+  useEffect(() => {
+    if (userId) {
+      localStorage.setItem("linkedin_user_id", userId);
+      console.log("✅ LinkedIn User ID saved:", userId);
+
+      // Optionally redirect to dashboard or wherever
+      navigate("/dashboard", { replace: true });
+    } else {
+      console.error("❌ user_id not found in URL.");
     }
-    if (error) {
-      console.error("❌ Error fetching LinkedIn details:", error);
-    }
-  }, [data, error]);
+  }, [userId, navigate]);
 
   return (
     <div>
       <h2>LinkedIn Callback</h2>
-      {isLoading && <p>Loading...</p>}
-      {!isLoading && !error && (
-        <>
-          <p>
-            <strong>Code:</strong> {code}
-          </p>
-          <p>
-            <strong>State:</strong> {state}
-          </p>
-        </>
+      {userId ? (
+        <p>Saving your LinkedIn login...</p>
+      ) : (
+        <p>Missing user ID in the callback URL.</p>
       )}
-      {error && <p>Something went wrong fetching LinkedIn data.</p>}
     </div>
   );
 };
