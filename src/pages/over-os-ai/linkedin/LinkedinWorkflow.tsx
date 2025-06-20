@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Flex,
   IconButton,
   Image,
@@ -8,6 +9,7 @@ import {
   Text,
   Tooltip,
   useColorModeValue,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
@@ -15,32 +17,29 @@ import { PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
+import { useCreateSmartPost } from "@/utils/apis/linkedin.api"; // ✅ Adjust the import if path differs
 
 const LinkedinWorkflow = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userInput, setUserInput] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [isDone, setIsDone] = useState(false);
+  const [linkedinUserId, setLinkedinUserId] = useState<string | null>(null);
 
-  const [text] = useTypewriter({
-    words: [
-      "Boost your reach",
-      "AI for Thought Leadership",
-      "Post on LinkedIn",
-    ],
-    delaySpeed: 2000,
-    typeSpeed: 10,
-    deleteSpeed: 10,
-    onLoopDone: () => setIsDone(true),
-  });
-
+  const {
+    mutate: createSmartPost,
+    isPending,
+    // isSuccess,
+  } = useCreateSmartPost();
+  const toast = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const linkedinUserId = localStorage.getItem("linkedin_user_id");
-
-    if (!linkedinUserId) {
-      navigate("/dashboard"); // 👈 Redirect if linkedin_user_id is missing
+    const id = localStorage.getItem("linkedin_user_id");
+    if (!id) {
+      navigate("/dashboard");
+    } else {
+      setLinkedinUserId(id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -54,6 +53,54 @@ const LinkedinWorkflow = () => {
   const removeImage = (index: number) => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   };
+
+  const handleSubmit = () => {
+    if (!linkedinUserId || !userInput.trim()) return;
+
+    createSmartPost(
+      {
+        user_id: linkedinUserId,
+        user_prompt: userInput,
+        image_files: selectedImages,
+        urls: [], // Optional: supply URLs if needed
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Post created!",
+            description:
+              "Your content has been successfully submitted to LinkedIn.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+          setUserInput("");
+          setSelectedImages([]);
+        },
+        onError: () => {
+          toast({
+            title: "Error",
+            description: "Something went wrong while posting.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        },
+      }
+    );
+  };
+
+  const [text] = useTypewriter({
+    words: [
+      "Boost your reach",
+      "AI for Thought Leadership",
+      "Post on LinkedIn",
+    ],
+    delaySpeed: 2000,
+    typeSpeed: 10,
+    deleteSpeed: 10,
+    onLoopDone: () => setIsDone(true),
+  });
 
   const MotionText = motion(Text);
   const iconBg = useColorModeValue("gray.100", "gray.700");
@@ -186,6 +233,19 @@ const LinkedinWorkflow = () => {
             ))}
           </Flex>
         )}
+
+        {/* Submit Button */}
+        <Flex justify="flex-end" mt={4}>
+          <Button
+            onClick={handleSubmit}
+            colorScheme="blue"
+            isLoading={isPending}
+            isDisabled={!userInput.trim()}
+          >
+            Post to LinkedIn
+          </Button>
+        </Flex>
+
         {/* Tips Section */}
         <Box mt={6} px={2}>
           <Text fontWeight="semibold" fontSize="md" color="text" mb={2}>
