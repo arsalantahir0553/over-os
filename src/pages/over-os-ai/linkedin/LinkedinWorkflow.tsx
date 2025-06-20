@@ -1,12 +1,16 @@
 import {
+  useGenerateLinkedinPrompt,
+  usePublishGeneratedPost,
+} from "@/utils/apis/linkedin.api";
+import {
   Box,
   Button,
   Flex,
   IconButton,
   Image,
   Input,
-  InputGroup,
   Text,
+  Textarea,
   Tooltip,
   useColorModeValue,
   useToast,
@@ -17,22 +21,22 @@ import { PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
-import { useCreateSmartPost } from "@/utils/apis/linkedin.api"; // ✅ Adjust the import if path differs
 
 const LinkedinWorkflow = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [userInput, setUserInput] = useState("");
+  const [userPrompt, setUserPrompt] = useState(""); // initial short prompt
+  const [generatedText, setGeneratedText] = useState(""); // full AI-generated text
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [isDone, setIsDone] = useState(false);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [linkedinUserId, setLinkedinUserId] = useState<string | null>(null);
 
-  const {
-    mutate: createSmartPost,
-    isPending,
-    // isSuccess,
-  } = useCreateSmartPost();
   const toast = useToast();
   const navigate = useNavigate();
+
+  const { mutate: generatePrompt, isPending: isGenerating } =
+    useGenerateLinkedinPrompt();
+  const { mutate: publishPost, isPending: isPublishing } =
+    usePublishGeneratedPost();
 
   useEffect(() => {
     const id = localStorage.getItem("linkedin_user_id");
@@ -41,8 +45,7 @@ const LinkedinWorkflow = () => {
     } else {
       setLinkedinUserId(id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigate]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -54,33 +57,38 @@ const LinkedinWorkflow = () => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
-    if (!linkedinUserId || !userInput.trim()) return;
+  const handleGenerate = () => {
+    if (!linkedinUserId || !userPrompt.trim()) return;
 
-    createSmartPost(
+    generatePrompt(
       {
         user_id: linkedinUserId,
-        user_prompt: userInput,
+        user_prompt: userPrompt,
         image_files: selectedImages,
-        urls: [], // Optional: supply URLs if needed
+        urls: [], // Extend if needed
       },
       {
-        onSuccess: () => {
-          toast({
-            title: "Post created!",
-            description:
-              "Your content has been successfully submitted to LinkedIn.",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
-          setUserInput("");
-          setSelectedImages([]);
+        onSuccess: (data) => {
+          const post = data.generated_posts?.[0];
+          if (post) {
+            setGeneratedText(post.text || "");
+
+            const image = post.image_path
+              ? Array.isArray(post.image_path)
+                ? post.image_path[0]
+                : post.image_path
+              : "";
+
+            // ✅ Log the actual image path for verification
+            console.log("Image path from API:", image);
+
+            setImageUrls([image]); // set properly here
+          }
         },
         onError: () => {
           toast({
-            title: "Error",
-            description: "Something went wrong while posting.",
+            title: "AI Generation Failed",
+            description: "Try again later.",
             status: "error",
             duration: 3000,
             isClosable: true,
@@ -90,7 +98,59 @@ const LinkedinWorkflow = () => {
     );
   };
 
-  const [text] = useTypewriter({
+  const handleSubmit = () => {
+    if (!linkedinUserId || !userPrompt.trim() || !generatedText.trim()) {
+      toast({
+        title: "Missing Data",
+        description: "Prompt and generated post text are required.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    console.log("checking image Urls", imageUrls);
+
+    publishPost(
+      {
+        user_id: linkedinUserId,
+        user_prompt: userPrompt,
+        post: {
+          text: generatedText,
+          image_path: imageUrls.length > 0 ? imageUrls[0] : "", // safe fallback
+          url: "",
+        },
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: "Post successfully published to LinkedIn.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+          setUserPrompt("");
+          setGeneratedText("");
+          setSelectedImages([]);
+          setImageUrls([]);
+        },
+        onError: (err) => {
+          console.error(err);
+          toast({
+            title: "Error",
+            description: "Failed to publish post.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        },
+      }
+    );
+  };
+
+  const [typewriterText] = useTypewriter({
     words: [
       "Boost your reach",
       "AI for Thought Leadership",
@@ -99,14 +159,12 @@ const LinkedinWorkflow = () => {
     delaySpeed: 2000,
     typeSpeed: 10,
     deleteSpeed: 10,
-    onLoopDone: () => setIsDone(true),
   });
 
   const MotionText = motion(Text);
   const iconBg = useColorModeValue("gray.100", "gray.700");
   const iconHoverBg = useColorModeValue("gray.200", "gray.600");
   const iconColor = useColorModeValue("gray.700", "accent");
-
   return (
     <Box
       maxW="1260px"
@@ -116,7 +174,7 @@ const LinkedinWorkflow = () => {
       backdropFilter="blur(16px)"
       borderRadius="xl"
     >
-      <VStack spacing={8} align="stretch">
+      <VStack spacing={10} align="stretch">
         {/* Heading */}
         <Box textAlign="center">
           <MotionText
@@ -124,83 +182,29 @@ const LinkedinWorkflow = () => {
             fontWeight="extrabold"
             fontFamily="Joan"
             letterSpacing="wide"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
           >
             <Box
               as="span"
               bgGradient="linear(to-r, primary, accent)"
               bgClip="text"
             >
-              {text}
+              {typewriterText}
             </Box>
             <Box as="span" color="white">
-              {isDone ? <Cursor cursorStyle="." /> : <Cursor cursorStyle="|" />}
+              <Cursor cursorStyle="|" />
             </Box>
           </MotionText>
         </Box>
 
-        {/* Input + Upload */}
-        <Box position="relative">
-          <InputGroup>
-            <Input
-              placeholder="What would you like to post on LinkedIn?"
-              variant="unstyled"
-              fontSize="lg"
-              borderRadius={"none"}
-              fontWeight="medium"
-              pb={1.5}
-              borderBottom="2px"
-              borderColor="accent"
-              _placeholder={{ color: "gray.600" }}
-              _focus={{
-                borderColor: "primary",
-                boxShadow: "0 1px 0 0 var(--chakra-colors-primary)",
-              }}
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              pr="2.5rem"
-              color="text"
-            />
-            <Box
-              position="absolute"
-              right="0"
-              top="30%"
-              transform="translateY(-50%)"
-            >
-              <Tooltip label="Upload images" rounded="md">
-                <IconButton
-                  icon={<Upload size={16} />}
-                  aria-label="Upload"
-                  size="sm"
-                  bg={iconBg}
-                  color={iconColor}
-                  _hover={{ bg: iconHoverBg }}
-                  onClick={() => fileInputRef.current?.click()}
-                />
-              </Tooltip>
-            </Box>
-          </InputGroup>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            ref={fileInputRef}
-            onChange={handleImageUpload}
-            style={{ display: "none" }}
-          />
-        </Box>
-
         {/* Image Previews */}
         {selectedImages.length > 0 && (
-          <Flex mt={2} gap={3} flexWrap="wrap">
+          <Flex mt={-2} gap={3} flexWrap="wrap" justify="flex-start">
             {selectedImages.map((file, index) => (
               <Box
                 key={index}
                 position="relative"
-                w="50px"
-                h="50px"
+                w="60px"
+                h="60px"
                 borderRadius="md"
                 overflow="hidden"
                 boxShadow="0 0 0 1px var(--chakra-colors-accent)"
@@ -234,40 +238,92 @@ const LinkedinWorkflow = () => {
           </Flex>
         )}
 
-        {/* Submit Button */}
-        <Flex justify="flex-end" mt={4}>
-          <Button
-            onClick={handleSubmit}
-            colorScheme="blue"
-            isLoading={isPending}
-            isDisabled={!userInput.trim()}
-          >
-            Post to LinkedIn
-          </Button>
+        {/* Prompt Input + Generate */}
+        <Flex direction="column" gap={3}>
+          <Text fontSize="sm" color="mutedText">
+            What would you like to post about?
+          </Text>
+          <Input
+            placeholder="e.g. Share my full-stack development journey"
+            value={userPrompt}
+            onChange={(e) => setUserPrompt(e.target.value)}
+            variant="unstyled"
+            borderBottom="2px"
+            borderColor="accent"
+            fontSize="lg"
+            color="text"
+            _placeholder={{ color: "gray.500" }}
+          />
+          <Flex justify="flex-end">
+            <Button
+              onClick={handleGenerate}
+              isLoading={isGenerating}
+              bg="surfaceButton"
+              color="white"
+              _hover={{ bg: "brand.400" }}
+            >
+              Generate
+            </Button>
+          </Flex>
         </Flex>
 
-        {/* Tips Section */}
-        <Box mt={6} px={2}>
-          <Text fontWeight="semibold" fontSize="md" color="text" mb={2}>
-            💡 Tips for Better LinkedIn Posts
-          </Text>
-          <VStack spacing={2} align="start" fontSize="sm" color="gray.400">
-            <Text as="li">
-              Start with a strong hook or question to grab attention.
+        {/* Generated Text Area */}
+        {generatedText && (
+          <Textarea
+            value={generatedText}
+            onChange={(e) => setGeneratedText(e.target.value)}
+            placeholder="AI-generated post will appear here"
+            fontSize="md"
+            minHeight="150px"
+            borderColor="accent"
+            color="text"
+            _placeholder={{ color: "gray.500" }}
+          />
+        )}
+
+        {/* Image Upload */}
+        <Flex gap={2} align="center">
+          <Tooltip label="Upload images" rounded="md">
+            <IconButton
+              icon={<Upload size={16} />}
+              aria-label="Upload"
+              size="sm"
+              bg={iconBg}
+              color={iconColor}
+              _hover={{ bg: iconHoverBg }}
+              onClick={() => fileInputRef.current?.click()}
+            />
+          </Tooltip>
+          <Input
+            type="file"
+            accept="image/*"
+            multiple
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+            style={{ display: "none" }}
+          />
+          {selectedImages.length > 0 && (
+            <Text color="mutedText" fontSize="sm">
+              {selectedImages.length} image
+              {selectedImages.length > 1 ? "s" : ""} selected
             </Text>
-            <Text as="li">
-              Add personal insights or real experiences for authenticity.
-            </Text>
-            <Text as="li">
-              Use 2–3 hashtags to increase visibility (e.g. <b>#AI</b>,{" "}
-              <b>#Productivity</b>).
-            </Text>
-            <Text as="li">
-              Include an image or infographic to boost engagement.
-            </Text>
-            <Text as="li">Keep it concise — ideally under 300 words.</Text>
-          </VStack>
-        </Box>
+          )}
+        </Flex>
+
+        {/* Submit */}
+        {generatedText && (
+          <Flex justify="flex-end">
+            <Button
+              onClick={handleSubmit}
+              bg="primary"
+              color="white"
+              isLoading={isPublishing}
+              _hover={{ bg: "brand.400" }}
+            >
+              Post to LinkedIn
+            </Button>
+          </Flex>
+        )}
       </VStack>
     </Box>
   );
