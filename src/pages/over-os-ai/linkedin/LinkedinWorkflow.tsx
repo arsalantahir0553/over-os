@@ -250,11 +250,39 @@ const LinkedinWorkflow = () => {
             variant="unstyled"
             borderBottom="2px"
             borderColor="accent"
+            borderRadius={"0"}
             fontSize="lg"
             color="text"
             _placeholder={{ color: "gray.500" }}
           />
-          <Flex justify="flex-end">
+          <Flex justify="flex-end" gap={3}>
+            <Flex gap={2} align="center">
+              <Tooltip label="Upload images" rounded="md">
+                <IconButton
+                  icon={<Upload size={16} />}
+                  aria-label="Upload"
+                  size="sm"
+                  bg={iconBg}
+                  color={iconColor}
+                  _hover={{ bg: iconHoverBg }}
+                  onClick={() => fileInputRef.current?.click()}
+                />
+              </Tooltip>
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                style={{ display: "none" }}
+              />
+              {selectedImages.length > 0 && (
+                <Text color="mutedText" fontSize="sm">
+                  {selectedImages.length} image
+                  {selectedImages.length > 1 ? "s" : ""} selected
+                </Text>
+              )}
+            </Flex>
             <Button
               onClick={handleGenerate}
               isLoading={isGenerating}
@@ -280,35 +308,6 @@ const LinkedinWorkflow = () => {
             _placeholder={{ color: "gray.500" }}
           />
         )}
-
-        {/* Image Upload */}
-        <Flex gap={2} align="center">
-          <Tooltip label="Upload images" rounded="md">
-            <IconButton
-              icon={<Upload size={16} />}
-              aria-label="Upload"
-              size="sm"
-              bg={iconBg}
-              color={iconColor}
-              _hover={{ bg: iconHoverBg }}
-              onClick={() => fileInputRef.current?.click()}
-            />
-          </Tooltip>
-          <Input
-            type="file"
-            accept="image/*"
-            multiple
-            ref={fileInputRef}
-            onChange={handleImageUpload}
-            style={{ display: "none" }}
-          />
-          {selectedImages.length > 0 && (
-            <Text color="mutedText" fontSize="sm">
-              {selectedImages.length} image
-              {selectedImages.length > 1 ? "s" : ""} selected
-            </Text>
-          )}
-        </Flex>
 
         {/* Submit */}
         {generatedText && (
