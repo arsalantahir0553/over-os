@@ -259,7 +259,11 @@ const DashboardHome = () => {
           </Flex>
         )}
 
-        <Flex justify="space-between" align="center" mt={-2}>
+        <Flex
+          justify="space-between"
+          align={{ md: "center", base: "start" }}
+          mt={-2}
+        >
           <Tooltip label="Add New" rounded="md">
             <IconButton
               icon={<PlusIcon size={16} />}
@@ -271,7 +275,12 @@ const DashboardHome = () => {
             />
           </Tooltip>
 
-          <Flex gap={4} wrap="wrap" justifyContent="center">
+          <Flex
+            gap={4}
+            wrap="wrap"
+            justifyContent="center"
+            display={{ md: "flex", base: "none" }}
+          >
             {topCategories.map((cat, index) => {
               const Icon = categoryIcons[cat] ?? FiMonitor;
               return (
@@ -320,6 +329,51 @@ const DashboardHome = () => {
               _hover={{ bg: iconHoverBg }}
             />
           </Tooltip>
+        </Flex>
+
+        <Flex
+          gap={4}
+          wrap="wrap"
+          w={"full"}
+          justifyContent="center"
+          display={{ md: "none", base: "flex" }}
+        >
+          {topCategories.map((cat, index) => {
+            const Icon = categoryIcons[cat] ?? FiMonitor;
+            return (
+              <Box
+                key={index}
+                role="group"
+                rounded="md"
+                boxShadow="sm"
+                bg={iconBg}
+                px={1.5}
+                py={1}
+                cursor="pointer"
+                _hover={{ bg: iconHoverBg }}
+                transition="all 0.2s"
+                onClick={() => {
+                  setSelectedCategory(cat); // update category
+                  fetchRandomPrompt(); // trigger prompt fetch
+                }}
+              >
+                <Flex align="center" gap={2} zIndex={2}>
+                  {selectedCategory === cat && isLoading ? (
+                    <Spinner size="xs" color="accent" />
+                  ) : (
+                    <Icon
+                      size={12}
+                      color="var(--chakra-colors-accent)"
+                      style={{ transition: "color 0.2s" }}
+                    />
+                  )}
+                  <Text fontSize="12px" color="text" fontWeight="medium">
+                    {cat}
+                  </Text>
+                </Flex>
+              </Box>
+            );
+          })}
         </Flex>
 
         {/* Trending Workflows */}
