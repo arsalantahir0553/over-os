@@ -4,29 +4,29 @@ import {
   Flex,
   IconButton,
   Image,
-  Input,
   InputGroup,
   Spinner,
   Text,
+  Textarea,
   Tooltip,
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
+import { motion } from "framer-motion";
 import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import DashboardWorkflows from "./DashboardWorkflows";
 
-import { PiRankingThin } from "react-icons/pi";
-import { AiOutlineProduct } from "react-icons/ai";
-import { FiBookOpen, FiMonitor, FiTarget, FiTrendingUp } from "react-icons/fi";
 import {
   useGetWorkflowById,
   useRandomPromptByCategory,
   useWorkflowCategories,
 } from "@/utils/apis/workflow.api";
+import { AiOutlineProduct } from "react-icons/ai";
+import { FiBookOpen, FiMonitor, FiTarget, FiTrendingUp } from "react-icons/fi";
+import { PiRankingThin } from "react-icons/pi";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const categoryIcons: Record<string, any> = {
@@ -86,7 +86,7 @@ const DashboardHome = () => {
     }
   }, [chatPrompt, setUserInput]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (userInput.trim() !== "") {
@@ -148,26 +148,46 @@ const DashboardHome = () => {
         {/* Input + Upload */}
         <Box position="relative">
           <InputGroup>
-            <Input
+            <Textarea
               placeholder="Tell me about your marketing goal..."
               variant="unstyled"
               fontSize="lg"
-              borderRadius={"none"}
               fontWeight="medium"
-              pb={1.5}
-              borderBottom="2px"
+              resize="none"
+              overflow="hidden"
+              padding="0"
+              lineHeight="1.5"
+              height="auto"
+              minH="1.5rem" // Single line initial height
+              maxH="6rem" // Maximum height before scrolling
+              border="none"
+              borderBottom="2px solid"
               borderColor="accent"
-              _placeholder={{ color: "gray.600" }}
+              borderRadius="0"
+              _placeholder={{
+                color: "gray.600",
+                lineHeight: "1.5",
+              }}
               _focus={{
                 borderColor: "primary",
-                boxShadow: "0 1px 0 0 var(--chakra-colors-primary)",
+                boxShadow: "none",
               }}
               value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
+              onChange={(e) => {
+                setUserInput(e.target.value);
+                // Auto-expand logic:
+                e.currentTarget.style.height = "auto";
+                e.currentTarget.style.height = `${Math.min(
+                  e.currentTarget.scrollHeight,
+                  6 * 16 // 6rem in pixels (adjust based on your font size)
+                )}px`;
+              }}
               onKeyDown={handleKeyDown}
-              pr="2.5rem"
               color="text"
+              pr="2.5rem"
+              rows={1} // Start with 1 visible row
             />
+
             <Box
               position="absolute"
               right="0"

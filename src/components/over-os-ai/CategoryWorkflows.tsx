@@ -55,18 +55,14 @@ const WorkflowCard = ({ workflow }: { workflow: any }) => {
         position="absolute"
         top="-2px"
         right="-7px"
-        bgGradient={
-          workflow.isActive
-            ? "linear(to-br, teal.400, green.400)"
-            : "linear(to-br, orange.300, red.400)"
-        }
-        color="white"
+        bgGradient={workflow.isActive ? "border" : "border"}
+        color="text"
         px={4}
         py={1}
         fontSize="xs"
         fontWeight="bold"
         borderBottomRadius="12px"
-        boxShadow="0 4px 8px rgba(0,0,0,0.2)"
+        boxShadow="0 4px 8px rgba(0, 0, 0, 0.17)"
         zIndex={10}
       >
         {workflow.isActive ? "✅ GET STARTED" : "⏳ COMING SOON"}

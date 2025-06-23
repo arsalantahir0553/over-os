@@ -22,6 +22,19 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 
+const loadingMessages = [
+  "Just a moment — we’re working on something great for you…",
+  "Hang tight, generating your content…",
+  "Creating something worth sharing…",
+  "We’re writing this up for you…",
+  "Putting your words together…",
+  "One sec — we’re making this sound amazing…",
+  "Composing your message…",
+  "Working on it — this won’t take long…",
+  "Giving your prompt the attention it deserves…",
+  "Almost there — polishing your response…",
+];
+
 const LinkedinWorkflow = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userPrompt, setUserPrompt] = useState(""); // initial short prompt
@@ -29,7 +42,9 @@ const LinkedinWorkflow = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [linkedinUserId, setLinkedinUserId] = useState<string | null>(null);
-
+  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
+  const loadingIndexRef = useRef<number>(0);
+  const intervalRef = useRef<number | null>(null);
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -60,15 +75,28 @@ const LinkedinWorkflow = () => {
   const handleGenerate = () => {
     if (!linkedinUserId || !userPrompt.trim()) return;
 
+    // Start rotating messages
+    loadingIndexRef.current = 0;
+    setLoadingMessage(loadingMessages[0]);
+
+    intervalRef.current = setInterval(() => {
+      loadingIndexRef.current =
+        (loadingIndexRef.current + 1) % loadingMessages.length;
+      setLoadingMessage(loadingMessages[loadingIndexRef.current]);
+    }, 3500); // change message every 3.5 seconds
+
     generatePrompt(
       {
         user_id: linkedinUserId,
         user_prompt: userPrompt,
         image_files: selectedImages,
-        urls: [], // Extend if needed
+        urls: [],
       },
       {
         onSuccess: (data) => {
+          clearInterval(intervalRef.current!);
+          setLoadingMessage(null);
+
           const post = data.generated_posts?.[0];
           if (post) {
             setGeneratedText(post.text || "");
@@ -79,13 +107,14 @@ const LinkedinWorkflow = () => {
                 : post.image_path
               : "";
 
-            // ✅ Log the actual image path for verification
             console.log("Image path from API:", image);
-
-            setImageUrls([image]); // set properly here
+            setImageUrls([image]);
           }
         },
         onError: () => {
+          clearInterval(intervalRef.current!);
+          setLoadingMessage(null);
+
           toast({
             title: "AI Generation Failed",
             description: "Try again later.",
@@ -160,6 +189,12 @@ const LinkedinWorkflow = () => {
     typeSpeed: 10,
     deleteSpeed: 10,
   });
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   const MotionText = motion(Text);
   const iconBg = useColorModeValue("gray.100", "gray.700");
@@ -243,17 +278,43 @@ const LinkedinWorkflow = () => {
           <Text fontSize="sm" color="mutedText">
             What would you like to post about?
           </Text>
-          <Input
-            placeholder="e.g. Share my full-stack development journey"
-            value={userPrompt}
-            onChange={(e) => setUserPrompt(e.target.value)}
+          <Textarea
+            placeholder="Tell me about your marketing goal..."
             variant="unstyled"
-            borderBottom="2px"
-            borderColor="accent"
-            borderRadius={"0"}
             fontSize="lg"
+            fontWeight="medium"
+            resize="none"
+            overflow="hidden"
+            padding="0"
+            lineHeight="1.5"
+            height="auto"
+            minH="1.5rem" // Single line initial height
+            maxH="6rem" // Maximum height before scrolling
+            border="none"
+            borderBottom="2px solid"
+            borderColor="accent"
+            borderRadius="0"
+            _placeholder={{
+              color: "gray.600",
+              lineHeight: "1.5",
+            }}
+            _focus={{
+              borderColor: "primary",
+              boxShadow: "none",
+            }}
+            value={userPrompt}
+            onChange={(e) => {
+              setUserPrompt(e.target.value);
+              // Auto-expand logic:
+              e.currentTarget.style.height = "auto";
+              e.currentTarget.style.height = `${Math.min(
+                e.currentTarget.scrollHeight,
+                6 * 16 // 6rem in pixels (adjust based on your font size)
+              )}px`;
+            }}
             color="text"
-            _placeholder={{ color: "gray.500" }}
+            pr="2.5rem"
+            rows={1} // Start with 1 visible row
           />
           <Flex justify="flex-end" gap={3}>
             <Flex gap={2} align="center">
@@ -293,6 +354,11 @@ const LinkedinWorkflow = () => {
               Generate
             </Button>
           </Flex>
+          {isGenerating && loadingMessage && (
+            <Text fontSize="sm" color="gray.400" mt={1}>
+              {loadingMessage}
+            </Text>
+          )}
         </Flex>
 
         {/* Generated Text Area */}
