@@ -3,9 +3,12 @@ import { Outlet } from "react-router-dom";
 import DashboardSidebar from "@/components/over-os-ai/DashboardSidebar";
 import DashboardTopbar from "@/components/over-os-ai/DashboardTopbar";
 import { useForceColorMode } from "@/hooks/useForceColorMode";
+import { useState } from "react";
 
 const DashboardLayout = () => {
   useForceColorMode("dark");
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <Flex h="100vh" bg="bg">
@@ -13,7 +16,11 @@ const DashboardLayout = () => {
         <DashboardSidebar />
         <Flex flex="1" direction="column" overflow="hidden">
           <Box flexShrink={0}>
-            <DashboardTopbar />
+            <DashboardTopbar
+              isDrawerOpen={drawerOpen}
+              onDrawerOpen={() => setDrawerOpen(true)}
+              onDrawerClose={() => setDrawerOpen(false)}
+            />
           </Box>
           <Box
             flex="1"

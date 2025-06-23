@@ -84,7 +84,7 @@ const DashboardSidebar = () => {
       bg="surfaceSidebar"
       color="white"
       p={4}
-      display="flex"
+      display={{ md: "flex", base: "none" }}
       flexDirection="column"
       borderRadius={"8px"}
       justifyContent="space-between"

@@ -5,7 +5,7 @@ import Layout from "./layout";
 import ContactUs from "./pages/contact-us";
 import Home from "./pages/home";
 import DashboardHome from "./pages/over-os-ai";
-import OverOsLayout from "./pages/over-os-ai/layout";
+import DashboardLayout from "./pages/over-os-ai/layout";
 import WaitingList from "./pages/waiting-list";
 import PrivacyPolicy from "./pages/privacy-policy";
 import EULA from "./pages/eula/EULA";
@@ -46,7 +46,7 @@ const App = () => {
 
         {/* Dashboard pages with OverOs layout */}
         <Route element={<PrivateRoute />}>
-          <Route element={<OverOsLayout />}>
+          <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<DashboardHome />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/workflow/demo/:id" element={<DemoChat />} />
@@ -61,7 +61,7 @@ const App = () => {
             <Route path="/test" element={<Test />} />
           </Route>
         </Route>
-        <Route element={<OverOsLayout />}>
+        <Route element={<DashboardLayout />}>
           <Route path="/explore" element={<WorkflowLibrary />} />
         </Route>
 
