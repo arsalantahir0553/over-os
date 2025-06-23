@@ -203,6 +203,7 @@ const LinkedinWorkflow = () => {
   return (
     <Box
       maxW="1260px"
+      h={"100vh"}
       mx="auto"
       py={16}
       px={[4, 6]}

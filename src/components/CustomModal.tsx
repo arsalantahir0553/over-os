@@ -37,7 +37,7 @@ export const CustomModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
-      <ModalContent maxW={width}>
+      <ModalContent maxW={width} mx={4}>
         <ModalHeader color={"text"}>{headerText}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>{children}</ModalBody>

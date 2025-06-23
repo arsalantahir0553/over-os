@@ -75,7 +75,7 @@ any) => {
       <Flex
         as="header"
         align="center"
-        justify="space-between"
+        justify={{ base: "space-between", md: "end" }}
         px={4}
         py={3}
         bg="surface"
@@ -89,6 +89,7 @@ any) => {
           alt="Logo"
           maxH="28px"
           onClick={() => navigate("/dashboard")}
+          display={{ md: "none", base: "block" }}
         />
 
         {/* Right Icons */}

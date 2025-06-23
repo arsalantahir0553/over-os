@@ -38,8 +38,7 @@ const WorkflowDetails = () => {
 
   const handleLogin = async () => {
     try {
-      const { data } = await refetch(); // manually refetch the LinkedIn URL
-
+      const { data } = await refetch();
       const originalUrl = data?.linkedin_login_url || data?.url;
       if (!originalUrl) {
         console.error("LinkedIn login URL missing in API response");
@@ -90,10 +89,16 @@ const WorkflowDetails = () => {
   }
 
   return (
-    <Box maxW="1062px" mx="auto" p={6} borderRadius="xl" bg="surface">
+    <Box
+      maxW="1062px"
+      mx="auto"
+      p={{ base: 4, md: 6 }}
+      borderRadius="xl"
+      bg="surface"
+    >
       <Box pt={6}>
         <Text
-          fontSize="36px"
+          fontSize={{ base: "28px", md: "36px" }}
           fontWeight="400"
           fontFamily="Joan"
           textAlign="center"
@@ -123,10 +128,10 @@ const WorkflowDetails = () => {
             _hover={{ bg: "primary", opacity: 0.9 }}
             _active={{ bg: "primary", opacity: 0.8 }}
             borderRadius="8px"
-            fontSize="22px"
+            fontSize={{ base: "18px", md: "22px" }}
             size="md"
             fontWeight={400}
-            px={16}
+            px={{ base: 8, md: 16 }}
             fontFamily="Inter"
             onClick={() => handleTryNow(workflow.id)}
           >
@@ -153,23 +158,25 @@ const WorkflowDetails = () => {
           ))}
         </Flex>
 
-        <Box position="relative" mt={32}>
+        <Box position="relative" mt={{ base: 12, md: 32 }}>
           <Box
-            bg={"surfaceCardBg"}
-            w="980px"
+            bg="surfaceCardBg"
+            w={{ base: "100%", md: "980px" }}
             mx="auto"
             borderRadius="15px"
-            h="295px"
+            h={{ base: "100px", md: "295px" }}
+            minH={{ md: "180px", base: "100px" }}
           >
             <Image
               src={workflow.bannerImage || graphImage}
               alt="Workflow Diagram"
               borderRadius="lg"
-              top={-12}
-              mb={6}
-              left="90px"
-              w="830px"
               position="absolute"
+              top={{ base: -6, md: -12 }}
+              left={{ base: "50%", md: "90px" }}
+              transform={{ base: "translateX(-50%)", md: "none" }}
+              w={{ base: "90%", md: "830px" }}
+              mb={6}
             />
           </Box>
         </Box>
@@ -182,7 +189,12 @@ const WorkflowDetails = () => {
         <Divider mb={6} borderColor="border" />
 
         <VStack spacing={4} pb={10}>
-          <Text fontWeight="400" fontFamily="Joan" fontSize="30px" color="text">
+          <Text
+            fontWeight="400"
+            fontFamily="Joan"
+            fontSize={{ base: "24px", md: "30px" }}
+            color="text"
+          >
             What users say
           </Text>
           <Image
@@ -228,12 +240,14 @@ const WorkflowDetails = () => {
           </Text>
         </VStack>
       </Box>
+
       <LinkedinLoginModal
         isOpen={isOpen}
         onClose={onClose}
         onLogin={handleLogin}
         isPending={isFetching}
       />
+
       <LoginRequiredModal
         isOpen={isQuickbooksOpen}
         onClose={onQuickbooksClose}
@@ -262,7 +276,7 @@ const InfoCard = ({
 }) => (
   <Box
     flex="1"
-    minW="280px"
+    minW={{ base: "100%", md: "280px" }}
     borderRadius="2xl"
     p={6}
     bg="surface2"
@@ -301,11 +315,11 @@ const EnhancedInfoSection = ({
 }) => {
   return (
     <Flex
+      direction={{ base: "column", md: "row" }}
       justify="space-between"
       mx={{ base: 4, md: 10 }}
       gap={8}
       mt={20}
-      wrap="wrap"
       mb={16}
     >
       <InfoCard

@@ -11,7 +11,7 @@ const DashboardLayout = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <Flex h="100vh" bg="bg">
+    <Flex h={{ md: "100vh", base: "auto" }} bg="bg">
       <Box flex="1" overflow="hidden" display="flex">
         <DashboardSidebar />
         <Flex flex="1" direction="column" overflow="hidden">
