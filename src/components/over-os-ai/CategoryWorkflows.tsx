@@ -131,7 +131,7 @@ const CategoryWorkflows = () => {
       >
         <Flex align="center" gap={3}>
           <Icon as={IconComponent} boxSize={6} color="accent" />
-          <Heading size="lg" color="text">
+          <Heading size={{ md: "lg", base: "sm" }} color="text">
             {category}
           </Heading>
         </Flex>

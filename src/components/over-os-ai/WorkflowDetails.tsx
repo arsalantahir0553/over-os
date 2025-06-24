@@ -18,8 +18,7 @@ import { FaStar } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import graphImage from "../../assets/images/graph.png";
 import TestimonialImage from "../../assets/images/testimonial.png";
-import { LinkedinLoginModal } from "@/pages/over-os-ai/linkedin/LinkedinLoginModal";
-import { useGetLinkedinAuthUrl } from "@/utils/apis/linkedin.api";
+// import { useGetLinkedinAuthUrl } from "@/utils/apis/linkedin.api";
 import { LoginRequiredModal } from "@/pages/over-os-ai/chat/LoginRequiredModal";
 import { useQBLogin } from "@/utils/apis/overos.api";
 
@@ -27,28 +26,28 @@ const WorkflowDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { data: workflow, isLoading, isError } = useGetWorkflowById(id!);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const { isOpen, onOpen, onClose } = useDisclosure();
   const { mutate: triggerLogin, isPending } = useQBLogin();
   const {
     isOpen: isQuickbooksOpen,
     onOpen: onQuickbooksOpen,
     onClose: onQuickbooksClose,
   } = useDisclosure();
-  const { refetch, isFetching } = useGetLinkedinAuthUrl();
+  // const { refetch, isFetching } = useGetLinkedinAuthUrl();
 
-  const handleLogin = async () => {
-    try {
-      const { data } = await refetch();
-      const originalUrl = data?.linkedin_login_url || data?.url;
-      if (!originalUrl) {
-        console.error("LinkedIn login URL missing in API response");
-        return;
-      }
-      window.location.href = originalUrl;
-    } catch (err) {
-      console.error("Failed to fetch LinkedIn auth URL:", err);
-    }
-  };
+  // const handleLogin = async () => {
+  //   try {
+  //     const { data } = await refetch();
+  //     const originalUrl = data?.linkedin_login_url || data?.url;
+  //     if (!originalUrl) {
+  //       console.error("LinkedIn login URL missing in API response");
+  //       return;
+  //     }
+  //     window.location.href = originalUrl;
+  //   } catch (err) {
+  //     console.error("Failed to fetch LinkedIn auth URL:", err);
+  //   }
+  // };
 
   const handleQBLogin = async () => {
     await triggerLogin(undefined, {
@@ -64,7 +63,8 @@ const WorkflowDetails = () => {
 
   const handleTryNow = (workflowId: string) => {
     if (workflowId === "30579017-12c7-4058-859b-54825547b345") {
-      onOpen();
+      navigate(`/workflow/linkedin`);
+      // onOpen();
     } else if (workflowId === "9bfc211a-8b9c-47f1-b955-7312747ddf57") {
       onQuickbooksOpen();
     } else {
@@ -92,7 +92,7 @@ const WorkflowDetails = () => {
     <Box
       maxW="1062px"
       mx="auto"
-      p={{ base: 4, md: 6 }}
+      p={{ base: 0, md: 6 }}
       borderRadius="xl"
       bg="surface"
     >
@@ -115,7 +115,7 @@ const WorkflowDetails = () => {
           mb={6}
           fontWeight={300}
           fontSize="15px"
-          maxW="820px"
+          maxW={"820px"}
           mx="auto"
         >
           {workflow.longDescription}
@@ -131,7 +131,7 @@ const WorkflowDetails = () => {
             fontSize={{ base: "18px", md: "22px" }}
             size="md"
             fontWeight={400}
-            px={{ base: 8, md: 16 }}
+            px={{ base: 16, md: 16 }}
             fontFamily="Inter"
             onClick={() => handleTryNow(workflow.id)}
           >
@@ -143,9 +143,9 @@ const WorkflowDetails = () => {
           {workflow.tags?.map((tag) => (
             <Tag
               key={tag}
-              size="lg"
-              px={6}
-              py={2}
+              size={{ md: "lg", base: "sm" }}
+              px={{ md: 6, base: 2 }}
+              py={{ md: 2, base: 1.5 }}
               variant="outline"
               borderColor="border"
               color="text"
@@ -241,13 +241,6 @@ const WorkflowDetails = () => {
         </VStack>
       </Box>
 
-      <LinkedinLoginModal
-        isOpen={isOpen}
-        onClose={onClose}
-        onLogin={handleLogin}
-        isPending={isFetching}
-      />
-
       <LoginRequiredModal
         isOpen={isQuickbooksOpen}
         onClose={onQuickbooksClose}
@@ -317,7 +310,7 @@ const EnhancedInfoSection = ({
     <Flex
       direction={{ base: "column", md: "row" }}
       justify="space-between"
-      mx={{ base: 4, md: 10 }}
+      mx={{ base: 0, md: 10 }}
       gap={8}
       mt={20}
       mb={16}

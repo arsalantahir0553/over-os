@@ -116,7 +116,7 @@ const DashboardHome = () => {
       maxW="1260px"
       mx="auto"
       py={16}
-      px={[4, 6]}
+      px={[0, 6]}
       backdropFilter="blur(16px)"
       borderRadius="xl"
     >
@@ -124,7 +124,7 @@ const DashboardHome = () => {
         {/* Heading */}
         <Box textAlign="center">
           <MotionText
-            fontSize={["4xl", "5xl"]}
+            fontSize={["2xl", "5xl"]}
             fontWeight="extrabold"
             fontFamily="Joan"
             letterSpacing="wide"
@@ -151,7 +151,7 @@ const DashboardHome = () => {
             <Textarea
               placeholder="Tell me about your marketing goal..."
               variant="unstyled"
-              fontSize="lg"
+              fontSize={{ md: "lg", base: "sm" }}
               fontWeight="medium"
               resize="none"
               overflow="hidden"
@@ -191,7 +191,7 @@ const DashboardHome = () => {
             <Box
               position="absolute"
               right="0"
-              top="30%"
+              top={{ md: "30%", base: "16%" }}
               transform="translateY(-50%)"
             >
               <Tooltip label="Upload images" rounded="md">
@@ -332,11 +332,12 @@ const DashboardHome = () => {
         </Flex>
 
         <Flex
-          gap={4}
-          wrap="wrap"
+          gap={2}
+          // wrap="wrap"
           w={"full"}
-          justifyContent="center"
+          justifyContent="left"
           display={{ md: "none", base: "flex" }}
+          overflowX={"auto"}
         >
           {topCategories.map((cat, index) => {
             const Icon = categoryIcons[cat] ?? FiMonitor;
@@ -367,7 +368,12 @@ const DashboardHome = () => {
                       style={{ transition: "color 0.2s" }}
                     />
                   )}
-                  <Text fontSize="12px" color="text" fontWeight="medium">
+                  <Text
+                    fontSize="12px"
+                    color="text"
+                    fontWeight="medium"
+                    whiteSpace={"nowrap"}
+                  >
                     {cat}
                   </Text>
                 </Flex>
