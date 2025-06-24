@@ -278,19 +278,34 @@ const InfoCard = ({
     transition="all 0.3s"
     _hover={{ boxShadow: "xl", transform: "translateY(-4px)" }}
   >
-    <Text fontSize="30px" fontWeight={40} fontFamily="Joan" mb={2} color="text">
+    <Text
+      fontSize={{ md: "30px", base: "20px" }}
+      fontWeight={40}
+      fontFamily="Joan"
+      mb={2}
+      color="text"
+    >
       {title}
     </Text>
     {subtitle && (
-      <Text fontSize="sm" color="gray.400" mb={4}>
+      <Text fontSize={{ md: "sm", base: "xs" }} color="gray.400" mb={4}>
         {subtitle}
       </Text>
     )}
     <VStack align="start" spacing={3}>
       {items.map((item, idx) => (
         <Flex key={idx}>
-          <Icon as={icon} mt="5px" color={`${color}.400`} mr={2} />
-          <Text fontSize="15" fontWeight={350} color="text">
+          <Icon
+            as={icon}
+            mt={{ md: "5px", base: "2px" }}
+            color={`${color}.400`}
+            mr={2}
+          />
+          <Text
+            fontSize={{ md: "15", base: "12px" }}
+            fontWeight={350}
+            color="text"
+          >
             {item}
           </Text>
         </Flex>

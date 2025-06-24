@@ -334,7 +334,7 @@ const LinkedinWorkflow = () => {
           <Textarea
             placeholder="Tell me about your marketing goal..."
             variant="unstyled"
-            fontSize="lg"
+            fontSize={{ md: "lg", base: "sm" }}
             fontWeight="medium"
             resize="none"
             overflow="hidden"
@@ -403,6 +403,7 @@ const LinkedinWorkflow = () => {
               bg="surfaceButton"
               color="white"
               _hover={{ bg: "brand.400" }}
+              size={{ md: "md", base: "sm" }}
             >
               Generate
             </Button>
@@ -421,10 +422,16 @@ const LinkedinWorkflow = () => {
             onChange={(e) => setGeneratedText(e.target.value)}
             placeholder="AI-generated post will appear here"
             fontSize="md"
-            minHeight="150px"
-            borderColor="accent"
+            minHeight="180px"
+            p={0}
             color="text"
+            resize="none"
+            border="none"
             _placeholder={{ color: "gray.500" }}
+            _focus={{
+              border: "none",
+              boxShadow: "none",
+            }}
           />
         )}
 
