@@ -258,7 +258,7 @@ const LinkedinWorkflow = () => {
       h="100vh"
       mx="auto"
       py={16}
-      px={[4, 6]}
+      px={[0, 6]}
       backdropFilter="blur(16px)"
       borderRadius="xl"
     >
@@ -266,7 +266,7 @@ const LinkedinWorkflow = () => {
         {/* Heading */}
         <Box textAlign="center">
           <MotionText
-            fontSize={["3xl", "5xl"]}
+            fontSize={["2xl", "5xl"]}
             fontWeight="extrabold"
             fontFamily="Joan"
             letterSpacing="wide"

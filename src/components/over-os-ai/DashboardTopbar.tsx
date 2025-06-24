@@ -124,6 +124,7 @@ any) => {
             fontSize="16px"
             fontWeight="500"
             fontFamily="Inter"
+            display={{ md: "block", base: "none" }}
             size="md"
             px={6}
             bg="surfaceButton"
