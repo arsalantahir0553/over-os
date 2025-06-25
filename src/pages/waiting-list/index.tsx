@@ -1,7 +1,16 @@
-import { Box, Button, Container, Flex, Input, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  Input,
+  Text,
+  Textarea,
+} from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useJoinWaitingList } from "@/utils/apis/waiting-list.api";
+import { useNavigate } from "react-router-dom";
 
 const WaitingList = () => {
   const [form, setForm] = useState({
@@ -15,6 +24,7 @@ const WaitingList = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+  const navigate = useNavigate();
 
   const [errors, setErrors] = useState({
     fullName: false,
@@ -22,10 +32,11 @@ const WaitingList = () => {
     referralSource: false,
     interestDescription: false,
   });
-
   const { mutate, isPending } = useJoinWaitingList();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: false }));
@@ -52,6 +63,7 @@ const WaitingList = () => {
           referralSource: "",
           interestDescription: "",
         });
+        navigate("/");
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (error: any) => {
@@ -91,19 +103,34 @@ const WaitingList = () => {
             {
               name: "interestDescription",
               label: "What tasks would you like to automate?",
-              placeholder:
-                "Automate emails, fix and deploy code or generate content",
+              placeholder: `Examples:\n• Schedule my LinkedIn posts\n• Run outreach to VC's\n• Launch a campaign on Reddit`,
             },
           ].map(({ name, label, placeholder, type = "text" }) => (
             <Flex direction="column" gap={1} key={name}>
               <Text fontSize="14px">{label}</Text>
-              <Input
-                name={name}
-                type={type}
-                placeholder={placeholder}
-                value={form[name as keyof typeof form]}
-                onChange={handleInputChange}
-              />
+              {name === "interestDescription" ? (
+                <Textarea
+                  name={name}
+                  placeholder={placeholder}
+                  value={form[name as keyof typeof form]}
+                  onChange={(e) =>
+                    handleInputChange(
+                      e as React.ChangeEvent<HTMLTextAreaElement>
+                    )
+                  }
+                  resize="vertical"
+                  minHeight="100px"
+                />
+              ) : (
+                <Input
+                  name={name}
+                  type={type}
+                  placeholder={placeholder}
+                  value={form[name as keyof typeof form]}
+                  onChange={handleInputChange}
+                />
+              )}
+
               {errors[name as keyof typeof errors] && (
                 <Text color="red.500" fontSize="sm">
                   {`${label} is required`}

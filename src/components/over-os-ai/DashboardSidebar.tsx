@@ -103,7 +103,7 @@ const DashboardSidebar = () => {
           maxH="50px"
           cursor="pointer"
           mx={responsiveIsExpanded ? 0 : "auto"}
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/")}
         />
         <IconButton
           size="sm"

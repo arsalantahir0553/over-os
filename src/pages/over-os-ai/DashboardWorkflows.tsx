@@ -97,7 +97,8 @@ const WorkflowCard = ({ workflow }: { workflow: any }) => {
   );
 };
 
-const DashboardWorkflows = () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const DashboardWorkflows = ({ fromDashboard }: any) => {
   const {
     data: trendingData,
     isLoading: trendingLoading,
@@ -133,7 +134,7 @@ const DashboardWorkflows = () => {
   const { workflowsByCategory } = dashboardData || {};
 
   return (
-    <Box pt={"70px"}>
+    <Box pt={fromDashboard ? "10px" : "70px"}>
       {/* Trending Workflows */}
       <Text
         fontSize="2xl"
