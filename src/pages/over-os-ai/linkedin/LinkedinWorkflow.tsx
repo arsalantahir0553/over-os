@@ -1,4 +1,5 @@
 import {
+  useDetectIntent,
   useGenerateLinkedinPrompt,
   useGetLinkedinAuthUrl,
   usePublishGeneratedPost,
@@ -24,6 +25,7 @@ import { useEffect, useRef, useState } from "react";
 // import { useNavigate } from "react-router-dom";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
+import { useChat } from "@/utils/apis/overos.api";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -54,8 +56,19 @@ const LinkedinWorkflow = () => {
   const loadingIndexRef = useRef<number>(0);
   const intervalRef = useRef<number | null>(null);
   const toast = useToast();
+  const { mutate: detectIntent, isPending: isDetectingIntent } =
+    useDetectIntent();
+  const { mutate: chatRequest, isPending: isChatting } = useChat();
   // const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const generatedTextRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (generatedTextRef.current) {
+      generatedTextRef.current.style.height = "auto"; // Reset height
+      generatedTextRef.current.style.height = `${generatedTextRef.current.scrollHeight}px`; // Set to full content height
+    }
+  }, [generatedText]);
 
   const { mutate: generatePrompt, isPending: isGenerating } =
     useGenerateLinkedinPrompt();
@@ -118,6 +131,7 @@ const LinkedinWorkflow = () => {
       return;
     }
 
+    // Start loading messages
     loadingIndexRef.current = 0;
     setLoadingMessage(loadingMessages[0]);
     intervalRef.current = setInterval(() => {
@@ -126,51 +140,122 @@ const LinkedinWorkflow = () => {
       setLoadingMessage(loadingMessages[loadingIndexRef.current]);
     }, 3500);
 
-    generatePrompt(
-      {
-        user_id: linkedinUserId,
-        user_prompt: userPrompt,
-        image_files: selectedImages,
-        urls: [],
-      },
-      {
-        onSuccess: (data) => {
-          clearInterval(intervalRef.current!);
-          setLoadingMessage(null);
-          const post = data.generated_posts?.[0];
-          if (post) {
-            const text = post.text || "";
-            const image = post.image_path
-              ? Array.isArray(post.image_path)
-                ? post.image_path[0]
-                : post.image_path
-              : "";
+    // Step 1: Detect intent
+    detectIntent(userPrompt, {
+      onSuccess: (intent) => {
+        if (intent === "chat") {
+          chatRequest(
+            { prompt: userPrompt },
+            {
+              onSuccess: (data) => {
+                clearInterval(intervalRef.current!);
+                setLoadingMessage(null);
+                setGeneratedText(data?.response || ""); // Assuming response is in `data.response`
+                localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+                localStorage.setItem(
+                  LOCAL_STORAGE_KEYS.response,
+                  data?.response || ""
+                );
+                localStorage.setItem(
+                  LOCAL_STORAGE_KEYS.imageUrls,
+                  JSON.stringify([])
+                );
+                setImageUrls([]);
+              },
+              onError: () => {
+                clearInterval(intervalRef.current!);
+                setLoadingMessage(null);
+                toast({
+                  title: "Chat Error",
+                  description: "Failed to get a chat response.",
+                  status: "error",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              },
+            }
+          );
+        } else if (intent === "linkedin") {
+          generatePrompt(
+            {
+              user_id: linkedinUserId,
+              user_prompt: userPrompt,
+              image_files: selectedImages,
+              urls: [],
+            },
+            {
+              onSuccess: (data) => {
+                clearInterval(intervalRef.current!);
+                setLoadingMessage(null);
+                const post = data.generated_posts?.[0];
+                if (post) {
+                  const text = post.text || "";
+                  const image = post.image_path
+                    ? Array.isArray(post.image_path)
+                      ? post.image_path[0]
+                      : post.image_path
+                    : "";
 
-            setGeneratedText(text);
-            setImageUrls(image ? [image] : []);
+                  setGeneratedText(text);
+                  setImageUrls(image ? [image] : []);
 
-            // Persist in localStorage
-            localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-            localStorage.setItem(LOCAL_STORAGE_KEYS.response, text);
-            localStorage.setItem(
-              LOCAL_STORAGE_KEYS.imageUrls,
-              JSON.stringify(image ? [image] : [])
-            );
-          }
-        },
-        onError: () => {
+                  // Save to localStorage
+                  localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+                  localStorage.setItem(LOCAL_STORAGE_KEYS.response, text);
+                  localStorage.setItem(
+                    LOCAL_STORAGE_KEYS.imageUrls,
+                    JSON.stringify(image ? [image] : [])
+                  );
+                }
+              },
+              onError: () => {
+                clearInterval(intervalRef.current!);
+                setLoadingMessage(null);
+                toast({
+                  title: "AI Generation Failed",
+                  description: "Try again later.",
+                  status: "error",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              },
+            }
+          );
+        } else if (intent === "linkedin_no_topic") {
           clearInterval(intervalRef.current!);
           setLoadingMessage(null);
           toast({
-            title: "AI Generation Failed",
-            description: "Try again later.",
-            status: "error",
+            title: "Missing Topic",
+            description:
+              "Please add a clear topic to your prompt for LinkedIn.",
+            status: "warning",
+            duration: 4000,
+            isClosable: true,
+          });
+        } else {
+          clearInterval(intervalRef.current!);
+          setLoadingMessage(null);
+          toast({
+            title: "No LinkedIn Topic Detected",
+            description: "Try rephrasing your prompt.",
+            status: "info",
             duration: 3000,
             isClosable: true,
           });
-        },
-      }
-    );
+        }
+      },
+      onError: () => {
+        clearInterval(intervalRef.current!);
+        setLoadingMessage(null);
+        toast({
+          title: "Intent Detection Failed",
+          description: "Could not determine intent. Please try again.",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      },
+    });
   };
 
   const handleSubmit = () => {
@@ -255,7 +340,7 @@ const LinkedinWorkflow = () => {
   return (
     <Box
       maxW="1260px"
-      h="100vh"
+      // h="100vh"
       mx="auto"
       py={16}
       px={[0, 6]}
@@ -399,7 +484,7 @@ const LinkedinWorkflow = () => {
             </Flex>
             <Button
               onClick={handleGenerate}
-              isLoading={isGenerating}
+              isLoading={isGenerating || isDetectingIntent || isChatting}
               bg="surfaceButton"
               color="white"
               _hover={{ bg: "brand.400" }}
@@ -418,6 +503,7 @@ const LinkedinWorkflow = () => {
         {/* Generated Text Area */}
         {generatedText && (
           <Textarea
+            ref={generatedTextRef}
             value={generatedText}
             onChange={(e) => setGeneratedText(e.target.value)}
             placeholder="AI-generated post will appear here"
@@ -427,6 +513,7 @@ const LinkedinWorkflow = () => {
             color="text"
             resize="none"
             border="none"
+            overflow="hidden"
             _placeholder={{ color: "gray.500" }}
             _focus={{
               border: "none",

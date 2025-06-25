@@ -133,3 +133,27 @@ export const usePublishGeneratedPost = () => {
     mutationFn: (payload: PublishPostPayload) => publishLinkedinPost(payload),
   });
 };
+
+export const detectIntentFromPrompt = async (
+  prompt: string
+): Promise<"chat" | "linkedin" | "linkedin_no_topic"> => {
+  const params = new URLSearchParams();
+  params.append("prompt", prompt);
+
+  const response = await axios.post(
+    `${API_WORKFLOW_URL}/linkedin/api/intent`,
+    params.toString(), // Send as form-urlencoded string
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+  return response.data.intent;
+};
+
+export const useDetectIntent = () => {
+  return useMutation({
+    mutationFn: (prompt: string) => detectIntentFromPrompt(prompt),
+  });
+};
