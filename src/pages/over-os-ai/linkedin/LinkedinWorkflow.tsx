@@ -126,11 +126,6 @@ const LinkedinWorkflow = () => {
   const handleGenerate = () => {
     if (!userPrompt.trim()) return;
 
-    if (!linkedinUserId) {
-      onOpen();
-      return;
-    }
-
     // Start loading messages
     loadingIndexRef.current = 0;
     setLoadingMessage(loadingMessages[0]);
@@ -178,7 +173,7 @@ const LinkedinWorkflow = () => {
         } else if (intent === "linkedin") {
           generatePrompt(
             {
-              user_id: linkedinUserId,
+              user_id: linkedinUserId || "",
               user_prompt: userPrompt,
               image_files: selectedImages,
               urls: [],
