@@ -171,9 +171,13 @@ const LinkedinWorkflow = () => {
             }
           );
         } else if (intent === "linkedin") {
+          if (!linkedinUserId) {
+            onOpen();
+            return;
+          }
           generatePrompt(
             {
-              user_id: linkedinUserId || "",
+              user_id: linkedinUserId,
               user_prompt: userPrompt,
               image_files: selectedImages,
               urls: [],
