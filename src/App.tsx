@@ -26,6 +26,7 @@ import CategoryWorkflows from "./components/over-os-ai/CategoryWorkflows";
 import Test from "./pages/over-os-ai/Test";
 import LinkedInCallback from "./pages/over-os-ai/linkedin/LinkedInCallback";
 import LinkedinWorkflow from "./pages/over-os-ai/linkedin/LinkedinWorkflow";
+import LinkedinLayout from "./pages/layouts/LinkedinLayout";
 
 const App = () => {
   useEffect(() => {
@@ -50,7 +51,6 @@ const App = () => {
             <Route path="/dashboard" element={<DashboardHome />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/workflow/demo/:id" element={<DemoChat />} />
-            <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
             <Route path="/workflow/details/:id" element={<WorkflowDetails />} />
             <Route
               path="/workflow/category/:category"
@@ -60,6 +60,9 @@ const App = () => {
             <Route path="/linkedin/callback" element={<LinkedInCallback />} />
             <Route path="/test" element={<Test />} />
           </Route>
+        </Route>
+        <Route element={<LinkedinLayout />}>
+          <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
         </Route>
         <Route element={<DashboardLayout />}>
           <Route path="/explore" element={<WorkflowLibrary />} />

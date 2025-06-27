@@ -11,6 +11,7 @@ import {
   IconButton,
   Image,
   Input,
+  Spinner,
   Text,
   Textarea,
   Tooltip,
@@ -26,6 +27,9 @@ import { useEffect, useRef, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
 import { useChat } from "@/utils/apis/overos.api";
+import { Link } from "react-router-dom";
+import { useLoggedInUser } from "@/utils/apis/auth.api";
+import { useCreateHistory } from "@/utils/apis/history.api";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -62,6 +66,10 @@ const LinkedinWorkflow = () => {
   // const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
+  const [detectedIntent, setDetectedIntent] = useState<string | null>(null);
+  const { data: user } = useLoggedInUser();
+
+  // console.log("user_id", user.id);
 
   useEffect(() => {
     if (generatedTextRef.current) {
@@ -75,7 +83,7 @@ const LinkedinWorkflow = () => {
   const { mutate: publishPost, isPending: isPublishing } =
     usePublishGeneratedPost();
   const { refetch, isFetching } = useGetLinkedinAuthUrl();
-
+  const { mutate: createHistory } = useCreateHistory();
   // Load from localStorage on mount
   useEffect(() => {
     const id = localStorage.getItem("linkedin_user_id");
@@ -138,19 +146,20 @@ const LinkedinWorkflow = () => {
     // Step 1: Detect intent
     detectIntent(userPrompt, {
       onSuccess: (intent) => {
-        if (intent === "chat") {
+        setDetectedIntent(intent);
+        if (intent === "chat" || intent === "linkedin_no_topic") {
           chatRequest(
             { prompt: userPrompt },
             {
               onSuccess: (data) => {
                 clearInterval(intervalRef.current!);
                 setLoadingMessage(null);
-                setGeneratedText(data?.response || ""); // Assuming response is in `data.response`
+                const fullText = data?.response || "";
+
+                setGeneratedText(fullText);
+
                 localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-                localStorage.setItem(
-                  LOCAL_STORAGE_KEYS.response,
-                  data?.response || ""
-                );
+                localStorage.setItem(LOCAL_STORAGE_KEYS.response, fullText);
                 localStorage.setItem(
                   LOCAL_STORAGE_KEYS.imageUrls,
                   JSON.stringify([])
@@ -170,11 +179,17 @@ const LinkedinWorkflow = () => {
               },
             }
           );
-        } else if (intent === "linkedin") {
+          return;
+        }
+
+        if (intent === "linkedin") {
           if (!linkedinUserId) {
+            clearInterval(intervalRef.current!);
+            setLoadingMessage(null);
             onOpen();
             return;
           }
+
           generatePrompt(
             {
               user_id: linkedinUserId,
@@ -198,7 +213,6 @@ const LinkedinWorkflow = () => {
                   setGeneratedText(text);
                   setImageUrls(image ? [image] : []);
 
-                  // Save to localStorage
                   localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
                   localStorage.setItem(LOCAL_STORAGE_KEYS.response, text);
                   localStorage.setItem(
@@ -220,17 +234,6 @@ const LinkedinWorkflow = () => {
               },
             }
           );
-        } else if (intent === "linkedin_no_topic") {
-          clearInterval(intervalRef.current!);
-          setLoadingMessage(null);
-          toast({
-            title: "Missing Topic",
-            description:
-              "Please add a clear topic to your prompt for LinkedIn.",
-            status: "warning",
-            duration: 4000,
-            isClosable: true,
-          });
         } else {
           clearInterval(intervalRef.current!);
           setLoadingMessage(null);
@@ -293,10 +296,21 @@ const LinkedinWorkflow = () => {
             duration: 3000,
             isClosable: true,
           });
-          setUserPrompt("");
-          setGeneratedText("");
-          setSelectedImages([]);
-          setImageUrls([]);
+
+          createHistory({
+            user_id: user.id,
+            prompt: userPrompt,
+            generated_post: generatedText,
+            image_url: imageUrls[0] || "",
+            meta: JSON.stringify({
+              source: "LinkedInWorkflow",
+              timestamp: new Date().toISOString(),
+            }),
+          });
+          // setUserPrompt("");
+          // setGeneratedText("");
+          // setSelectedImages([]);
+          // setImageUrls([]);
           localStorage.removeItem(LOCAL_STORAGE_KEYS.prompt);
           localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
           localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
@@ -492,11 +506,15 @@ const LinkedinWorkflow = () => {
               Generate
             </Button>
           </Flex>
-          {isGenerating && loadingMessage && (
-            <Text fontSize="sm" color="gray.400" mt={1}>
-              {loadingMessage}
-            </Text>
-          )}
+          {(isGenerating || isDetectingIntent || isChatting) &&
+            loadingMessage && (
+              <Flex align="center" gap={2} mt={2}>
+                <Spinner size="sm" color="accent" />
+                <Text fontSize="sm" color="gray.400">
+                  {loadingMessage}
+                </Text>
+              </Flex>
+            )}
         </Flex>
 
         {/* Generated Text Area */}
@@ -520,9 +538,40 @@ const LinkedinWorkflow = () => {
             }}
           />
         )}
+        {(detectedIntent === "chat" ||
+          detectedIntent === "linkedin_no_topic") && (
+          <Box
+            mt={3}
+            px={4}
+            py={3}
+            bg="gray.700"
+            borderRadius="md"
+            fontStyle="italic"
+            fontSize="sm"
+            color="gray.200"
+            borderLeft="4px solid"
+            borderColor="accent"
+          >
+            I am an AI agent designed to generate high-quality LinkedIn posts. I
+            work best when I’m provided a context like your industry or the
+            problem you’re trying to solve. For other automations and questions,
+            please try our general chat{" "}
+            <Link to="/dashboard" color="primary">
+              <Box
+                fontSize={"16px"}
+                as="span"
+                textDecoration={"underline"}
+                color={"blue.500"}
+              >
+                here
+              </Box>
+            </Link>
+            .
+          </Box>
+        )}
 
         {/* Submit */}
-        {generatedText && (
+        {generatedText && detectedIntent === "linkedin" && (
           <Flex justify="flex-end">
             <Button
               onClick={handleSubmit}
