@@ -30,6 +30,7 @@ import { useChat } from "@/utils/apis/overos.api";
 import { Link } from "react-router-dom";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
+import { queryClient } from "@/utils/apis/query.client";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -297,16 +298,26 @@ const LinkedinWorkflow = () => {
             isClosable: true,
           });
 
-          createHistory({
-            user_id: user.id,
-            prompt: userPrompt,
-            generated_post: generatedText,
-            image_url: imageUrls[0] || "",
-            meta: JSON.stringify({
-              source: "LinkedInWorkflow",
-              timestamp: new Date().toISOString(),
-            }),
-          });
+          createHistory(
+            {
+              user_id: user.id,
+              prompt: userPrompt,
+              generated_post: generatedText,
+              image_url: imageUrls[0] || "",
+              meta: JSON.stringify({
+                source: "LinkedInWorkflow",
+                timestamp: new Date().toISOString(),
+              }),
+            },
+            {
+              onSuccess: () => {
+                queryClient.invalidateQueries({
+                  queryKey: ["user-history", user.id, 10, 0],
+                });
+              },
+            }
+          );
+
           // setUserPrompt("");
           // setGeneratedText("");
           // setSelectedImages([]);

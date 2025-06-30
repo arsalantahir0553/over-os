@@ -86,10 +86,15 @@ const LinkedinSidebar = () => {
 
   useEffect(() => {
     if (historyPage?.data) {
-      setHistoryData((prev) => [...prev, ...historyPage.data]);
+      setHistoryData((prev) =>
+        historyOffset === 0 ? historyPage.data : [...prev, ...historyPage.data]
+      );
+
       const total = historyPage.pagination?.total || 0;
       if (historyOffset + historyLimit >= total) {
         setHasMoreHistory(false);
+      } else {
+        setHasMoreHistory(true);
       }
     }
   }, [historyLimit, historyOffset, historyPage]);
