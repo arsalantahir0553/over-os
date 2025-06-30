@@ -177,6 +177,12 @@ const WorkflowDetails = () => {
               transform={{ base: "translateX(-50%)", md: "none" }}
               w={{ base: "90%", md: "830px" }}
               mb={6}
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (target.src !== graphImage) {
+                  target.src = graphImage;
+                }
+              }}
             />
           </Box>
         </Box>
