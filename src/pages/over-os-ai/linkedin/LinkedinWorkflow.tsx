@@ -11,7 +11,6 @@ import {
   IconButton,
   Image,
   Input,
-  Spinner,
   Text,
   Textarea,
   Tooltip,
@@ -24,12 +23,13 @@ import { motion } from "framer-motion";
 import { PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 // import { useNavigate } from "react-router-dom";
-import { Cursor, useTypewriter } from "react-simple-typewriter";
-import { LinkedinLoginModal } from "./LinkedinLoginModal";
-import { useChat } from "@/utils/apis/overos.api";
-import { Link } from "react-router-dom";
+import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { useLoggedInUser } from "@/utils/apis/auth.api";
 import { useCreateHistory } from "@/utils/apis/history.api";
+import { useChat } from "@/utils/apis/overos.api";
+import { Link } from "react-router-dom";
+import { Cursor, useTypewriter } from "react-simple-typewriter";
+import { LinkedinLoginModal } from "./LinkedinLoginModal";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -507,14 +507,7 @@ const LinkedinWorkflow = () => {
             </Button>
           </Flex>
           {(isGenerating || isDetectingIntent || isChatting) &&
-            loadingMessage && (
-              <Flex align="center" gap={2} mt={2}>
-                <Spinner size="sm" color="accent" />
-                <Text fontSize="sm" color="gray.400">
-                  {loadingMessage}
-                </Text>
-              </Flex>
-            )}
+            loadingMessage && <LoadingOverlay message={loadingMessage} />}
         </Flex>
 
         {/* Generated Text Area */}
@@ -539,36 +532,37 @@ const LinkedinWorkflow = () => {
           />
         )}
         {(detectedIntent === "chat" ||
-          detectedIntent === "linkedin_no_topic") && (
-          <Box
-            mt={3}
-            px={4}
-            py={3}
-            bg="gray.700"
-            borderRadius="md"
-            fontStyle="italic"
-            fontSize="sm"
-            color="gray.200"
-            borderLeft="4px solid"
-            borderColor="accent"
-          >
-            I am an AI agent designed to generate high-quality LinkedIn posts. I
-            work best when I’m provided a context like your industry or the
-            problem you’re trying to solve. For other automations and questions,
-            please try our general chat{" "}
-            <Link to="/dashboard" color="primary">
-              <Box
-                fontSize={"16px"}
-                as="span"
-                textDecoration={"underline"}
-                color={"blue.500"}
-              >
-                here
-              </Box>
-            </Link>
-            .
-          </Box>
-        )}
+          detectedIntent === "linkedin_no_topic") &&
+          !isChatting && (
+            <Box
+              mt={3}
+              px={4}
+              py={3}
+              bg="gray.700"
+              borderRadius="md"
+              fontStyle="italic"
+              fontSize="sm"
+              color="gray.200"
+              borderLeft="4px solid"
+              borderColor="accent"
+            >
+              I am an AI agent designed to generate high-quality LinkedIn posts.
+              I work best when I’m provided a context like your industry or the
+              problem you’re trying to solve. For other automations and
+              questions, please try our general chat{" "}
+              <Link to="/dashboard" color="primary">
+                <Box
+                  fontSize={"16px"}
+                  as="span"
+                  textDecoration={"underline"}
+                  color={"blue.500"}
+                >
+                  here
+                </Box>
+              </Link>
+              .
+            </Box>
+          )}
 
         {/* Submit */}
         {generatedText && detectedIntent === "linkedin" && (

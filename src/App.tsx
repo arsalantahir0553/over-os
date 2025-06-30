@@ -27,6 +27,7 @@ import Test from "./pages/over-os-ai/Test";
 import LinkedInCallback from "./pages/over-os-ai/linkedin/LinkedInCallback";
 import LinkedinWorkflow from "./pages/over-os-ai/linkedin/LinkedinWorkflow";
 import LinkedinLayout from "./pages/layouts/LinkedinLayout";
+import LinkedinHistoryDetails from "./pages/over-os-ai/linkedin/LinkedinHistoryDetails";
 
 const App = () => {
   useEffect(() => {
@@ -63,6 +64,10 @@ const App = () => {
         </Route>
         <Route element={<LinkedinLayout />}>
           <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
+          <Route
+            path="/workflow/linkedin/:historyId"
+            element={<LinkedinHistoryDetails />}
+          />
         </Route>
         <Route element={<DashboardLayout />}>
           <Route path="/explore" element={<WorkflowLibrary />} />

@@ -98,7 +98,7 @@ const LinkedinSidebar = () => {
     localStorage.removeItem("linkedin_prompt");
     localStorage.removeItem("linkedin_response");
     localStorage.removeItem("linkedin_image_urls");
-    navigate("/workflow/linkedin");
+    window.location.href = "/workflow/linkedin"; // Full page reload
   };
 
   return (
@@ -212,6 +212,7 @@ const LinkedinSidebar = () => {
                 <SidebarSubItem
                   key={h.id}
                   label={`Linkedin Post: ${h.prompt}`}
+                  historyId={h.id}
                 />
               ))}
               {hasMoreHistory && (
@@ -327,19 +328,29 @@ const SidebarSection = ({ children }: any) => (
   </Box>
 );
 
-const SidebarSubItem = ({ label }: { label: string }) => (
-  <Text
-    fontSize="sm"
-    px={2}
-    py={1}
-    rounded="md"
-    cursor="pointer"
-    _hover={{ bg: "whiteAlpha.200" }}
-    noOfLines={1}
-  >
-    {label}
-  </Text>
-);
+const SidebarSubItem = ({
+  label,
+  historyId,
+}: {
+  label: string;
+  historyId: string;
+}) => {
+  const navigate = useNavigate();
+  return (
+    <Text
+      fontSize="sm"
+      px={2}
+      py={1}
+      rounded="md"
+      cursor="pointer"
+      _hover={{ bg: "whiteAlpha.200" }}
+      noOfLines={1}
+      onClick={() => navigate(`workflow/linkedin/${historyId}`)}
+    >
+      {label}
+    </Text>
+  );
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const UserMenu = ({ User, isLoading, isExpanded }: any) => {
