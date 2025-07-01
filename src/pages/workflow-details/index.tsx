@@ -22,7 +22,7 @@ import TestimonialImage from "../../assets/images/testimonial.png";
 import { LoginRequiredModal } from "@/pages/over-os-ai/chat/LoginRequiredModal";
 import { useQBLogin } from "@/utils/apis/overos.api";
 
-const WorkflowDetails = () => {
+const HomeWorkflowDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { data: workflow, isLoading, isError } = useGetWorkflowById(id!);
@@ -156,7 +156,9 @@ const WorkflowDetails = () => {
               cursor="pointer"
               _hover={{ bg: "cardBg" }}
             >
-              {tag}
+              {tag
+                .replace(/-/g, " ") // Replace dashes with spaces
+                .replace(/\b\w/g, (c) => c.toUpperCase())}
             </Tag>
           ))}
         </Flex>
@@ -260,7 +262,7 @@ const WorkflowDetails = () => {
   );
 };
 
-export default WorkflowDetails;
+export default HomeWorkflowDetails;
 
 const InfoCard = ({
   title,

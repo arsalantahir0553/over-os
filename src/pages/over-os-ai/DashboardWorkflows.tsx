@@ -35,8 +35,14 @@ const categoryIcons: Record<string, any> = {
   "Ranking Rocket Pack": PiRankingThin,
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const WorkflowCard = ({ workflow }: { workflow: any }) => {
+const WorkflowCard = ({
+  workflow,
+  fromDashboard,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  workflow: any;
+  fromDashboard?: boolean;
+}) => {
   const navigate = useNavigate();
 
   return (
@@ -54,7 +60,9 @@ const WorkflowCard = ({ workflow }: { workflow: any }) => {
       overflow="hidden"
       h="180px"
       onClick={() => {
-        if (workflow.isActive) {
+        if (fromDashboard) {
+          navigate(`/workflow-details/${workflow.id}`);
+        } else {
           navigate(`/workflow/details/${workflow.id}`);
         }
       }}
@@ -97,8 +105,7 @@ const WorkflowCard = ({ workflow }: { workflow: any }) => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const DashboardWorkflows = ({ fromDashboard }: any) => {
+const DashboardWorkflows = ({ fromDashboard }: { fromDashboard?: boolean }) => {
   const {
     data: trendingData,
     isLoading: trendingLoading,
@@ -149,7 +156,11 @@ const DashboardWorkflows = ({ fromDashboard }: any) => {
       </Text>
       <SimpleGrid columns={[1, null, 3]} spacing={6} mb={10}>
         {trendingWorkflows?.map((workflow) => (
-          <WorkflowCard key={workflow.id} workflow={workflow} />
+          <WorkflowCard
+            key={workflow.id}
+            workflow={workflow}
+            fromDashboard={!!fromDashboard}
+          />
         ))}
       </SimpleGrid>
 
@@ -168,7 +179,11 @@ const DashboardWorkflows = ({ fromDashboard }: any) => {
               </Flex>
               <SimpleGrid columns={[1, null, 3]} spacing={6}>
                 {workflows.map((workflow) => (
-                  <WorkflowCard key={workflow.id} workflow={workflow} />
+                  <WorkflowCard
+                    key={workflow.id}
+                    workflow={workflow}
+                    fromDashboard={!!fromDashboard}
+                  />
                 ))}
               </SimpleGrid>
             </Box>

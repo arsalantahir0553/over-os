@@ -28,6 +28,7 @@ import LinkedInCallback from "./pages/over-os-ai/linkedin/LinkedInCallback";
 import LinkedinWorkflow from "./pages/over-os-ai/linkedin/LinkedinWorkflow";
 import LinkedinLayout from "./pages/layouts/LinkedinLayout";
 import LinkedinHistoryDetails from "./pages/over-os-ai/linkedin/LinkedinHistoryDetails";
+import HomeWorkflowDetails from "./pages/workflow-details";
 
 const App = () => {
   useEffect(() => {
@@ -41,6 +42,10 @@ const App = () => {
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/waiting-list" element={<WaitingList />} />
+          <Route
+            path="/workflow-details/:id"
+            element={<HomeWorkflowDetails />}
+          />
           <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/eula" element={<EULA />} />
@@ -61,13 +66,14 @@ const App = () => {
             <Route path="/linkedin/callback" element={<LinkedInCallback />} />
             <Route path="/test" element={<Test />} />
           </Route>
-        </Route>
-        <Route element={<LinkedinLayout />}>
-          <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
-          <Route
-            path="/workflow/linkedin/:historyId"
-            element={<LinkedinHistoryDetails />}
-          />
+
+          <Route element={<LinkedinLayout />}>
+            <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
+            <Route
+              path="/workflow/linkedin/:historyId"
+              element={<LinkedinHistoryDetails />}
+            />
+          </Route>
         </Route>
         <Route element={<DashboardLayout />}>
           <Route path="/explore" element={<WorkflowLibrary />} />
