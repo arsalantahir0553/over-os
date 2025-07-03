@@ -225,13 +225,14 @@ const LinkedinWorkflow = () => {
               onError: () => {
                 clearInterval(intervalRef.current!);
                 setLoadingMessage(null);
-                toast({
-                  title: "AI Generation Failed",
-                  description: "Try again later.",
-                  status: "error",
-                  duration: 3000,
-                  isClosable: true,
-                });
+                onOpen();
+                // toast({
+                //   title: "AI Generation Failed",
+                //   description: "Try again later.",
+                //   status: "error",
+                //   duration: 3000,
+                //   isClosable: true,
+                // });
               },
             }
           );
@@ -327,13 +328,15 @@ const LinkedinWorkflow = () => {
           localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
         },
         onError: () => {
-          toast({
-            title: "Error",
-            description: "Failed to publish post.",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
+          onOpen();
+
+          // toast({
+          //   title: "Error",
+          //   description: "Failed to publish post.",
+          //   status: "error",
+          //   duration: 3000,
+          //   isClosable: true,
+          // });
         },
       }
     );
