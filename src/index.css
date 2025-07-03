@@ -29,3 +29,88 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+.transparent-datepicker .react-datepicker__input-container input {
+  background-color: transparent !important;
+  border: none;
+  color: white; /* Or use 'inherit' if themed */
+  padding: 6px 8px;
+}
+
+.react-datepicker {
+  background-color: #1b2236; /* Match your theme's cardBg or surface */
+  border: 1px solid #2d3748;
+  color: white;
+}
+
+.react-datepicker__day--selected {
+  background-color: #3b82f6 !important; /* Primary */
+}
+
+.selected-day {
+  background-color: #3b82f6 !important; /* use your brand.500 or chakra token */
+  color: white !important;
+  border-radius: 50% !important;
+}
+
+/* Container */
+.chakra-datepicker-dark {
+  background-color: #161b22; /* brand.800 */
+  color: #f3f4f6; /* gray.100 */
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border-radius: 8px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Month container */
+.chakra-datepicker-dark .react-datepicker__month-container {
+  background-color: #161b22; /* brand.800 */
+}
+
+/* Header */
+.chakra-datepicker-dark .react-datepicker__header {
+  background-color: #1f2937; /* brand.700 */
+  border-bottom: 1px solid #2d3748;
+}
+
+/* Day names (Sun, Mon...) */
+.chakra-datepicker-dark .react-datepicker__day-name {
+  color: #9ca3af; /* gray.400 */
+}
+
+/* Days */
+.chakra-datepicker-dark .react-datepicker__day {
+  background-color: transparent;
+  color: #e5e7eb; /* gray.200 */
+}
+
+/* Hovered day */
+.chakra-datepicker-dark .react-datepicker__day:hover {
+  background-color: #3b82f6; /* your brand.500 */
+  color: #0f122b !important; /* brand.900 (dark navy), acts as black text */
+  border-radius: 6px;
+}
+/* Selected day */
+.chakra-datepicker-dark .react-datepicker__day--selected,
+.chakra-datepicker-dark .react-datepicker__day--keyboard-selected {
+  background-color: #00fff7; /* neon.cyan */
+  color: #0f122b; /* brand.900 */
+  border-radius: 6px;
+}
+
+/* Today */
+.chakra-datepicker-dark .react-datepicker__day--today {
+  border: 1px solid #3b82f6; /* subtle today highlight */
+}
+
+/* Navigation arrows */
+.chakra-datepicker-dark .react-datepicker__navigation-icon::before {
+  border-color: #f3f4f6; /* gray.100 */
+}
+
+/* Month label */
+.chakra-datepicker-dark .react-datepicker__current-month {
+  color: #f3f4f6;
+}
