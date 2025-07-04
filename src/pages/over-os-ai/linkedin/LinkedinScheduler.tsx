@@ -6,7 +6,7 @@ import {
   Select,
   SimpleGrid,
   Text,
-  Textarea,
+  // Textarea,
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
@@ -70,7 +70,7 @@ const LinkedinScheduler = () => {
           borderColor="border"
         >
           <option value="one-time">One Time</option>
-          <option value="query">Query Based</option>
+          {/* <option value="query">Query Based</option> */}
           <option value="recursive">Recursive</option>
         </Select>
 
@@ -103,7 +103,7 @@ const LinkedinScheduler = () => {
           </Flex>
         )}
 
-        {mode === "query" && (
+        {/* {mode === "query" && (
           <Textarea
             placeholder="Enter scheduling prompt..."
             bg="surface"
@@ -112,7 +112,7 @@ const LinkedinScheduler = () => {
             borderRadius="md"
             _focus={{ borderColor: "primary", boxShadow: "none" }}
           />
-        )}
+        )} */}
 
         {mode === "recursive" && (
           <VStack align="stretch" spacing={4}>
