@@ -114,3 +114,37 @@ body {
 .chakra-datepicker-dark .react-datepicker__current-month {
   color: #f3f4f6;
 }
+
+.transparent-datepicker input {
+  background: transparent !important;
+  border: none !important;
+  font-weight: 500;
+}
+
+.chakra-datepicker-dark {
+  background-color: #1a202c;
+  color: white;
+}
+
+.selected-day {
+  background-color: #3182ce !important;
+  color: white !important;
+  border-radius: 50%;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker__input-container {
+  width: 100%;
+}
+
+.react-datepicker__input-container input {
+  width: 100%;
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}

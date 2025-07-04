@@ -49,17 +49,17 @@ const LinkedinScheduler = () => {
 
   return (
     <Box
-      p={6}
-      borderRadius="xl"
+      width="100%"
+      px={[4, 6, 12]} // Responsive horizontal padding
+      py={[4, 6]}
+      mt={6}
       bg={cardBg}
       border="1px solid"
       borderColor={borderColor}
-      maxW="600px"
-      //   mx="auto"
-      mt={2}
+      borderRadius="xl"
     >
-      <VStack spacing={6} align="stretch">
-        <Text fontSize="xl" fontWeight="bold">
+      <VStack spacing={6} align="stretch" width="100%">
+        <Text fontSize="2xl" fontWeight="bold">
           Schedule Settings
         </Text>
 
@@ -70,27 +70,44 @@ const LinkedinScheduler = () => {
           borderColor="border"
         >
           <option value="one-time">One Time</option>
-          {/* <option value="query">Query Based</option> */}
           <option value="recursive">Recursive</option>
         </Select>
 
         {mode === "one-time" && (
-          <Flex direction="column" gap={4}>
+          <Flex direction={["column", "row"]} gap={4}>
             <Flex
               align="center"
               gap={3}
               bg="surface"
               px={1}
               pl={3}
-              rounded={"4px"}
+              rounded="md"
+              flex="1"
+              cursor={"pointer"}
             >
-              <CalendarIcon width={18} />
-              <Box className="transparent-datepicker">
+              <Box
+                className="transparent-datepicker"
+                display="flex"
+                alignItems="center"
+                width="full"
+              >
                 <DatePicker
                   selected={startDate}
                   onChange={(date) => date && setStartDate(date)}
                   dateFormat="MMMM d, yyyy"
                   calendarClassName="chakra-datepicker-dark"
+                  customInput={
+                    <Flex align="center" gap={3} width="full">
+                      <CalendarIcon width={18} />
+                      <Box flex={1}>
+                        {startDate.toLocaleDateString("en-US", {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </Box>
+                    </Flex>
+                  }
                 />
               </Box>
             </Flex>
@@ -99,20 +116,10 @@ const LinkedinScheduler = () => {
               placeholder="Select time"
               bg="surface"
               borderColor="border"
+              flex="1"
             />
           </Flex>
         )}
-
-        {/* {mode === "query" && (
-          <Textarea
-            placeholder="Enter scheduling prompt..."
-            bg="surface"
-            borderColor="border"
-            borderWidth="1px"
-            borderRadius="md"
-            _focus={{ borderColor: "primary", boxShadow: "none" }}
-          />
-        )} */}
 
         {mode === "recursive" && (
           <VStack align="stretch" spacing={4}>
@@ -127,7 +134,7 @@ const LinkedinScheduler = () => {
             </Select>
 
             {recurrence === "weekly" && (
-              <SimpleGrid columns={7} spacing={2}>
+              <SimpleGrid columns={[2, 4, 7]} spacing={2}>
                 {daysOfWeek.map((day) => (
                   <Button
                     key={day}
@@ -143,12 +150,7 @@ const LinkedinScheduler = () => {
             )}
 
             {recurrence === "monthly" && (
-              <Box
-                display={"flex"}
-                alignContent={"start"}
-                flexDirection={"column"}
-                gap={2}
-              >
+              <Box display="flex" flexDirection="column" gap={3}>
                 <Button
                   leftIcon={<CalendarIcon width={18} />}
                   onClick={() => setIsCalendarOpen(!isCalendarOpen)}
@@ -160,88 +162,71 @@ const LinkedinScheduler = () => {
                   fontWeight={400}
                   _hover={{ bg: "surface" }}
                   justifyContent="flex-start"
-                  width="100%" // Optional, only if you want full-width alignment
+                  width="100%"
                 >
                   {isCalendarOpen ? "Hide Calendar" : "Select Dates"}
                 </Button>
 
                 {isCalendarOpen && (
-                  <>
-                    <Flex
-                      align="center"
-                      gap={3}
-                      //   bg="surface"
-                      justifyContent={"start"}
-                      w={"full"}
-                      px={1}
-                      //   pl={3}
-                      rounded={"4px"}
-                      mt={3}
-                    >
-                      <Box className="transparent-datepicker">
-                        <DatePicker
-                          onChange={(date) => date && toggleDate(date)}
-                          highlightDates={selectedDates}
-                          inline
-                          calendarClassName="chakra-datepicker-dark"
-                          dayClassName={(date) =>
-                            selectedDates.some(
-                              (d) => d.toDateString() === date.toDateString()
-                            )
-                              ? "selected-day"
-                              : ""
-                          }
-                        />
-                      </Box>
-                    </Flex>
-                  </>
+                  <Box className="transparent-datepicker" mt={2}>
+                    <DatePicker
+                      onChange={(date) => date && toggleDate(date)}
+                      highlightDates={selectedDates}
+                      inline
+                      calendarClassName="chakra-datepicker-dark"
+                      dayClassName={(date) =>
+                        selectedDates.some(
+                          (d) => d.toDateString() === date.toDateString()
+                        )
+                          ? "selected-day"
+                          : ""
+                      }
+                    />
+                  </Box>
                 )}
-
-                <Flex gap={4} mt={4} wrap="wrap">
-                  {/* Start Date */}
+                <Flex gap={4} wrap="wrap" mt={4}>
                   <Box flex="1">
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Start Date
                     </Text>
                     <Box
-                      //   px={3}
-                      //   py={2}
                       rounded="md"
                       bg="surface"
                       border="1px solid"
                       borderColor="border"
                       className="transparent-datepicker"
-                      w={"full"}
+                      w="full"
+                      position="relative"
                     >
                       <DatePicker
                         selected={startDate}
                         onChange={(date) => date && setStartDate(date)}
                         dateFormat="MMMM d, yyyy"
                         calendarClassName="chakra-datepicker-dark"
+                        wrapperClassName="w-full"
                       />
                     </Box>
                   </Box>
 
-                  {/* End Date */}
                   <Box flex="1">
                     <Text fontSize="sm" mb={1} color="mutedText">
                       End Date
                     </Text>
                     <Box
-                      //   px={3}
-                      //   py={2}
-                      w={"full"}
                       rounded="md"
                       bg="surface"
                       border="1px solid"
                       borderColor="border"
                       className="transparent-datepicker"
+                      w="full"
+                      position="relative"
                     >
                       <DatePicker
                         selected={endDate}
                         onChange={(date) => date && setEndDate(date)}
                         dateFormat="MMMM d, yyyy"
                         calendarClassName="chakra-datepicker-dark"
+                        wrapperClassName="w-full"
                       />
                     </Box>
                   </Box>
@@ -271,9 +256,16 @@ const LinkedinScheduler = () => {
           </VStack>
         )}
 
-        <Button bg="primary" color="white" _hover={{ bg: "brand.400" }}>
-          Save Schedule
-        </Button>
+        <Flex justify="flex-end">
+          <Button
+            mt={4}
+            bg="primary"
+            color="white"
+            _hover={{ bg: "brand.400" }}
+          >
+            Save Schedule
+          </Button>
+        </Flex>
       </VStack>
     </Box>
   );
