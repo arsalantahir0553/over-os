@@ -188,6 +188,8 @@ const LinkedinWorkflow = () => {
           if (!linkedinUserId) {
             clearInterval(intervalRef.current!);
             setLoadingMessage(null);
+            localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+            localStorage.setItem(LOCAL_STORAGE_KEYS.response, generatedText);
             onOpen();
             return;
           }
@@ -270,6 +272,8 @@ const LinkedinWorkflow = () => {
 
   const handleSubmit = () => {
     if (!linkedinUserId) {
+      localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+      localStorage.setItem(LOCAL_STORAGE_KEYS.response, generatedText);
       onOpen();
       return;
     }
