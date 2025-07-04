@@ -111,6 +111,7 @@ const LinkedinWorkflow = () => {
     }
   }, []);
 
+  console.log("checking user id", linkedinUserId);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const filesArray = Array.from(e.target.files);
@@ -225,6 +226,11 @@ const LinkedinWorkflow = () => {
               onError: () => {
                 clearInterval(intervalRef.current!);
                 setLoadingMessage(null);
+                localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+                localStorage.setItem(
+                  LOCAL_STORAGE_KEYS.response,
+                  generatedText
+                );
                 onOpen();
                 // toast({
                 //   title: "AI Generation Failed",
@@ -328,6 +334,8 @@ const LinkedinWorkflow = () => {
           localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
         },
         onError: () => {
+          localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+          localStorage.setItem(LOCAL_STORAGE_KEYS.response, generatedText);
           onOpen();
 
           // toast({
