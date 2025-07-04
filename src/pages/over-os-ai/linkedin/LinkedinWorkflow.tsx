@@ -109,6 +109,10 @@ const LinkedinWorkflow = () => {
         setImageUrls([]);
       }
     }
+
+    localStorage.removeItem(LOCAL_STORAGE_KEYS.prompt);
+    localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
+    localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
   }, []);
 
   console.log("checking user id", linkedinUserId);
@@ -122,11 +126,19 @@ const LinkedinWorkflow = () => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleOnOpen = () => {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.response, generatedText);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.imageUrls, JSON.stringify([]));
+    onOpen();
+  };
+
   const handleLogin = async () => {
     try {
       const { data } = await refetch();
       const originalUrl = data?.linkedin_login_url || data?.url;
       if (!originalUrl) return;
+
       window.location.href = originalUrl;
     } catch (err) {
       console.error("Failed to fetch LinkedIn auth URL:", err);
@@ -188,9 +200,7 @@ const LinkedinWorkflow = () => {
           if (!linkedinUserId) {
             clearInterval(intervalRef.current!);
             setLoadingMessage(null);
-            localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-            localStorage.setItem(LOCAL_STORAGE_KEYS.response, generatedText);
-            onOpen();
+            handleOnOpen();
             return;
           }
 
@@ -228,12 +238,7 @@ const LinkedinWorkflow = () => {
               onError: () => {
                 clearInterval(intervalRef.current!);
                 setLoadingMessage(null);
-                localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-                localStorage.setItem(
-                  LOCAL_STORAGE_KEYS.response,
-                  generatedText
-                );
-                onOpen();
+                handleOnOpen();
                 // toast({
                 //   title: "AI Generation Failed",
                 //   description: "Try again later.",
@@ -272,9 +277,7 @@ const LinkedinWorkflow = () => {
 
   const handleSubmit = () => {
     if (!linkedinUserId) {
-      localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-      localStorage.setItem(LOCAL_STORAGE_KEYS.response, generatedText);
-      onOpen();
+      handleOnOpen();
       return;
     }
 
@@ -338,9 +341,7 @@ const LinkedinWorkflow = () => {
           localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
         },
         onError: () => {
-          localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-          localStorage.setItem(LOCAL_STORAGE_KEYS.response, generatedText);
-          onOpen();
+          handleOnOpen();
 
           // toast({
           //   title: "Error",

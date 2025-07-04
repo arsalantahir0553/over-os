@@ -75,7 +75,12 @@ const DashboardSidebar = () => {
     navigate(`/workflow/category/${encodeURIComponent(category)}`);
   };
 
-  const handleNewChat = () => navigate("/dashboard");
+  const handleNewChat = () => {
+    localStorage.removeItem("linkedin_prompt");
+    localStorage.removeItem("linkedin_response");
+    localStorage.removeItem("linkedin_image_urls");
+    navigate("/dashboard");
+  };
 
   return (
     <Box

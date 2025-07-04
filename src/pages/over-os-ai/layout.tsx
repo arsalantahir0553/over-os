@@ -1,24 +1,13 @@
-import { Box, Flex } from "@chakra-ui/react";
-import { Outlet, useLocation } from "react-router-dom";
 import DashboardSidebar from "@/components/over-os-ai/DashboardSidebar";
 import DashboardTopbar from "@/components/over-os-ai/DashboardTopbar";
 import { useForceColorMode } from "@/hooks/useForceColorMode";
-import { useEffect, useState } from "react";
+import { Box, Flex } from "@chakra-ui/react";
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
 
 const DashboardLayout = () => {
   useForceColorMode("dark");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const location = useLocation();
-
-  useEffect(() => {
-    const currentPath = location.pathname;
-
-    if (currentPath !== "/workflow/linkedin") {
-      localStorage.removeItem("linkedin_prompt");
-      localStorage.removeItem("linkedin_response");
-      localStorage.removeItem("linkedin_image_urls");
-    }
-  }, [location.pathname]);
 
   return (
     <Flex h={{ md: "100vh", base: "auto" }} bg="bg">
