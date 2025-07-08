@@ -115,13 +115,15 @@ export const useIntent = () =>
   });
 
 const chat = async ({ prompt }: { prompt: string }) => {
-  const params = new URLSearchParams();
-  params.append("prompt", prompt);
-  const response = await axios.post(`${API_BASE_URL}/chat`, params, {
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-  });
+  const response = await axios.post(
+    `${API_BASE_URL}/chat`,
+    { prompt }, // ✅ Send raw JSON
+    {
+      headers: {
+        "Content-Type": "application/json", // ✅ Use JSON content type
+      },
+    }
+  );
 
   return response.data;
 };

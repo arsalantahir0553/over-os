@@ -196,33 +196,27 @@ const LinkedinWorkflow = () => {
 
           generatePrompt(
             {
-              user_id: linkedinUserId,
-              user_prompt: userPrompt,
-              image_files: selectedImages,
-              urls: [],
+              description: userPrompt,
+              content: userPrompt,
+              // urls: [],
             },
             {
               onSuccess: (data) => {
                 clearInterval(intervalRef.current!);
                 setLoadingMessage(null);
-                const post = data.generated_posts?.[0];
+                const post = data.post_content;
                 if (post) {
-                  const text = post.text || "";
-                  const image = post.image_path
-                    ? Array.isArray(post.image_path)
-                      ? post.image_path[0]
-                      : post.image_path
-                    : "";
+                  // const text = post.text || "";
 
-                  setGeneratedText(text);
-                  setImageUrls(image ? [image] : []);
+                  setGeneratedText(post);
+                  // setImageUrls(image ? [image] : []);
 
                   localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-                  localStorage.setItem(LOCAL_STORAGE_KEYS.response, text);
-                  localStorage.setItem(
-                    LOCAL_STORAGE_KEYS.imageUrls,
-                    JSON.stringify(image ? [image] : [])
-                  );
+                  localStorage.setItem(LOCAL_STORAGE_KEYS.response, post);
+                  // localStorage.setItem(
+                  //   LOCAL_STORAGE_KEYS.imageUrls,
+                  //   JSON.stringify(image ? [image] : [])
+                  // );
                 }
               },
               onError: () => {

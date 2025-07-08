@@ -44,32 +44,22 @@ export const useGetLinkedinDetails = (code: string, state: string) => {
     enabled: !!code && !!state,
   });
 };
-
+// 👇 Update the payload interface based on Swagger schema
 export interface GeneratePostPayload {
-  user_id: string;
-  user_prompt: string;
-  image_files?: File[];
-  urls?: string[];
+  description: string;
+  content: string;
 }
 
 export const generateLinkedinPost = async ({
-  user_id,
-  user_prompt,
-  image_files = [],
-  urls = [],
+  description,
+  content,
 }: GeneratePostPayload) => {
-  const formData = new FormData();
-  formData.append("user_prompt", user_prompt);
-
-  image_files.forEach((file) => formData.append("image_files", file));
-  urls.forEach((url) => formData.append("urls", url));
-
   const response = await axios.post(
-    `${API_WORKFLOW_URL}/linkedin/api/users/${user_id}/generate_posts`,
-    formData,
+    `${API_WORKFLOW_URL}/generate-post`,
+    { description, content }, // ✅ send as JSON
     {
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Content-Type": "application/json", // ✅ correct content-type
       },
     }
   );
@@ -82,6 +72,7 @@ export const useGenerateLinkedinPrompt = () => {
     mutationFn: (payload: GeneratePostPayload) => generateLinkedinPost(payload),
   });
 };
+
 export interface PublishPostPayload {
   user_id: string;
   user_prompt: string;
@@ -137,15 +128,12 @@ export const usePublishGeneratedPost = () => {
 export const detectIntentFromPrompt = async (
   prompt: string
 ): Promise<"chat" | "linkedin" | "linkedin_no_topic"> => {
-  const params = new URLSearchParams();
-  params.append("prompt", prompt);
-
   const response = await axios.post(
-    `${API_WORKFLOW_URL}/linkedin/api/intent`,
-    params.toString(), // Send as form-urlencoded string
+    `${API_WORKFLOW_URL}/identify-intent`,
+    { user_prompt: prompt }, // ✅ send JSON body
     {
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json", // ✅ correct content-type
       },
     }
   );
