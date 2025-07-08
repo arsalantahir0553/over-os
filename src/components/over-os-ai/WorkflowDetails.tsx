@@ -63,6 +63,9 @@ const WorkflowDetails = () => {
 
   const handleTryNow = (workflowId: string) => {
     if (workflowId === "30579017-12c7-4058-859b-54825547b345") {
+      localStorage.removeItem("linkedin_prompt");
+      localStorage.removeItem("linkedin_response");
+      localStorage.removeItem("linkedin_image_urls");
       navigate(`/workflow/linkedin`);
       // onOpen();
     } else if (workflowId === "9bfc211a-8b9c-47f1-b955-7312747ddf57") {
