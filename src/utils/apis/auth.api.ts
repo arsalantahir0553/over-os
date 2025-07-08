@@ -85,7 +85,7 @@ const getLoggedInUser = async () => {
     ) {
       // Remove token and optionally reload or redirect
       localStorage.removeItem("token");
-      console.warn("Token expired. Logged out.");
+      window.location.href = "https://overos.xyz";
     }
 
     throw error; // Let React Query handle the error
