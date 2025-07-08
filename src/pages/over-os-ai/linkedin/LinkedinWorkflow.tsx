@@ -27,10 +27,12 @@ import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { useLoggedInUser } from "@/utils/apis/auth.api";
 import { useCreateHistory } from "@/utils/apis/history.api";
 import { useChat } from "@/utils/apis/overos.api";
+import { queryClient } from "@/utils/apis/query.client";
+import { MdOutlineSchedule } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
-import { queryClient } from "@/utils/apis/query.client";
+import LinkedinScheduler from "./LinkedinScheduler";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -69,6 +71,7 @@ const LinkedinWorkflow = () => {
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
   const [detectedIntent, setDetectedIntent] = useState<string | null>(null);
   const { data: user } = useLoggedInUser();
+  const [showScheduler, setShowScheduler] = useState(false);
 
   // console.log("user_id", user.id);
 
@@ -206,39 +209,33 @@ const LinkedinWorkflow = () => {
 
           generatePrompt(
             {
-              user_id: linkedinUserId,
-              user_prompt: userPrompt,
-              image_files: selectedImages,
-              urls: [],
+              description: userPrompt,
+              content: userPrompt,
+              // urls: [],
             },
             {
               onSuccess: (data) => {
                 clearInterval(intervalRef.current!);
                 setLoadingMessage(null);
-                const post = data.generated_posts?.[0];
+                const post = data.post_content;
                 if (post) {
-                  const text = post.text || "";
-                  const image = post.image_path
-                    ? Array.isArray(post.image_path)
-                      ? post.image_path[0]
-                      : post.image_path
-                    : "";
+                  // const text = post.text || "";
 
-                  setGeneratedText(text);
-                  setImageUrls(image ? [image] : []);
+                  setGeneratedText(post);
+                  // setImageUrls(image ? [image] : []);
 
                   localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-                  localStorage.setItem(LOCAL_STORAGE_KEYS.response, text);
-                  localStorage.setItem(
-                    LOCAL_STORAGE_KEYS.imageUrls,
-                    JSON.stringify(image ? [image] : [])
-                  );
+                  localStorage.setItem(LOCAL_STORAGE_KEYS.response, post);
+                  // localStorage.setItem(
+                  //   LOCAL_STORAGE_KEYS.imageUrls,
+                  //   JSON.stringify(image ? [image] : [])
+                  // );
                 }
               },
               onError: () => {
                 clearInterval(intervalRef.current!);
                 setLoadingMessage(null);
-                handleOnOpen();
+                onOpen();
                 // toast({
                 //   title: "AI Generation Failed",
                 //   description: "Try again later.",
@@ -341,15 +338,15 @@ const LinkedinWorkflow = () => {
           localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
         },
         onError: () => {
-          handleOnOpen();
+          onOpen();
 
-          // toast({
-          //   title: "Error",
-          //   description: "Failed to publish post.",
-          //   status: "error",
-          //   duration: 3000,
-          //   isClosable: true,
-          // });
+          toast({
+            title: "Error",
+            description: "Failed to publish post.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
         },
       }
     );
@@ -494,45 +491,58 @@ const LinkedinWorkflow = () => {
             pr="2.5rem"
             rows={1} // Start with 1 visible row
           />
-          <Flex justify="flex-end" gap={3}>
-            <Flex gap={2} align="center">
-              <Tooltip label="Upload images" rounded="md">
-                <IconButton
-                  icon={<Upload size={16} />}
-                  aria-label="Upload"
-                  size="sm"
-                  bg={iconBg}
-                  color={iconColor}
-                  _hover={{ bg: iconHoverBg }}
-                  onClick={() => fileInputRef.current?.click()}
-                />
-              </Tooltip>
-              <Input
-                type="file"
-                accept="image/*"
-                multiple
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                style={{ display: "none" }}
-              />
-              {selectedImages.length > 0 && (
-                <Text color="mutedText" fontSize="sm">
-                  {selectedImages.length} image
-                  {selectedImages.length > 1 ? "s" : ""} selected
-                </Text>
-              )}
-            </Flex>
+          <Flex justify="space-between" gap={3}>
             <Button
-              onClick={handleGenerate}
-              isLoading={isGenerating || isDetectingIntent || isChatting}
-              bg="surfaceButton"
-              color="white"
-              _hover={{ bg: "brand.400" }}
-              size={{ md: "md", base: "sm" }}
+              display={"flex"}
+              gap={2}
+              fontWeight={500}
+              onClick={() => setShowScheduler((prev) => !prev)}
             >
-              Generate
+              Schedule <MdOutlineSchedule />
             </Button>
+            <Box display={"flex"} gap={2}>
+              <Flex gap={2} align="center">
+                <Tooltip label="Upload images" rounded="md">
+                  <IconButton
+                    icon={<Upload size={16} />}
+                    aria-label="Upload"
+                    size="sm"
+                    bg={iconBg}
+                    color={iconColor}
+                    _hover={{ bg: iconHoverBg }}
+                    onClick={() => fileInputRef.current?.click()}
+                  />
+                </Tooltip>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  style={{ display: "none" }}
+                />
+                {selectedImages.length > 0 && (
+                  <Text color="mutedText" fontSize="sm">
+                    {selectedImages.length} image
+                    {selectedImages.length > 1 ? "s" : ""} selected
+                  </Text>
+                )}
+              </Flex>
+              <Button
+                onClick={handleGenerate}
+                isLoading={isGenerating || isDetectingIntent || isChatting}
+                bg="surfaceButton"
+                color="white"
+                _hover={{ bg: "brand.400" }}
+                size={{ md: "md", base: "sm" }}
+              >
+                Generate
+              </Button>
+            </Box>
           </Flex>
+
+          {showScheduler && <LinkedinScheduler />}
+
           {(isGenerating || isDetectingIntent || isChatting) &&
             loadingMessage && <LoadingOverlay message={loadingMessage} />}
         </Flex>
