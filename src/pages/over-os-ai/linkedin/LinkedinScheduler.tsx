@@ -6,7 +6,11 @@ import {
   Select,
   SimpleGrid,
   Text,
-  // Textarea,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
@@ -18,13 +22,14 @@ import "react-datepicker/dist/react-datepicker.css";
 const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const LinkedinScheduler = () => {
-  const [mode, setMode] = useState("one-time");
+  const [mode, setMode] = useState<"one-time" | "recursive">("one-time");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [recurrence, setRecurrence] = useState("weekly");
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
   const toggleDay = (day: string) => {
     setSelectedDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
@@ -50,9 +55,9 @@ const LinkedinScheduler = () => {
   return (
     <Box
       width="100%"
-      px={[4, 6, 12]} // Responsive horizontal padding
+      px={[4, 6, 12]}
       py={[4, 6]}
-      mt={6}
+      mt={2}
       bg={cardBg}
       border="1px solid"
       borderColor={borderColor}
@@ -63,198 +68,210 @@ const LinkedinScheduler = () => {
           Schedule Settings
         </Text>
 
-        <Select
-          value={mode}
-          onChange={(e) => setMode(e.target.value)}
-          bg="surface"
-          borderColor="border"
+        <Tabs
+          index={mode === "one-time" ? 0 : 1}
+          onChange={(i) => setMode(i === 0 ? "one-time" : "recursive")}
+          colorScheme="blue"
+          variant="line"
         >
-          <option value="one-time">One Time</option>
-          <option value="recursive">Recursive</option>
-        </Select>
+          <TabList>
+            <Tab>One Time</Tab>
+            <Tab>Recurring</Tab>
+          </TabList>
 
-        {mode === "one-time" && (
-          <Flex direction={["column", "row"]} gap={4}>
-            <Flex
-              align="center"
-              gap={3}
-              bg="surface"
-              px={1}
-              pl={3}
-              rounded="md"
-              flex="1"
-              cursor={"pointer"}
-            >
-              <Box
-                className="transparent-datepicker"
-                display="flex"
-                alignItems="center"
-                width="full"
-              >
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => date && setStartDate(date)}
-                  dateFormat="MMMM d, yyyy"
-                  calendarClassName="chakra-datepicker-dark"
-                  customInput={
-                    <Flex align="center" gap={3} width="full">
-                      <CalendarIcon width={18} />
-                      <Box flex={1}>
-                        {startDate.toLocaleDateString("en-US", {
-                          month: "long",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </Box>
-                    </Flex>
-                  }
-                />
-              </Box>
-            </Flex>
-            <Input
-              type="time"
-              placeholder="Select time"
-              bg="surface"
-              borderColor="border"
-              flex="1"
-            />
-          </Flex>
-        )}
-
-        {mode === "recursive" && (
-          <VStack align="stretch" spacing={4}>
-            <Select
-              value={recurrence}
-              onChange={(e) => setRecurrence(e.target.value)}
-              bg="surface"
-              borderColor="border"
-            >
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </Select>
-
-            {recurrence === "weekly" && (
-              <SimpleGrid columns={[2, 4, 7]} spacing={2}>
-                {daysOfWeek.map((day) => (
-                  <Button
-                    key={day}
-                    size="sm"
-                    variant={selectedDays.includes(day) ? "solid" : "outline"}
-                    colorScheme={selectedDays.includes(day) ? "blue" : "gray"}
-                    onClick={() => toggleDay(day)}
-                  >
-                    {day}
-                  </Button>
-                ))}
-              </SimpleGrid>
-            )}
-
-            {recurrence === "monthly" && (
-              <Box display="flex" flexDirection="column" gap={3}>
-                <Button
-                  leftIcon={<CalendarIcon width={18} />}
-                  onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+          <TabPanels>
+            {/* ONE-TIME MODE */}
+            <TabPanel px={0}>
+              <Flex direction={["column", "row"]} gap={4}>
+                <Flex
+                  align="center"
+                  gap={3}
                   bg="surface"
-                  size="md"
-                  color="text"
-                  border="1px solid"
-                  borderColor="border"
-                  fontWeight={400}
-                  _hover={{ bg: "surface" }}
-                  justifyContent="flex-start"
-                  width="100%"
+                  px={1}
+                  pl={3}
+                  rounded="md"
+                  flex="1"
+                  cursor={"pointer"}
                 >
-                  {isCalendarOpen ? "Hide Calendar" : "Select Dates"}
-                </Button>
-
-                {isCalendarOpen && (
-                  <Box className="transparent-datepicker" mt={2}>
+                  <Box
+                    className="transparent-datepicker"
+                    display="flex"
+                    alignItems="center"
+                    width="full"
+                  >
                     <DatePicker
-                      onChange={(date) => date && toggleDate(date)}
-                      highlightDates={selectedDates}
-                      inline
+                      selected={startDate}
+                      onChange={(date) => date && setStartDate(date)}
+                      dateFormat="MMMM d, yyyy"
                       calendarClassName="chakra-datepicker-dark"
-                      dayClassName={(date) =>
-                        selectedDates.some(
-                          (d) => d.toDateString() === date.toDateString()
-                        )
-                          ? "selected-day"
-                          : ""
+                      customInput={
+                        <Flex align="center" gap={3} width="full">
+                          <CalendarIcon width={18} />
+                          <Box flex={1}>
+                            {startDate.toLocaleDateString("en-US", {
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </Box>
+                        </Flex>
                       }
                     />
                   </Box>
-                )}
-                <Flex gap={4} wrap="wrap" mt={4}>
-                  <Box flex="1">
-                    <Text fontSize="sm" mb={1} color="mutedText">
-                      Start Date
-                    </Text>
-                    <Box
-                      rounded="md"
-                      bg="surface"
-                      border="1px solid"
-                      borderColor="border"
-                      className="transparent-datepicker"
-                      w="full"
-                      position="relative"
-                    >
-                      <DatePicker
-                        selected={startDate}
-                        onChange={(date) => date && setStartDate(date)}
-                        dateFormat="MMMM d, yyyy"
-                        calendarClassName="chakra-datepicker-dark"
-                        wrapperClassName="w-full"
-                      />
-                    </Box>
-                  </Box>
-
-                  <Box flex="1">
-                    <Text fontSize="sm" mb={1} color="mutedText">
-                      End Date
-                    </Text>
-                    <Box
-                      rounded="md"
-                      bg="surface"
-                      border="1px solid"
-                      borderColor="border"
-                      className="transparent-datepicker"
-                      w="full"
-                      position="relative"
-                    >
-                      <DatePicker
-                        selected={endDate}
-                        onChange={(date) => date && setEndDate(date)}
-                        dateFormat="MMMM d, yyyy"
-                        calendarClassName="chakra-datepicker-dark"
-                        wrapperClassName="w-full"
-                      />
-                    </Box>
-                  </Box>
                 </Flex>
 
-                <Box mt={2}>
-                  <Text fontSize="sm" color="mutedText">
-                    Selected Dates:
-                  </Text>
-                  <Flex wrap="wrap" gap={2}>
-                    {selectedDates.map((date, idx) => (
-                      <Box
-                        key={idx}
-                        px={4}
-                        py={2}
-                        bg="border"
-                        borderRadius="md"
-                        fontSize="sm"
+                <Input
+                  type="time"
+                  placeholder="Select time"
+                  bg="surface"
+                  borderColor="border"
+                  flex="1"
+                />
+              </Flex>
+            </TabPanel>
+
+            {/* RECURRING MODE */}
+            <TabPanel px={0}>
+              <VStack align="stretch" spacing={4}>
+                <Select
+                  value={recurrence}
+                  onChange={(e) => setRecurrence(e.target.value)}
+                  bg="surface"
+                  borderColor="border"
+                >
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </Select>
+
+                {recurrence === "weekly" && (
+                  <SimpleGrid columns={[2, 4, 7]} spacing={2}>
+                    {daysOfWeek.map((day) => (
+                      <Button
+                        key={day}
+                        size="sm"
+                        variant={
+                          selectedDays.includes(day) ? "solid" : "outline"
+                        }
+                        colorScheme={
+                          selectedDays.includes(day) ? "blue" : "gray"
+                        }
+                        onClick={() => toggleDay(day)}
                       >
-                        {date.toDateString()}
-                      </Box>
+                        {day}
+                      </Button>
                     ))}
-                  </Flex>
-                </Box>
-              </Box>
-            )}
-          </VStack>
-        )}
+                  </SimpleGrid>
+                )}
+
+                {recurrence === "monthly" && (
+                  <Box display="flex" flexDirection="column" gap={3}>
+                    <Button
+                      leftIcon={<CalendarIcon width={18} />}
+                      onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                      bg="surface"
+                      size="md"
+                      color="text"
+                      border="1px solid"
+                      borderColor="border"
+                      fontWeight={400}
+                      _hover={{ bg: "surface" }}
+                      justifyContent="flex-start"
+                      width="100%"
+                    >
+                      {isCalendarOpen ? "Hide Calendar" : "Select Dates"}
+                    </Button>
+
+                    {isCalendarOpen && (
+                      <Box className="transparent-datepicker" mt={2}>
+                        <DatePicker
+                          onChange={(date) => date && toggleDate(date)}
+                          highlightDates={selectedDates}
+                          inline
+                          calendarClassName="chakra-datepicker-dark"
+                          dayClassName={(date) =>
+                            selectedDates.some(
+                              (d) => d.toDateString() === date.toDateString()
+                            )
+                              ? "selected-day"
+                              : ""
+                          }
+                        />
+                      </Box>
+                    )}
+
+                    <Flex gap={4} wrap="wrap" mt={4}>
+                      <Box flex="1">
+                        <Text fontSize="sm" mb={1} color="mutedText">
+                          Start Date
+                        </Text>
+                        <Box
+                          rounded="md"
+                          bg="surface"
+                          border="1px solid"
+                          borderColor="border"
+                          className="transparent-datepicker"
+                          w="full"
+                          position="relative"
+                        >
+                          <DatePicker
+                            selected={startDate}
+                            onChange={(date) => date && setStartDate(date)}
+                            dateFormat="MMMM d, yyyy"
+                            calendarClassName="chakra-datepicker-dark"
+                            wrapperClassName="w-full"
+                          />
+                        </Box>
+                      </Box>
+
+                      <Box flex="1">
+                        <Text fontSize="sm" mb={1} color="mutedText">
+                          End Date
+                        </Text>
+                        <Box
+                          rounded="md"
+                          bg="surface"
+                          border="1px solid"
+                          borderColor="border"
+                          className="transparent-datepicker"
+                          w="full"
+                          position="relative"
+                        >
+                          <DatePicker
+                            selected={endDate}
+                            onChange={(date) => date && setEndDate(date)}
+                            dateFormat="MMMM d, yyyy"
+                            calendarClassName="chakra-datepicker-dark"
+                            wrapperClassName="w-full"
+                          />
+                        </Box>
+                      </Box>
+                    </Flex>
+
+                    <Box mt={2}>
+                      <Text fontSize="sm" color="mutedText">
+                        Selected Dates:
+                      </Text>
+                      <Flex wrap="wrap" gap={2}>
+                        {selectedDates.map((date, idx) => (
+                          <Box
+                            key={idx}
+                            px={4}
+                            py={2}
+                            bg="border"
+                            borderRadius="md"
+                            fontSize="sm"
+                          >
+                            {date.toDateString()}
+                          </Box>
+                        ))}
+                      </Flex>
+                    </Box>
+                  </Box>
+                )}
+              </VStack>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
 
         <Flex justify="flex-end">
           <Button
