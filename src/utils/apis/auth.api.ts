@@ -70,10 +70,26 @@ const getLoggedInUser = async () => {
     throw new Error("No authentication token found");
   }
 
-  const response = await axios.get(`${API_BASE_URL}/user/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
+  try {
+    const response = await axios.get(`${API_BASE_URL}/user/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    // Check for 401 Unauthorized
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 401 &&
+      error.response?.data?.message === "Invalid or expired token"
+    ) {
+      // Remove token and optionally reload or redirect
+      localStorage.removeItem("token");
+      console.warn("Token expired. Logged out.");
+    }
+
+    throw error; // Let React Query handle the error
+  }
 };
 
 export const useLoggedInUser = () => {
