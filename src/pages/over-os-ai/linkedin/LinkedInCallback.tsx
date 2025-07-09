@@ -4,30 +4,35 @@ import { useLocation, useNavigate } from "react-router-dom";
 const LinkedInCallback = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const params = new URLSearchParams(location.search);
-
-  const userId = params.get("user_id");
 
   useEffect(() => {
-    if (userId) {
-      localStorage.setItem("linkedin_user_id", userId);
-      console.log("✅ LinkedIn User ID saved:", userId);
+    const params = new URLSearchParams(location.search);
 
-      // Optionally redirect to dashboard or wherever
-      // navigate("/workflow/linkedin", { replace: true });
+    const userId = params.get("user_id");
+    const status = params.get("status");
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    const tokenType = params.get("token_type");
+
+    if (userId && accessToken && refreshToken && tokenType) {
+      localStorage.setItem("linkedin_user_id", userId);
+      localStorage.setItem("linkedin_status", status || "");
+      localStorage.setItem("linkedin_access_token", accessToken);
+      localStorage.setItem("linkedin_refresh_token", refreshToken);
+      localStorage.setItem("linkedin_token_type", tokenType);
+
+      console.log("✅ LinkedIn login data saved to localStorage");
+
+      navigate("/workflow/linkedin", { replace: true });
     } else {
-      console.error("❌ user_id not found in URL.");
+      console.error("❌ Missing one or more LinkedIn callback parameters");
     }
-  }, [userId, navigate]);
+  }, [location.search, navigate]);
 
   return (
     <div>
       <h2>LinkedIn Callback</h2>
-      {userId ? (
-        <p>Saving your LinkedIn login...</p>
-      ) : (
-        <p>Missing user ID in the callback URL.</p>
-      )}
+      <p>Processing your login...</p>
     </div>
   );
 };
