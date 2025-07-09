@@ -1,24 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import api from "./axios.interceptor";
 
 const API_WORKFLOW_URL = import.meta.env.VITE_API_OVEROS_URL;
 
-export const buildLinkedinAuthUrl = (): string => {
-  const base = "https://www.linkedin.com/oauth/v2/authorization";
-
-  const params = new URLSearchParams({
-    response_type: "code",
-    client_id: import.meta.env.VITE_LINKEDIN_CLIENT_ID!,
-    redirect_uri: import.meta.env.VITE_LINKEDIN_REDIRECT_URI!,
-    scope: import.meta.env.VITE_LINKEDIN_SCOPE!,
-    // state: import.meta.env.VITE_LINKEDIN_STATE!,
-  });
-
-  return `${base}?${params.toString()}`;
-};
-
 export const getLinkedinAuthUrl = async () => {
-  const response = await axios.get(`${API_WORKFLOW_URL}`);
+  const response = await api.get(`/`);
   return response.data;
 };
 
@@ -30,40 +17,22 @@ export const useGetLinkedinAuthUrl = () => {
   });
 };
 
-export const getLinkedinDetails = async (code: string, state: string) => {
-  const response = await axios.get(`${API_WORKFLOW_URL}/linkedin/api/getID`, {
-    params: { code, state },
-  });
-  return response.data;
-};
-
-export const useGetLinkedinDetails = (code: string, state: string) => {
-  return useQuery({
-    queryKey: ["linkedin-details", code, state],
-    queryFn: () => getLinkedinDetails(code, state),
-    enabled: !!code && !!state,
-  });
-};
 // 👇 Update the payload interface based on Swagger schema
 export interface GeneratePostPayload {
-  description: string;
-  content: string;
+  prompt: string;
 }
 
-export const generateLinkedinPost = async ({
-  description,
-  content,
-}: GeneratePostPayload) => {
-  const response = await axios.post(
-    `${API_WORKFLOW_URL}/generate-post`,
-    { description, content }, // ✅ send as JSON
+export const generateLinkedinPost = async ({ prompt }: GeneratePostPayload) => {
+  const response = await api.post(
+    `/linkedin-generate-post?prompt=${encodeURIComponent(prompt)}`,
+    {}, // ✅ empty body
     {
       headers: {
-        "Content-Type": "application/json", // ✅ correct content-type
+        "Content-Type": "application/json",
       },
     }
   );
-
+  console.log("checking response", response.data);
   return response.data;
 };
 
@@ -84,7 +53,6 @@ export interface PublishPostPayload {
 }
 
 export const publishLinkedinPost = async ({
-  user_id,
   user_prompt,
   post,
 }: PublishPostPayload) => {
@@ -103,15 +71,11 @@ export const publishLinkedinPost = async ({
   console.log("Final payload:", formData.toString());
 
   try {
-    const response = await axios.post(
-      `${API_WORKFLOW_URL}/linkedin/api/users/${user_id}/publish_posts`,
-      formData.toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
+    const response = await api.post(`/publish_posts`, formData.toString(), {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("API Error:", error);
@@ -125,23 +89,45 @@ export const usePublishGeneratedPost = () => {
   });
 };
 
-export const detectIntentFromPrompt = async (
-  prompt: string
-): Promise<"chat" | "linkedin" | "linkedin_no_topic"> => {
-  const response = await axios.post(
-    `${API_WORKFLOW_URL}/identify-intent`,
-    { user_prompt: prompt }, // ✅ send JSON body
-    {
-      headers: {
-        "Content-Type": "application/json", // ✅ correct content-type
-      },
-    }
-  );
-  return response.data.intent;
-};
+// =====================================
+// Auth routes
+// =====================================
 
-export const useDetectIntent = () => {
-  return useMutation({
-    mutationFn: (prompt: string) => detectIntentFromPrompt(prompt),
-  });
+export const refreshLinkedinToken = async () => {
+  const refreshToken = localStorage.getItem("linkedin_refresh_token");
+
+  if (!refreshToken) {
+    throw new Error("No refresh token available.");
+  }
+
+  try {
+    const response = await axios.post(
+      `${API_WORKFLOW_URL}/auth/refresh`,
+      { refresh_token: refreshToken },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const { access_token, refresh_token: newRefreshToken } = response.data;
+
+    localStorage.setItem("linkedin_access_token", access_token);
+    if (newRefreshToken) {
+      localStorage.setItem("linkedin_refresh_token", newRefreshToken);
+    }
+
+    return access_token;
+  } catch (error) {
+    console.error("⚠️ Refresh token failed:", error);
+    // Logout logic here if refresh fails
+    localStorage.removeItem("linkedin_access_token");
+    localStorage.removeItem("linkedin_refresh_token");
+    localStorage.removeItem("linkedin_user_id");
+    localStorage.removeItem("linkedin_status");
+    localStorage.removeItem("linkedin_token_type");
+    window.location.href = "/login"; // or navigate("/login")
+    throw error;
+  }
 };

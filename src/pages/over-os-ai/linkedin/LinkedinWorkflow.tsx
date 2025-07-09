@@ -1,9 +1,12 @@
+import { LoadingOverlay } from "@/components/LoadingOverlay";
+import { useLoggedInUser } from "@/utils/apis/auth.api";
+import { useCreateHistory } from "@/utils/apis/history.api";
 import {
-  useDetectIntent,
   useGenerateLinkedinPrompt,
   useGetLinkedinAuthUrl,
   usePublishGeneratedPost,
 } from "@/utils/apis/linkedin.api";
+import { queryClient } from "@/utils/apis/query.client";
 import {
   Box,
   Button,
@@ -22,14 +25,7 @@ import {
 import { motion } from "framer-motion";
 import { PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-import { LoadingOverlay } from "@/components/LoadingOverlay";
-import { useLoggedInUser } from "@/utils/apis/auth.api";
-import { useCreateHistory } from "@/utils/apis/history.api";
-import { useChat } from "@/utils/apis/overos.api";
-import { queryClient } from "@/utils/apis/query.client";
 import { MdOutlineSchedule } from "react-icons/md";
-import { Link } from "react-router-dom";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
 import LinkedinScheduler from "./LinkedinScheduler";
@@ -46,6 +42,7 @@ const loadingMessages = [
   "Giving your prompt the attention it deserves…",
   "Almost there — polishing your response…",
 ];
+
 const LOCAL_STORAGE_KEYS = {
   prompt: "linkedin_prompt",
   response: "linkedin_response",
@@ -63,17 +60,20 @@ const LinkedinWorkflow = () => {
   const loadingIndexRef = useRef<number>(0);
   const intervalRef = useRef<number | null>(null);
   const toast = useToast();
-  const { mutate: detectIntent, isPending: isDetectingIntent } =
-    useDetectIntent();
-  const { mutate: chatRequest, isPending: isChatting } = useChat();
-  // const navigate = useNavigate();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const generatedTextRef = useRef<HTMLTextAreaElement>(null);
-  const [detectedIntent, setDetectedIntent] = useState<string | null>(null);
   const { data: user } = useLoggedInUser();
-  const [showScheduler, setShowScheduler] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  // console.log("user_id", user.id);
+  const generatedTextRef = useRef<HTMLTextAreaElement>(null);
+  const [showScheduler, setShowScheduler] = useState(false);
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const filesArray = Array.from(e.target.files);
+    setSelectedImages((prev) => [...prev, ...filesArray]);
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   useEffect(() => {
     if (generatedTextRef.current) {
@@ -88,15 +88,10 @@ const LinkedinWorkflow = () => {
     usePublishGeneratedPost();
   const { refetch, isFetching } = useGetLinkedinAuthUrl();
   const { mutate: createHistory } = useCreateHistory();
-  // Load from localStorage on mount
+
   useEffect(() => {
     const id = localStorage.getItem("linkedin_user_id");
-    if (!id) {
-      // Don't redirect; just block publishing later
-      setLinkedinUserId(null);
-    } else {
-      setLinkedinUserId(id);
-    }
+    setLinkedinUserId(id || null);
 
     const savedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.prompt);
     const savedResponse = localStorage.getItem(LOCAL_STORAGE_KEYS.response);
@@ -118,40 +113,9 @@ const LinkedinWorkflow = () => {
     localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
   }, []);
 
-  console.log("checking user id", linkedinUserId);
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const filesArray = Array.from(e.target.files);
-    setSelectedImages((prev) => [...prev, ...filesArray]);
-  };
-
-  const removeImage = (index: number) => {
-    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleOnOpen = () => {
-    localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-    localStorage.setItem(LOCAL_STORAGE_KEYS.response, generatedText);
-    localStorage.setItem(LOCAL_STORAGE_KEYS.imageUrls, JSON.stringify([]));
-    onOpen();
-  };
-
-  const handleLogin = async () => {
-    try {
-      const { data } = await refetch();
-      const originalUrl = data?.linkedin_login_url || data?.url;
-      if (!originalUrl) return;
-
-      window.location.href = originalUrl;
-    } catch (err) {
-      console.error("Failed to fetch LinkedIn auth URL:", err);
-    }
-  };
-
   const handleGenerate = () => {
     if (!userPrompt.trim()) return;
 
-    // Start loading messages
     loadingIndexRef.current = 0;
     setLoadingMessage(loadingMessages[0]);
     intervalRef.current = setInterval(() => {
@@ -160,124 +124,39 @@ const LinkedinWorkflow = () => {
       setLoadingMessage(loadingMessages[loadingIndexRef.current]);
     }, 3500);
 
-    // Step 1: Detect intent
-    detectIntent(userPrompt, {
-      onSuccess: (intent) => {
-        setDetectedIntent(intent);
-        if (intent === "chat" || intent === "linkedin_no_topic") {
-          chatRequest(
-            { prompt: userPrompt },
-            {
-              onSuccess: (data) => {
-                clearInterval(intervalRef.current!);
-                setLoadingMessage(null);
-                const fullText = data?.response || "";
+    generatePrompt(
+      { prompt: userPrompt },
+      {
+        onSuccess: (data) => {
+          clearInterval(intervalRef.current!);
+          setLoadingMessage(null);
+          setGeneratedText(data.post_text);
 
-                setGeneratedText(fullText);
-
-                localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-                localStorage.setItem(LOCAL_STORAGE_KEYS.response, fullText);
-                localStorage.setItem(
-                  LOCAL_STORAGE_KEYS.imageUrls,
-                  JSON.stringify([])
-                );
-                setImageUrls([]);
-              },
-              onError: () => {
-                clearInterval(intervalRef.current!);
-                setLoadingMessage(null);
-                toast({
-                  title: "Chat Error",
-                  description: "Failed to get a chat response.",
-                  status: "error",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              },
-            }
+          localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+          localStorage.setItem(LOCAL_STORAGE_KEYS.response, data.post_text);
+          localStorage.setItem(
+            LOCAL_STORAGE_KEYS.imageUrls,
+            JSON.stringify([])
           );
-          return;
-        }
-
-        if (intent === "linkedin") {
-          if (!linkedinUserId) {
-            clearInterval(intervalRef.current!);
-            setLoadingMessage(null);
-            handleOnOpen();
-            return;
-          }
-
-          generatePrompt(
-            {
-              description: userPrompt,
-              content: userPrompt,
-              // urls: [],
-            },
-            {
-              onSuccess: (data) => {
-                clearInterval(intervalRef.current!);
-                setLoadingMessage(null);
-                const post = data.post_content;
-                if (post) {
-                  // const text = post.text || "";
-
-                  setGeneratedText(post);
-                  // setImageUrls(image ? [image] : []);
-
-                  localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-                  localStorage.setItem(LOCAL_STORAGE_KEYS.response, post);
-                  // localStorage.setItem(
-                  //   LOCAL_STORAGE_KEYS.imageUrls,
-                  //   JSON.stringify(image ? [image] : [])
-                  // );
-                }
-              },
-              onError: () => {
-                clearInterval(intervalRef.current!);
-                setLoadingMessage(null);
-                onOpen();
-                // toast({
-                //   title: "AI Generation Failed",
-                //   description: "Try again later.",
-                //   status: "error",
-                //   duration: 3000,
-                //   isClosable: true,
-                // });
-              },
-            }
-          );
-        } else {
+          setImageUrls([]);
+        },
+        onError: () => {
           clearInterval(intervalRef.current!);
           setLoadingMessage(null);
           toast({
-            title: "No LinkedIn Topic Detected",
-            description: "Try rephrasing your prompt.",
-            status: "info",
+            title: "AI Generation Failed",
+            description: "Try again later.",
+            status: "error",
             duration: 3000,
             isClosable: true,
           });
-        }
-      },
-      onError: () => {
-        clearInterval(intervalRef.current!);
-        setLoadingMessage(null);
-        toast({
-          title: "Intent Detection Failed",
-          description: "Could not determine intent. Please try again.",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      },
-    });
+        },
+      }
+    );
   };
 
   const handleSubmit = () => {
-    if (!linkedinUserId) {
-      handleOnOpen();
-      return;
-    }
-
+    if (!linkedinUserId) return onOpen();
     if (!userPrompt.trim() || !generatedText.trim()) {
       toast({
         title: "Missing Data",
@@ -329,17 +208,11 @@ const LinkedinWorkflow = () => {
             }
           );
 
-          // setUserPrompt("");
-          // setGeneratedText("");
-          // setSelectedImages([]);
-          // setImageUrls([]);
           localStorage.removeItem(LOCAL_STORAGE_KEYS.prompt);
           localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
           localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
         },
         onError: () => {
-          onOpen();
-
           toast({
             title: "Error",
             description: "Failed to publish post.",
@@ -350,6 +223,16 @@ const LinkedinWorkflow = () => {
         },
       }
     );
+  };
+
+  const handleLogin = async () => {
+    try {
+      const { data } = await refetch();
+      const originalUrl = data?.linkedin_login_url || data?.url;
+      if (originalUrl) window.location.href = originalUrl;
+    } catch (err) {
+      console.error("Failed to fetch LinkedIn auth URL:", err);
+    }
   };
 
   useEffect(() => {
@@ -530,7 +413,7 @@ const LinkedinWorkflow = () => {
               </Flex>
               <Button
                 onClick={handleGenerate}
-                isLoading={isGenerating || isDetectingIntent || isChatting}
+                isLoading={isGenerating}
                 bg="surfaceButton"
                 color="white"
                 _hover={{ bg: "brand.400" }}
@@ -543,8 +426,9 @@ const LinkedinWorkflow = () => {
 
           {showScheduler && <LinkedinScheduler />}
 
-          {(isGenerating || isDetectingIntent || isChatting) &&
-            loadingMessage && <LoadingOverlay message={loadingMessage} />}
+          {isGenerating && loadingMessage && (
+            <LoadingOverlay message={loadingMessage} />
+          )}
         </Flex>
 
         {/* Generated Text Area */}
@@ -568,53 +452,19 @@ const LinkedinWorkflow = () => {
             }}
           />
         )}
-        {(detectedIntent === "chat" ||
-          detectedIntent === "linkedin_no_topic") &&
-          !isChatting && (
-            <Box
-              mt={3}
-              px={4}
-              py={3}
-              bg="gray.700"
-              borderRadius="md"
-              fontStyle="italic"
-              fontSize="sm"
-              color="gray.200"
-              borderLeft="4px solid"
-              borderColor="accent"
-            >
-              I am an AI agent designed to generate high-quality LinkedIn posts.
-              I work best when I’m provided a context like your industry or the
-              problem you’re trying to solve. For other automations and
-              questions, please try our general chat{" "}
-              <Link to="/dashboard" color="primary">
-                <Box
-                  fontSize={"16px"}
-                  as="span"
-                  textDecoration={"underline"}
-                  color={"blue.500"}
-                >
-                  here
-                </Box>
-              </Link>
-              .
-            </Box>
-          )}
 
         {/* Submit */}
-        {generatedText && detectedIntent === "linkedin" && (
-          <Flex justify="flex-end">
-            <Button
-              onClick={handleSubmit}
-              bg="primary"
-              color="white"
-              isLoading={isPublishing}
-              _hover={{ bg: "brand.400" }}
-            >
-              Post to LinkedIn
-            </Button>
-          </Flex>
-        )}
+        <Flex justify="flex-end">
+          <Button
+            onClick={handleSubmit}
+            bg="primary"
+            color="white"
+            isLoading={isPublishing}
+            _hover={{ bg: "brand.400" }}
+          >
+            Post to LinkedIn
+          </Button>
+        </Flex>
       </VStack>
       <LinkedinLoginModal
         isOpen={isOpen}
