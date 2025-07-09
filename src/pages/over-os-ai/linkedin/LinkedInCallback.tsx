@@ -14,7 +14,7 @@ const LinkedInCallback = () => {
       console.log("✅ LinkedIn User ID saved:", userId);
 
       // Optionally redirect to dashboard or wherever
-      navigate("/workflow/linkedin", { replace: true });
+      // navigate("/workflow/linkedin", { replace: true });
     } else {
       console.error("❌ user_id not found in URL.");
     }
