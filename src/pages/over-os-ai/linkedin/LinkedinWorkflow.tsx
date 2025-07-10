@@ -57,6 +57,7 @@ const LinkedinWorkflow = () => {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [linkedinUserId, setLinkedinUserId] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
+  const [showLinkedinButton, setShowLinkedinButton] = useState<boolean>(false);
   const loadingIndexRef = useRef<number>(0);
   const intervalRef = useRef<number | null>(null);
   const toast = useToast();
@@ -136,10 +137,24 @@ const LinkedinWorkflow = () => {
       { prompt: userPrompt },
       {
         onSuccess: (data) => {
+          if (data === null) {
+            clearInterval(intervalRef.current!);
+            setLoadingMessage(null);
+            toast({
+              title: "Post Generation Failed",
+              description:
+                "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
+              status: "error",
+              duration: 3000,
+              isClosable: true,
+            });
+            return;
+          }
+
           clearInterval(intervalRef.current!);
           setLoadingMessage(null);
           setGeneratedText(data.post_text);
-
+          setShowLinkedinButton(true);
           localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
           localStorage.setItem(LOCAL_STORAGE_KEYS.response, data.post_text);
           localStorage.setItem(
@@ -152,8 +167,9 @@ const LinkedinWorkflow = () => {
           clearInterval(intervalRef.current!);
           setLoadingMessage(null);
           toast({
-            title: "AI Generation Failed",
-            description: "Try again later.",
+            title: "Post Generation Failed",
+            description:
+              "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
             status: "error",
             duration: 3000,
             isClosable: true,
@@ -462,17 +478,19 @@ const LinkedinWorkflow = () => {
         )}
 
         {/* Submit */}
-        <Flex justify="flex-end">
-          <Button
-            onClick={handleSubmit}
-            bg="primary"
-            color="white"
-            isLoading={isPublishing}
-            _hover={{ bg: "brand.400" }}
-          >
-            Post to LinkedIn
-          </Button>
-        </Flex>
+        {showLinkedinButton && (
+          <Flex justify="flex-end">
+            <Button
+              onClick={handleSubmit}
+              bg="primary"
+              color="white"
+              isLoading={isPublishing}
+              _hover={{ bg: "brand.400" }}
+            >
+              Post to LinkedIn
+            </Button>
+          </Flex>
+        )}
       </VStack>
       <LinkedinLoginModal
         isOpen={isOpen}
