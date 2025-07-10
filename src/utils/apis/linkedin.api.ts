@@ -127,7 +127,7 @@ export const refreshLinkedinToken = async () => {
     localStorage.removeItem("linkedin_user_id");
     localStorage.removeItem("linkedin_status");
     localStorage.removeItem("linkedin_token_type");
-    window.location.href = "/login"; // or navigate("/login")
+    window.location.href = "/workflow/linkedin"; // or navigate("/login")
     throw error;
   }
 };

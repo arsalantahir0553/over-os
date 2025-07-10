@@ -71,6 +71,14 @@ const LinkedinWorkflow = () => {
     setSelectedImages((prev) => [...prev, ...filesArray]);
   };
 
+  useEffect(() => {
+    const linkedinRefreshToken = localStorage.getItem("linkedin_access_token");
+    if (!linkedinRefreshToken) {
+      onOpen();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const removeImage = (index: number) => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   };
