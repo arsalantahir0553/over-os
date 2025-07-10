@@ -1,15 +1,20 @@
-import { useGetHistoryById } from "@/utils/apis/history.api";
+import { useCreateHistory, useGetHistoryById } from "@/utils/apis/history.api";
+import { useLoggedInUser } from "@/utils/apis/auth.api";
+import { usePublishGeneratedPost } from "@/utils/apis/linkedin.api";
+import { queryClient } from "@/utils/apis/query.client";
 import {
   Box,
+  Button,
+  Center,
   Flex,
+  Spinner,
   Text,
   Textarea,
+  useToast,
   VStack,
-  Spinner,
-  Center,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 
@@ -17,6 +22,14 @@ const LinkedinHistoryDetails = () => {
   const MotionText = motion(Text);
   const { historyId } = useParams<{ historyId: string }>();
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
+  const toast = useToast();
+
+  const [editablePost, setEditablePost] = useState<string>("");
+
+  const { data: user } = useLoggedInUser();
+  const { data, isLoading, error } = useGetHistoryById(historyId ?? "");
+  const { mutate: publishPost, isPending } = usePublishGeneratedPost();
+  const { mutate: createHistory } = useCreateHistory();
 
   const [typewriterText] = useTypewriter({
     words: [
@@ -29,7 +42,78 @@ const LinkedinHistoryDetails = () => {
     deleteSpeed: 10,
   });
 
-  const { data, isLoading, error } = useGetHistoryById(historyId ?? "");
+  useEffect(() => {
+    if (data?.generated_post) {
+      setEditablePost(data.generated_post);
+    }
+  }, [data]);
+
+  const handlePostToLinkedin = () => {
+    if (!editablePost.trim()) {
+      toast({
+        title: "Post is empty",
+        description: "Please enter or edit your post before publishing.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    publishPost(
+      {
+        user_prompt: data?.prompt || "",
+        post: {
+          text: editablePost,
+          image_path: data?.image_url || "",
+          url: "",
+        },
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Post published!",
+            description: "Your post was successfully shared on LinkedIn.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+
+          // Create history after successful post
+          if (user?.id) {
+            createHistory(
+              {
+                user_id: user.id,
+                prompt: data?.prompt || "",
+                generated_post: editablePost,
+                image_url: data?.image_url || "",
+                meta: JSON.stringify({
+                  source: "LinkedInHistoryDetails",
+                  timestamp: new Date().toISOString(),
+                }),
+              },
+              {
+                onSuccess: () => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["user-history", user.id, 10, 0],
+                  });
+                },
+              }
+            );
+          }
+        },
+        onError: () => {
+          toast({
+            title: "Failed to post",
+            description: "Something went wrong. Try again later.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        },
+      }
+    );
+  };
 
   if (isLoading) {
     return (
@@ -78,7 +162,7 @@ const LinkedinHistoryDetails = () => {
           </MotionText>
         </Box>
 
-        {/* Prompt Input */}
+        {/* Original Prompt */}
         <Flex direction="column" gap={3}>
           <Textarea
             isReadOnly
@@ -106,11 +190,11 @@ const LinkedinHistoryDetails = () => {
           />
         </Flex>
 
-        {/* Generated Text Output */}
+        {/* Editable Generated Post */}
         <Textarea
           ref={generatedTextRef}
-          isReadOnly
-          value={data?.generated_post || ""}
+          value={editablePost}
+          onChange={(e) => setEditablePost(e.target.value)}
           placeholder="AI-generated post will appear here"
           fontSize="md"
           minHeight="180px"
@@ -120,8 +204,24 @@ const LinkedinHistoryDetails = () => {
           border="none"
           overflow="hidden"
           _placeholder={{ color: "gray.500" }}
-          _focus={{ border: "none", boxShadow: "none" }}
+          _focus={{
+            border: "none",
+            boxShadow: "none",
+          }}
         />
+
+        {/* Post to LinkedIn Button */}
+        <Flex justify="flex-end">
+          <Button
+            onClick={handlePostToLinkedin}
+            isLoading={isPending}
+            bg="primary"
+            color="white"
+            _hover={{ bg: "brand.400" }}
+          >
+            Repost to LinkedIn
+          </Button>
+        </Flex>
       </VStack>
     </Box>
   );

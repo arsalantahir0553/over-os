@@ -194,7 +194,7 @@ const LinkedinWorkflow = () => {
 
     publishPost(
       {
-        user_id: linkedinUserId,
+        // user_id: linkedinUserId,
         user_prompt: userPrompt,
         post: {
           text: generatedText,

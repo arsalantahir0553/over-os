@@ -43,7 +43,6 @@ export const useGenerateLinkedinPrompt = () => {
 };
 
 export interface PublishPostPayload {
-  user_id: string;
   user_prompt: string;
   post: {
     text: string;
