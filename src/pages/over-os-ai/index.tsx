@@ -194,7 +194,7 @@ const DashboardHome = () => {
                 )}px`;
               }}
               onKeyDown={isCategoryPrompt ? () => {} : handleKeyDown}
-              color="text"
+              color={isCategoryPrompt ? "gray.500" : "text"}
               pr="2.5rem"
               rows={1} // Start with 1 visible row
             />
@@ -210,12 +210,13 @@ const DashboardHome = () => {
                   <Text
                     fontSize="xs"
                     fontWeight="semibold"
-                    color="gray.400"
+                    color="textDark"
                     px={2}
-                    py={1}
-                    bg={iconBg}
-                    rounded="md"
+                    pb={0.5}
+                    bg={"neon.cyan"}
+                    rounded="sm"
                     whiteSpace="nowrap"
+                    mb={"-11px"}
                   >
                     Coming Soon
                   </Text>

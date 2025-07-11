@@ -55,6 +55,10 @@ const customTheme = extendTheme({
         default: "gray.800",
         _dark: "gray.100",
       },
+      textDark: {
+        default: "gray.100",
+        _dark: "gray.900",
+      },
       surface: {
         default: "white",
         _dark: "brand.1000",
