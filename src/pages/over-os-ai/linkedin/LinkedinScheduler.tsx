@@ -55,8 +55,8 @@ const LinkedinScheduler = () => {
   return (
     <Box
       width="100%"
-      px={[4, 6, 12]}
-      py={[4, 6]}
+      px={[4, 4, 6, 12]}
+      py={[4, 4, 6]}
       mt={2}
       bg={cardBg}
       border="1px solid"
@@ -64,7 +64,10 @@ const LinkedinScheduler = () => {
       borderRadius="xl"
     >
       <VStack spacing={6} align="stretch" width="100%">
-        <Text fontSize="2xl" fontWeight="bold">
+        <Text
+          fontSize={["md", "xl"]}
+          fontWeight={{ md: "bold", base: "semibold" }}
+        >
           Schedule Settings
         </Text>
 
@@ -74,15 +77,15 @@ const LinkedinScheduler = () => {
           colorScheme="blue"
           variant="line"
         >
-          <TabList>
-            <Tab>One Time</Tab>
-            <Tab>Recurring</Tab>
+          <TabList flexWrap="wrap">
+            <Tab flex={1}>One Time</Tab>
+            <Tab flex={1}>Recurring</Tab>
           </TabList>
 
           <TabPanels>
             {/* ONE-TIME MODE */}
             <TabPanel px={0}>
-              <Flex direction={["column", "row"]} gap={4}>
+              <Flex direction={["column", "column", "row"]} gap={4} wrap="wrap">
                 <Flex
                   align="center"
                   gap={3}
@@ -91,7 +94,7 @@ const LinkedinScheduler = () => {
                   pl={3}
                   rounded="md"
                   flex="1"
-                  cursor={"pointer"}
+                  cursor="pointer"
                 >
                   <Box
                     className="transparent-datepicker"
@@ -107,7 +110,7 @@ const LinkedinScheduler = () => {
                       customInput={
                         <Flex align="center" gap={3} width="full">
                           <CalendarIcon width={18} />
-                          <Box flex={1}>
+                          <Box flex={1} fontSize={"sm"}>
                             {startDate.toLocaleDateString("en-US", {
                               month: "long",
                               day: "numeric",
@@ -126,6 +129,7 @@ const LinkedinScheduler = () => {
                   bg="surface"
                   borderColor="border"
                   flex="1"
+                  fontSize="sm"
                 />
               </Flex>
             </TabPanel>
@@ -138,13 +142,14 @@ const LinkedinScheduler = () => {
                   onChange={(e) => setRecurrence(e.target.value)}
                   bg="surface"
                   borderColor="border"
+                  fontSize="sm"
                 >
                   <option value="weekly">Weekly</option>
                   <option value="monthly">Monthly</option>
                 </Select>
 
                 {recurrence === "weekly" && (
-                  <SimpleGrid columns={[2, 4, 7]} spacing={2}>
+                  <SimpleGrid columns={[2, 3, 4, 7]} spacing={2}>
                     {daysOfWeek.map((day) => (
                       <Button
                         key={day}
@@ -199,7 +204,12 @@ const LinkedinScheduler = () => {
                       </Box>
                     )}
 
-                    <Flex gap={4} wrap="wrap" mt={4}>
+                    <Flex
+                      gap={4}
+                      wrap="wrap"
+                      mt={4}
+                      direction={["column", "row"]}
+                    >
                       <Box flex="1">
                         <Text fontSize="sm" mb={1} color="mutedText">
                           Start Date
@@ -251,7 +261,7 @@ const LinkedinScheduler = () => {
                       <Text fontSize="sm" color="mutedText">
                         Selected Dates:
                       </Text>
-                      <Flex wrap="wrap" gap={2}>
+                      <Flex wrap="wrap" gap={2} mt={2}>
                         {selectedDates.map((date, idx) => (
                           <Box
                             key={idx}
@@ -279,6 +289,8 @@ const LinkedinScheduler = () => {
             bg="primary"
             color="white"
             _hover={{ bg: "brand.400" }}
+            fontSize="sm"
+            size={{ md: "md", base: "sm" }}
           >
             Save Schedule
           </Button>

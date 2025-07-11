@@ -401,7 +401,7 @@ const LinkedinWorkflow = () => {
           />
           <Flex justify="space-between" gap={3}>
             <Button
-              bg="surfaceButton"
+              bg={showScheduler ? "brand.400" : "surfaceButton"}
               display={"flex"}
               gap={2}
               color="white"
