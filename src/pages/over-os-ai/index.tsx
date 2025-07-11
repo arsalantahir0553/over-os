@@ -101,7 +101,6 @@ const DashboardHome = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (userInput.trim() !== "") {
-        localStorage.setItem("runWorkflow", "true");
         navigate("/chat");
       }
     }

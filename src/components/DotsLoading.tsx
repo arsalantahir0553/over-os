@@ -13,7 +13,7 @@ export default function ChatLoadingDots() {
       alignItems="center"
       justifyContent="center"
       borderRadius="20px"
-      bg="gray.100"
+      bg="gray.1000"
     >
       {[0, 1, 2].map((i) => (
         <MotionBox
