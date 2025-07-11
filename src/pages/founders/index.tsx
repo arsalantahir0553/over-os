@@ -33,7 +33,7 @@ const Founders = () => {
     >
       {/* Intro */}
       <Text color="blue.500" fontWeight="semibold" mb={10} fontSize="sm">
-        — MEET FOUNDERS —
+        — MEET OUR FOUNDERS —
       </Text>
 
       {/* Headline */}

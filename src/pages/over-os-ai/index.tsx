@@ -13,7 +13,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { Clock10Icon, PlusIcon, Upload } from "lucide-react";
+import { Clock10Icon, PlusIcon, SendHorizonal, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
@@ -45,6 +45,9 @@ const DashboardHome = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatPrompt = localStorage.getItem("chat_prompt");
   const [isDone, setIsDone] = useState(false);
+  const [isCategoryPrompt, setIsCategoryPrompt] = useState(false);
+  const [showPlusTooltip, setShowPlusTooltip] = useState(false);
+  const [showScheduleTooltip, setShowScheduleTooltip] = useState(false);
   const [text] = useTypewriter({
     words: ["Cursor For Growth Marketing", "Vibe Coding", "Vibe Marketing"],
     delaySpeed: 2000,
@@ -73,6 +76,7 @@ const DashboardHome = () => {
   useEffect(() => {
     if (promptData?.prompt) {
       setUserInput(promptData.prompt);
+      setIsCategoryPrompt(true); // Mark that it's from category
     }
   }, [promptData, setUserInput]);
 
@@ -85,6 +89,13 @@ const DashboardHome = () => {
       localStorage.removeItem("chat_prompt");
     }
   }, [chatPrompt, setUserInput]);
+
+  const handleMobileTooltip = (
+    setFn: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    setFn(true);
+    setTimeout(() => setFn(false), 1500);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -175,6 +186,7 @@ const DashboardHome = () => {
               value={userInput}
               onChange={(e) => {
                 setUserInput(e.target.value);
+                setIsCategoryPrompt(false);
                 // Auto-expand logic:
                 e.currentTarget.style.height = "auto";
                 e.currentTarget.style.height = `${Math.min(
@@ -182,7 +194,7 @@ const DashboardHome = () => {
                   6 * 16 // 6rem in pixels (adjust based on your font size)
                 )}px`;
               }}
-              onKeyDown={handleKeyDown}
+              onKeyDown={isCategoryPrompt ? () => {} : handleKeyDown}
               color="text"
               pr="2.5rem"
               rows={1} // Start with 1 visible row
@@ -194,19 +206,42 @@ const DashboardHome = () => {
               top={{ md: "30%", base: "16%" }}
               transform="translateY(-50%)"
             >
-              <Tooltip label="Upload images" rounded="md">
-                <IconButton
-                  icon={<Upload size={16} />}
-                  aria-label="Upload"
-                  size="sm"
-                  bg={iconBg}
-                  color={iconColor}
-                  _hover={{ bg: iconHoverBg }}
-                  onClick={() => fileInputRef.current?.click()}
-                />
-              </Tooltip>
+              {isCategoryPrompt ? (
+                <Tooltip label="Coming Soon" rounded="md">
+                  <Text
+                    fontSize="xs"
+                    fontWeight="semibold"
+                    color="gray.400"
+                    px={2}
+                    py={1}
+                    bg={iconBg}
+                    rounded="md"
+                    whiteSpace="nowrap"
+                  >
+                    Coming Soon
+                  </Text>
+                </Tooltip>
+              ) : (
+                <Tooltip label="Send" rounded="md">
+                  <IconButton
+                    icon={<SendHorizonal size={16} />}
+                    aria-label="Send"
+                    size="sm"
+                    bg={iconBg}
+                    color={iconColor}
+                    _hover={{ bg: iconHoverBg }}
+                    onClick={() => {
+                      if (userInput.trim() !== "") {
+                        localStorage.setItem("runWorkflow", "true");
+                        navigate("/chat");
+                      }
+                    }}
+                  />
+                </Tooltip>
+              )}
             </Box>
           </InputGroup>
+
           <input
             type="file"
             accept="image/*"
@@ -264,7 +299,12 @@ const DashboardHome = () => {
           align={{ md: "center", base: "start" }}
           mt={-2}
         >
-          <Tooltip label="Add New" rounded="md">
+          <Tooltip
+            label="Coming Soon"
+            isOpen={showPlusTooltip}
+            rounded="md"
+            placement="top"
+          >
             <IconButton
               icon={<PlusIcon size={16} />}
               aria-label="Add"
@@ -272,6 +312,7 @@ const DashboardHome = () => {
               bg={iconBg}
               color={iconColor}
               _hover={{ bg: iconHoverBg }}
+              onClick={() => handleMobileTooltip(setShowPlusTooltip)}
             />
           </Tooltip>
 
@@ -280,6 +321,7 @@ const DashboardHome = () => {
             wrap="wrap"
             justifyContent="center"
             display={{ md: "flex", base: "none" }}
+            mx={2}
           >
             {topCategories.map((cat, index) => {
               const Icon = categoryIcons[cat] ?? FiMonitor;
@@ -319,16 +361,37 @@ const DashboardHome = () => {
             })}
           </Flex>
 
-          <Tooltip label="Schedule" rounded="md">
-            <IconButton
-              icon={<Clock10Icon size={16} />}
-              aria-label="Schedule"
-              size="sm"
-              bg={iconBg}
-              color={iconColor}
-              _hover={{ bg: iconHoverBg }}
-            />
-          </Tooltip>
+          <Flex gap={3}>
+            <Tooltip
+              label="Coming Soon"
+              isOpen={showScheduleTooltip}
+              rounded="md"
+              placement="top"
+            >
+              <IconButton
+                icon={<Clock10Icon size={16} />}
+                aria-label="Schedule"
+                size="sm"
+                bg={iconBg}
+                color={iconColor}
+                _hover={{ bg: iconHoverBg }}
+                onClick={() => handleMobileTooltip(setShowScheduleTooltip)}
+              />
+            </Tooltip>
+            <Flex justify="flex-start">
+              <Tooltip label="Upload images" rounded="md">
+                <IconButton
+                  icon={<Upload size={16} />}
+                  aria-label="Upload"
+                  size="sm"
+                  bg={iconBg}
+                  color={iconColor}
+                  _hover={{ bg: iconHoverBg }}
+                  onClick={() => fileInputRef.current?.click()}
+                />
+              </Tooltip>
+            </Flex>
+          </Flex>
         </Flex>
 
         <Flex

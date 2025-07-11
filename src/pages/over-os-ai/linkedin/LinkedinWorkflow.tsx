@@ -7,6 +7,8 @@ import {
   usePublishGeneratedPost,
 } from "@/utils/apis/linkedin.api";
 import { queryClient } from "@/utils/apis/query.client";
+import { RiCalendarScheduleLine } from "react-icons/ri";
+
 import {
   Box,
   Button,
@@ -25,7 +27,6 @@ import {
 import { motion } from "framer-motion";
 import { PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { MdOutlineSchedule } from "react-icons/md";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
 import LinkedinScheduler from "./LinkedinScheduler";
@@ -72,13 +73,13 @@ const LinkedinWorkflow = () => {
     setSelectedImages((prev) => [...prev, ...filesArray]);
   };
 
-  useEffect(() => {
-    const linkedinRefreshToken = localStorage.getItem("linkedin_access_token");
-    if (!linkedinRefreshToken) {
-      onOpen();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   const linkedinRefreshToken = localStorage.getItem("linkedin_access_token");
+  //   if (!linkedinRefreshToken) {
+  //     onOpen();
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   const removeImage = (index: number) => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
@@ -400,12 +401,18 @@ const LinkedinWorkflow = () => {
           />
           <Flex justify="space-between" gap={3}>
             <Button
+              bg="surfaceButton"
               display={"flex"}
               gap={2}
-              fontWeight={500}
+              color="white"
+              _hover={{ bg: "brand.400" }}
+              size={{ md: "md", base: "xs" }}
               onClick={() => setShowScheduler((prev) => !prev)}
             >
-              Schedule <MdOutlineSchedule />
+              Schedule{" "}
+              <Box as="span" mb={"-2px"}>
+                <RiCalendarScheduleLine />
+              </Box>
             </Button>
             <Box display={"flex"} gap={2}>
               <Flex gap={2} align="center">
@@ -413,7 +420,7 @@ const LinkedinWorkflow = () => {
                   <IconButton
                     icon={<Upload size={16} />}
                     aria-label="Upload"
-                    size="sm"
+                    size={{ md: "sm", base: "xs" }}
                     bg={iconBg}
                     color={iconColor}
                     _hover={{ bg: iconHoverBg }}
@@ -441,7 +448,7 @@ const LinkedinWorkflow = () => {
                 bg="surfaceButton"
                 color="white"
                 _hover={{ bg: "brand.400" }}
-                size={{ md: "md", base: "sm" }}
+                size={{ md: "md", base: "xs" }}
               >
                 Generate
               </Button>
