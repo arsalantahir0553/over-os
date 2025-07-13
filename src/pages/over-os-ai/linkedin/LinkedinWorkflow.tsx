@@ -58,7 +58,7 @@ const LinkedinWorkflow = () => {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [linkedinUserId, setLinkedinUserId] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
-  const [showLinkedinButton, setShowLinkedinButton] = useState<boolean>(false);
+
   const loadingIndexRef = useRef<number>(0);
   const intervalRef = useRef<number | null>(null);
   const toast = useToast();
@@ -155,7 +155,6 @@ const LinkedinWorkflow = () => {
           clearInterval(intervalRef.current!);
           setLoadingMessage(null);
           setGeneratedText(data.post_text);
-          setShowLinkedinButton(true);
           localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
           localStorage.setItem(LOCAL_STORAGE_KEYS.response, data.post_text);
           localStorage.setItem(
@@ -485,7 +484,7 @@ const LinkedinWorkflow = () => {
         )}
 
         {/* Submit */}
-        {showLinkedinButton && (
+        {generatedText && (
           <Flex justify="flex-end">
             <Button
               onClick={handleSubmit}
