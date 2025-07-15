@@ -30,6 +30,7 @@ import { useEffect, useRef, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
 import LinkedinScheduler from "./LinkedinScheduler";
+import TaskStepsList from "./TaskStepList";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -72,14 +73,6 @@ const LinkedinWorkflow = () => {
     const filesArray = Array.from(e.target.files);
     setSelectedImages((prev) => [...prev, ...filesArray]);
   };
-
-  // useEffect(() => {
-  //   const linkedinRefreshToken = localStorage.getItem("linkedin_access_token");
-  //   if (!linkedinRefreshToken) {
-  //     onOpen();
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   const removeImage = (index: number) => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
@@ -455,6 +448,11 @@ const LinkedinWorkflow = () => {
           </Flex>
 
           {showScheduler && <LinkedinScheduler />}
+
+          {/* ================================================== */}
+          {/* steps  */}
+          <TaskStepsList />
+          {/* ================================================== */}
 
           {isGenerating && loadingMessage && (
             <LoadingOverlay message={loadingMessage} />
