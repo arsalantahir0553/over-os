@@ -7,7 +7,6 @@ import {
   usePublishGeneratedPost,
 } from "@/utils/apis/linkedin.api";
 import { queryClient } from "@/utils/apis/query.client";
-import { RiCalendarScheduleLine } from "react-icons/ri";
 
 import {
   Box,
@@ -29,7 +28,6 @@ import { PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
-import LinkedinScheduler from "./LinkedinScheduler";
 import TaskStepsList from "./TaskStepList";
 
 const loadingMessages = [
@@ -67,7 +65,6 @@ const LinkedinWorkflow = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
-  const [showScheduler, setShowScheduler] = useState(false);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const filesArray = Array.from(e.target.files);
@@ -391,21 +388,7 @@ const LinkedinWorkflow = () => {
             pr="2.5rem"
             rows={1} // Start with 1 visible row
           />
-          <Flex justify="space-between" gap={3}>
-            <Button
-              bg={showScheduler ? "brand.400" : "surfaceButton"}
-              display={"flex"}
-              gap={2}
-              color="white"
-              _hover={{ bg: "brand.400" }}
-              size={{ md: "md", base: "xs" }}
-              onClick={() => setShowScheduler((prev) => !prev)}
-            >
-              Schedule{" "}
-              <Box as="span" mb={"-2px"}>
-                <RiCalendarScheduleLine />
-              </Box>
-            </Button>
+          <Flex justify="end" gap={3}>
             <Box display={"flex"} gap={2}>
               <Flex gap={2} align="center">
                 <Tooltip label="Upload images" rounded="md">
@@ -446,8 +429,6 @@ const LinkedinWorkflow = () => {
               </Button>
             </Box>
           </Flex>
-
-          {showScheduler && <LinkedinScheduler />}
 
           {/* ================================================== */}
           {/* steps  */}

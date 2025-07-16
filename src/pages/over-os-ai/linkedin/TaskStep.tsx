@@ -4,14 +4,8 @@ import { keyframes } from "@emotion/react";
 import { FiEdit } from "react-icons/fi";
 import { AiTwotoneBulb } from "react-icons/ai";
 import { GiCheckMark } from "react-icons/gi";
-import {
-  ArrowDown,
-  ArrowUp,
-  Check,
-  Hourglass,
-  TimerReset,
-} from "lucide-react";
-import { MdClose } from "react-icons/md";
+import { ArrowDown, ArrowUp, Check, Hourglass, TimerReset } from "lucide-react";
+import { IoIosClose } from "react-icons/io";
 import { RiAiGenerate } from "react-icons/ri";
 
 const spin = keyframes`
@@ -60,7 +54,7 @@ export const TaskStep = ({
   progress,
   isExpanded,
   onToggle,
-  index
+  index,
 }: TaskStepProps) => {
   const isPending = status === "pending";
   const isComplete = status === "complete";
@@ -145,109 +139,120 @@ export const TaskStep = ({
 
       {/* Expanded content */}
       <Collapse in={isExpanded} animateOpacity>
-  <Box px={4} pb={4} borderTop="1px solid" borderColor="gray.600">
-    {index === 0 ? (
-      <>
-        <Text fontSize="sm" color="mutedText" mt={3} textColor="brand.500">
-          Search Results
-        </Text>
-        <Box display="flex" mt={2} flexDirection="column" gap={2}>
-          {TrendingData.map((td, index) => (
-            <Box
-              bg="brand.900"
-              px={4}
-              rounded="lg"
-              key={index}
-              w="full"
-              py={6}
-              display="flex"
-              justifyContent="space-between"
-              alignContent="center"
-              justifyItems="center"
-            >
-              <Box>
-                <Text textColor="brand.500">{td.title}</Text>
-                <Flex gap={4} mt={1} align="center">
-                  <Text textColor="#8974D0">{td.subTitle}</Text>
-                  <Text fontSize="14px" mt={1} textColor="gray.400">
-                    {td.date}
-                  </Text>
-                </Flex>
+        <Box px={4} pb={4} borderTop="1px solid" borderColor="gray.600">
+          {index === 0 ? (
+            <>
+              <Text
+                fontSize="sm"
+                color="mutedText"
+                mt={3}
+                textColor="brand.500"
+              >
+                Search Results
+              </Text>
+              <Box display="flex" mt={2} flexDirection="column" gap={2}>
+                {TrendingData.map((td, index) => (
+                  <Box
+                    bg="brand.900"
+                    px={4}
+                    rounded="lg"
+                    key={index}
+                    w="full"
+                    py={6}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignContent="center"
+                    justifyItems="center"
+                  >
+                    <Box>
+                      <Text textColor="brand.500">{td.title}</Text>
+                      <Flex gap={4} mt={1} align="center">
+                        <Text textColor="#8974D0">{td.subTitle}</Text>
+                        <Text fontSize="14px" mt={1} textColor="gray.400">
+                          {td.date}
+                        </Text>
+                      </Flex>
+                    </Box>
+                    <Box
+                      p={1}
+                      h="fit-content"
+                      cursor={"pointer"}
+                      rounded="full"
+                      bg="#422737"
+                    >
+                      <IoIosClose color="red" />
+                    </Box>
+                  </Box>
+                ))}
               </Box>
-              <Box p={1} h="fit-content" cursor={'pointer'} rounded="full" bg="red.500">
-                <MdClose width={12} height={12} />
+            </>
+          ) : index === 1 ? (
+            <Box mt={3}>
+              <Text fontSize="sm" fontWeight="medium" color="brand.500" mb={2}>
+                Generated Summary
+              </Text>
+              <Box
+                bg="brand.900"
+                borderRadius="md"
+                p={4}
+                border="1px solid"
+                borderColor="gray.600"
+                color="text"
+                fontSize="sm"
+              >
+                OpenAI has unveiled GPT-5, marking a significant leap in AI
+                capabilities with enhanced multimodal processing that can
+                seamlessly handle text, images, audio, and video in real-time.
+                The new model demonstrates unprecedented reasoning abilities and
+                can maintain context across multiple interaction types, setting
+                a new standard for AI assistant technology. Early beta tests
+                show 40% improvement in complex problem-solving compared to
+                GPT-4.
               </Box>
+
+              <Flex gap={3} mt={4}>
+                <Box
+                  as="button"
+                  px={4}
+                  py={2}
+                  fontSize="sm"
+                  rounded="md"
+                  bg="gray.700"
+                  _hover={{ bg: "gray.600" }}
+                  color="white"
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                >
+                  <RiAiGenerate />
+                  Regenerate
+                </Box>
+                <Box
+                  as="button"
+                  px={4}
+                  py={2}
+                  fontSize="sm"
+                  rounded="md"
+                  bg="blue.600"
+                  _hover={{ bg: "blue.500" }}
+                  color="white"
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                >
+                  <FiEdit />
+                  Edit Summary
+                </Box>
+              </Flex>
             </Box>
-          ))}
-        </Box>
-      </>
-    ) : index === 1 ? (
-      <Box mt={3}>
-        <Text fontSize="sm" fontWeight="medium" color="brand.500" mb={2}>
-          Generated Summary
-        </Text>
-        <Box
-          bg="brand.900"
-          borderRadius="md"
-          p={4}
-          border="1px solid"
-          borderColor="gray.600"
-          color="text"
-          fontSize="sm"
-        >
-          OpenAI has unveiled GPT-5, marking a significant leap in AI capabilities
-          with enhanced multimodal processing that can seamlessly handle text,
-          images, audio, and video in real-time. The new model demonstrates
-          unprecedented reasoning abilities and can maintain context across
-          multiple interaction types, setting a new standard for AI assistant
-          technology. Early beta tests show 40% improvement in complex
-          problem-solving compared to GPT-4.
-        </Box>
-
-        <Flex gap={3} mt={4}>
-          <Box
-            as="button"
-            px={4}
-            py={2}
-            fontSize="sm"
-            rounded="md"
-            bg="gray.700"
-            _hover={{ bg: "gray.600" }}
-            color="white"
-            display="flex"
-            alignItems="center"
-            gap={2}
-          >
-            <RiAiGenerate />
-            Regenerate
-
-          </Box>
-          <Box
-            as="button"
-            px={4}
-            py={2}
-            fontSize="sm"
-            rounded="md"
-            bg="blue.600"
-            _hover={{ bg: "blue.500" }}
-            color="white"
-            display="flex"
-            alignItems="center"
-            gap={2}
-          >
-            <FiEdit />
-            Edit Summary
-          </Box>
-        </Flex>
-      </Box>
-    ) : index === 2 ? (
-      <Box mt={3}>
-        <Text fontSize="sm" fontWeight="medium" color="brand.500" mb={2}>
-          Draft LinkedIn Post
-        </Text>
-        <Box
-          as="textarea"
-          defaultValue={`🚀 The AI revolution just shifted into hyperdrive.
+          ) : index === 2 ? (
+            <Box mt={3}>
+              <Text fontSize="sm" fontWeight="medium" color="brand.500" mb={2}>
+                Draft LinkedIn Post
+              </Text>
+              <Box
+                as="textarea"
+                defaultValue={`🚀 The AI revolution just shifted into hyperdrive.
 
 OpenAI has unveiled GPT-5, marking a significant leap in AI capabilities with enhanced multimodal processing that can seamlessly handle text, images, audio, and video in real-time. The new model demonstrates unprecedented reasoning abilities and can maintain context across multiple interaction types, setting a new standard for AI assistant technology. Early beta tests show 40% improvement in complex problem-solving compared to GPT-4.
 
@@ -256,100 +261,97 @@ This isn't just an incremental update—it's a glimpse into a future where AI be
 What's your take on multimodal AI? Game-changer or overhyped?
 
 #AI #OpenAI #GPT5 #Technology #Innovation #FutureOfWork`}
-          rows={5}
-          bg="brand.900"
-          border="1px solid"
-          borderColor="gray.600"
-          borderRadius="md"
-          color="text"
-          fontSize="sm"
-          p={4}
-          w="full"
-          _focus={{ outline: "none", borderColor: "brand.500" }}
-        />
+                rows={5}
+                bg="brand.900"
+                border="1px solid"
+                borderColor="gray.600"
+                borderRadius="md"
+                color="text"
+                fontSize="sm"
+                p={4}
+                w="full"
+                _focus={{ outline: "none", borderColor: "brand.500" }}
+              />
 
-        <Flex gap={3} mt={4} flexWrap="wrap">
-          <Box
-            as="button"
-            px={4}
-            py={2}
-            fontSize="sm"
-            rounded="md"
-            bg="brand.500"
-            _hover={{ bg: "brand.500" }}
-            color="white"
-            display="flex"
-            alignItems="center"
-            gap={2}
-          >
-            <GiCheckMark />
-            Agree & Continue
-          </Box>
-          <Box
-            as="button"
-            px={4}
-            py={2}
-            fontSize="sm"
-            rounded="md"
-            bg="gray.700"
-            _hover={{ bg: "gray.600" }}
-            color="white"
-            display="flex"
-            alignItems="center"
-            gap={2}
-          >
-            <RiAiGenerate />
-            Regenerate
-          </Box>
-          <Box
-            as="button"
-            px={4}
-            py={2}
-            fontSize="sm"
-            rounded="md"
-            bg="gray.700"
-            _hover={{ bg: "gray.600" }}
-            color="white"
-            display="flex"
-            alignItems="center"
-            gap={2}
-          >
-            <AiTwotoneBulb />
-            Change Tone
-          </Box>
-        </Flex>
-      </Box>
-    ) : (
-      <Box mt={3}>
-  <Text fontSize="sm" fontWeight="medium" color="brand.500" mb={2}>
-    Publishing Options
-  </Text>
-  <Box
-    bg="brand.900"
-    borderRadius="md"
-    p={4}
-    border="1px solid"
-    borderColor="gray.600"
-    color="text"
-    fontSize="sm"
-  >
-    This step will be available once the LinkedIn post is approved. You'll be able to:
-    <Box as="ul" pl={4} mt={2} style={{ listStyleType: "disc" }}>
-      <li>Schedule the post for optimal timing</li>
-      <li>Preview how it will appear on LinkedIn</li>
-      <li>Add additional hashtags or mentions</li>
-      <li>Choose posting time and audience</li>
-    </Box>
-  </Box>
-  <Scheduler />
-</Box>
-
-    )}
-  </Box>
-</Collapse>
-
-
-
+              <Flex gap={3} mt={4} flexWrap="wrap">
+                <Box
+                  as="button"
+                  px={4}
+                  py={2}
+                  fontSize="sm"
+                  rounded="md"
+                  bg="brand.500"
+                  _hover={{ bg: "brand.500" }}
+                  color="white"
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                >
+                  <GiCheckMark />
+                  Agree & Continue
+                </Box>
+                <Box
+                  as="button"
+                  px={4}
+                  py={2}
+                  fontSize="sm"
+                  rounded="md"
+                  bg="gray.700"
+                  _hover={{ bg: "gray.600" }}
+                  color="white"
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                >
+                  <RiAiGenerate />
+                  Regenerate
+                </Box>
+                <Box
+                  as="button"
+                  px={4}
+                  py={2}
+                  fontSize="sm"
+                  rounded="md"
+                  bg="gray.700"
+                  _hover={{ bg: "gray.600" }}
+                  color="white"
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                >
+                  <AiTwotoneBulb />
+                  Change Tone
+                </Box>
+              </Flex>
+            </Box>
+          ) : (
+            <Box mt={3}>
+              <Text fontSize="sm" fontWeight="medium" color="brand.500" mb={2}>
+                Publishing Options
+              </Text>
+              <Box
+                bg="brand.900"
+                borderRadius="md"
+                p={4}
+                border="1px solid"
+                borderColor="gray.600"
+                color="text"
+                fontSize="sm"
+              >
+                This step will be available once the LinkedIn post is approved.
+                You'll be able to:
+                <Box as="ul" pl={4} mt={2} style={{ listStyleType: "disc" }}>
+                  <li>Schedule the post for optimal timing</li>
+                  <li>Preview how it will appear on LinkedIn</li>
+                  <li>Add additional hashtags or mentions</li>
+                  <li>Choose posting time and audience</li>
+                </Box>
+              </Box>
+              <Scheduler />
+            </Box>
+          )}
+        </Box>
+      </Collapse>
     </Box>
   );
 };

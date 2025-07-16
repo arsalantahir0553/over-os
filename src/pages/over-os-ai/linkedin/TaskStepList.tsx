@@ -3,7 +3,7 @@ import { useState } from "react";
 import { TaskStep } from "./TaskStep";
 
 const TaskStepsList = () => {
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(0); // First one open by default
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null); // First one open by default
 
   const steps = [
     {
@@ -37,12 +37,12 @@ const TaskStepsList = () => {
     <VStack spacing={4} py={4} align="stretch">
       {steps.map((step, idx) => (
         <TaskStep
-  key={idx}
-  {...step}
-  index={idx} // 👈 pass index
-  isExpanded={expandedIndex === idx}
-  onToggle={() => setExpandedIndex(expandedIndex === idx ? null : idx)}
-/>
+          key={idx}
+          {...step}
+          index={idx} // 👈 pass index
+          isExpanded={expandedIndex === idx}
+          onToggle={() => setExpandedIndex(expandedIndex === idx ? null : idx)}
+        />
       ))}
     </VStack>
   );
