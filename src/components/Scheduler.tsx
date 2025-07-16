@@ -58,7 +58,7 @@ const Scheduler = () => {
       mt={2}
       bg={cardBg}
       border="1px solid"
-      borderColor={"gray.600"}
+      borderColor={"border"}
       borderRadius="xl"
     >
       <VStack spacing={6} align="stretch" width="100%">
@@ -149,11 +149,11 @@ const Scheduler = () => {
                   </Box>
                 </Flex>
 
-                <Box bg="brand.1000" px={4} py={3} rounded="md">
+                <Box bg="textDark" px={4} py={3} rounded="md">
                   <Text color="blue.300" fontSize="14px" fontWeight="semibold">
                     Schedule Preview:
                   </Text>
-                  <Text fontSize="14px" color="gray.300" mt={1}>
+                  <Text fontSize="14px" color="text" mt={1}>
                     {getSchedulePreview()}
                   </Text>
                 </Box>

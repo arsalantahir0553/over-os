@@ -79,6 +79,10 @@ const customTheme = extendTheme({
         default: "brand.500",
         _dark: "gray.1000",
       },
+      surfaceTimeline: {
+        default: "gray.100",
+        _dark: "gray.1000",
+      },
       bg: {
         default: "white",
         _dark: "brand.900",
@@ -86,6 +90,22 @@ const customTheme = extendTheme({
       primary: {
         default: "brand.500",
         _dark: "brand.400",
+      },
+      universalGreen: {
+        default: "green.200",
+        _dark: "green.500",
+      },
+      universalBlue: {
+        default: "blue.200",
+        _dark: "blue.500",
+      },
+      universalRed: {
+        default: "red.200",
+        _dark: "red.500",
+      },
+      universalGray: {
+        default: "gray.200",
+        _dark: "gray.500",
       },
       accent: {
         default: "neon.green",

@@ -61,10 +61,10 @@ export const TaskStep = ({
   const isInProgress = status === "in-progress";
 
   const borderColor = isComplete
-    ? "green.500"
+    ? "universalGreen"
     : isInProgress
-    ? "blue.500"
-    : "gray.600";
+    ? "universalBlue"
+    : "universalGray";
 
   const icon = {
     complete: <Check size={20} color="#22c55e" />,
@@ -85,7 +85,7 @@ export const TaskStep = ({
       borderRadius="md"
       borderWidth="1px"
       borderColor={borderColor}
-      bg="surfaceButton"
+      bg="surfaceTimeline"
     >
       <Flex
         align="center"
@@ -97,7 +97,7 @@ export const TaskStep = ({
       >
         {/* Left: Icon + Text */}
         <Flex align="center" gap={3}>
-          <Box mt={1} p={3} rounded="lg" bg="brand.1000">
+          <Box mt={1} p={3} rounded="lg" bg="surface">
             {icon}
           </Box>
           <Box>
@@ -139,7 +139,7 @@ export const TaskStep = ({
 
       {/* Expanded content */}
       <Collapse in={isExpanded} animateOpacity>
-        <Box px={4} pb={4} borderTop="1px solid" borderColor="gray.600">
+        <Box px={4} pb={4} borderTop="1px solid" borderColor="border">
           {index === 0 ? (
             <>
               <Text
@@ -153,7 +153,7 @@ export const TaskStep = ({
               <Box display="flex" mt={2} flexDirection="column" gap={2}>
                 {TrendingData.map((td, index) => (
                   <Box
-                    bg="brand.900"
+                    bg="bg"
                     px={4}
                     rounded="lg"
                     key={index}
@@ -178,9 +178,9 @@ export const TaskStep = ({
                       h="fit-content"
                       cursor={"pointer"}
                       rounded="full"
-                      bg="#422737"
+                      bg="universalRed"
                     >
-                      <IoIosClose color="red" />
+                      <IoIosClose color="black" />
                     </Box>
                   </Box>
                 ))}
@@ -192,11 +192,11 @@ export const TaskStep = ({
                 Generated Summary
               </Text>
               <Box
-                bg="brand.900"
+                bg="bg"
                 borderRadius="md"
                 p={4}
                 border="1px solid"
-                borderColor="gray.600"
+                borderColor="border"
                 color="text"
                 fontSize="sm"
               >
@@ -262,9 +262,9 @@ What's your take on multimodal AI? Game-changer or overhyped?
 
 #AI #OpenAI #GPT5 #Technology #Innovation #FutureOfWork`}
                 rows={5}
-                bg="brand.900"
+                bg="bg"
                 border="1px solid"
-                borderColor="gray.600"
+                borderColor="border"
                 borderRadius="md"
                 color="text"
                 fontSize="sm"
@@ -330,11 +330,11 @@ What's your take on multimodal AI? Game-changer or overhyped?
                 Publishing Options
               </Text>
               <Box
-                bg="brand.900"
+                bg="bg"
                 borderRadius="md"
                 p={4}
                 border="1px solid"
-                borderColor="gray.600"
+                borderColor="border"
                 color="text"
                 fontSize="sm"
               >
