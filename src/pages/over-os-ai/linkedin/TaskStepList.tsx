@@ -1,4 +1,4 @@
-import { VStack } from "@chakra-ui/react";
+import { Box, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 import { TaskStep } from "./TaskStep";
 
@@ -34,15 +34,16 @@ const TaskStepsList = () => {
   ];
 
   return (
-    <VStack spacing={4} py={4} align="stretch">
+    <VStack spacing={3} py={3} align="stretch" width="100%" px={{ base: 2, md: 0 }}>
       {steps.map((step, idx) => (
-        <TaskStep
-          key={idx}
-          {...step}
-          index={idx} // 👈 pass index
-          isExpanded={expandedIndex === idx}
-          onToggle={() => setExpandedIndex(expandedIndex === idx ? null : idx)}
-        />
+        <Box key={idx} width="100%" maxW="100%" overflow="hidden">
+          <TaskStep
+            {...step}
+            index={idx}
+            isExpanded={expandedIndex === idx}
+            onToggle={() => setExpandedIndex(expandedIndex === idx ? null : idx)}
+          />
+        </Box>
       ))}
     </VStack>
   );

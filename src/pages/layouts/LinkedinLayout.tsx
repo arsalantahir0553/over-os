@@ -35,7 +35,7 @@ const LinkedinLayout = () => {
           <Box
             flex="1"
             overflowY="auto"
-            p={6}
+            p={{ md: 6, base: 3 }}
             bg="surface"
             mx={3}
             mt={3}

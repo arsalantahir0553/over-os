@@ -86,35 +86,61 @@ export const TaskStep = ({
       borderWidth="1px"
       borderColor={borderColor}
       bg="surfaceTimeline"
+      width="100%"
     >
       <Flex
-        align="center"
+        align={{ base: "flex-start", md: "center" }}
         justify="space-between"
-        p={4}
+        p={{ base: 3, md: 4 }}
         transition="all 0.2s"
         cursor="pointer"
         onClick={onToggle}
+        flexDirection={{ base: "column", md: "row" }}
+        gap={{ base: 3, md: 0 }}
       >
         {/* Left: Icon + Text */}
-        <Flex align="center" gap={3}>
-          <Box mt={1} p={3} rounded="lg" bg="surface">
+        <Flex align="center" gap={3} width={{ base: "100%", md: "auto" }}>
+          <Box
+            mt={{ base: 0, md: 1 }}
+            p={{ base: 2, md: 3 }}
+            rounded="lg"
+            bg="surface"
+          >
             {icon}
           </Box>
-          <Box>
-            <Text fontWeight="semibold" fontSize="md" color="text">
+          <Box flex={1} minWidth={0}>
+            <Text
+              fontWeight="semibold"
+              fontSize={{ base: "sm", md: "md" }}
+              color="text"
+              noOfLines={1}
+            >
               {title}
             </Text>
-            <Text fontSize="sm" color="mutedText">
+            <Text
+              fontSize={{ base: "xs", md: "sm" }}
+              color="mutedText"
+              noOfLines={1}
+            >
               {description}
             </Text>
           </Box>
         </Flex>
 
         {/* Right: Progress + Toggle */}
-        <Flex gap={4} align="center">
-          <Box minW="100px" textAlign="right">
+        <Flex
+          gap={{ base: 2, md: 4 }}
+          align="center"
+          width={{ base: "100%", md: "auto" }}
+          justifyContent={{ base: "space-between", md: "flex-end" }}
+          pl={{ base: "48px", md: 0 }}
+        >
+          <Box
+            minW={{ base: "80px", md: "100px" }}
+            textAlign={{ base: "left", md: "right" }}
+          >
             {isPending ? (
-              <Text fontSize="sm" color="gray.500">
+              <Text fontSize={{ base: "xs", md: "sm" }} color="gray.500">
                 Waiting
               </Text>
             ) : (
@@ -125,21 +151,26 @@ export const TaskStep = ({
                   colorScheme={progressColor}
                   borderRadius="md"
                   mb={1}
+                  display={{ base: "none", sm: "block" }}
                 />
-                <Text fontSize="xs" color="gray.400">
-                  {progress}%
+                <Text fontSize={{ base: "xs", md: "xs" }} color="gray.400">
+                  {progress}% {isInProgress ? "Complete" : ""}
                 </Text>
               </>
             )}
           </Box>
-
           {isExpanded ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
         </Flex>
       </Flex>
 
       {/* Expanded content */}
       <Collapse in={isExpanded} animateOpacity>
-        <Box px={4} pb={4} borderTop="1px solid" borderColor="border">
+        <Box
+          px={{ base: 3, md: 4 }}
+          py={4}
+          borderTop="1px solid"
+          borderColor="border"
+        >
           {index === 0 ? (
             <>
               <Text
@@ -150,19 +181,26 @@ export const TaskStep = ({
               >
                 Search Results
               </Text>
-              <Box display="flex" mt={2} flexDirection="column" gap={2}>
+              <Box
+                display="flex"
+                mt={2}
+                flexDirection="column"
+                gap={2}
+                overflowX="auto"
+              >
                 {TrendingData.map((td, index) => (
                   <Box
                     bg="bg"
-                    px={4}
+                    px={{ base: 3, md: 4 }}
                     rounded="lg"
                     key={index}
                     w="full"
-                    py={6}
+                    minW="280px"
+                    py={{ base: 4, md: 6 }}
                     display="flex"
                     justifyContent="space-between"
-                    alignContent="center"
-                    justifyItems="center"
+                    alignItems="center"
+                    gap={2}
                   >
                     <Box>
                       <Text textColor="brand.500">{td.title}</Text>
@@ -229,16 +267,17 @@ export const TaskStep = ({
                 </Box>
                 <Box
                   as="button"
-                  px={4}
-                  py={2}
-                  fontSize="sm"
+                  px={3}
+                  py={1.5}
+                  fontSize={{ base: "xs", sm: "sm" }}
                   rounded="md"
                   bg="blue.600"
                   _hover={{ bg: "blue.500" }}
                   color="white"
                   display="flex"
                   alignItems="center"
-                  gap={2}
+                  gap={1}
+                  whiteSpace="nowrap"
                 >
                   <FiEdit />
                   Edit Summary
@@ -273,19 +312,20 @@ What's your take on multimodal AI? Game-changer or overhyped?
                 _focus={{ outline: "none", borderColor: "brand.500" }}
               />
 
-              <Flex gap={3} mt={4} flexWrap="wrap">
+              <Flex gap={2} mt={4} flexWrap="wrap">
                 <Box
                   as="button"
-                  px={4}
-                  py={2}
-                  fontSize="sm"
+                  px={3}
+                  py={1.5}
+                  fontSize={{ base: "xs", sm: "sm" }}
                   rounded="md"
                   bg="brand.500"
                   _hover={{ bg: "brand.500" }}
                   color="white"
                   display="flex"
                   alignItems="center"
-                  gap={2}
+                  gap={1}
+                  whiteSpace="nowrap"
                 >
                   <GiCheckMark />
                   Agree & Continue

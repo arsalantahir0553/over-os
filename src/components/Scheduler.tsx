@@ -53,27 +53,28 @@ const Scheduler = () => {
   return (
     <Box
       width="100%"
-      px={[4, 4, 6, 4]}
-      py={[4, 4, 4]}
+      px={{ base: 3, md: 4, lg: 6 }}
+      py={{ base: 3, md: 4 }}
       mt={2}
       bg={cardBg}
       border="1px solid"
-      borderColor={"border"}
+      borderColor="border"
       borderRadius="xl"
     >
       <VStack spacing={6} align="stretch" width="100%">
-        <Flex justify="space-between" align="center">
-          <Flex align="center" gap={2}>
-            <LuClock />
-            <Text fontSize="sm" fontWeight="medium" color="brand.500">
+        <Flex justify="space-between" align="center" flexWrap="wrap" gap={2}>
+          <Flex align="center" gap={2} flexShrink={0}>
+            <LuClock size={18} />
+            <Text fontSize={{ base: 'sm', md: 'md' }} fontWeight="medium" color="brand.500">
               Schedule LinkedIn Publishing
             </Text>
           </Flex>
           <Button
-            size="sm"
+            size={{ base: 'xs', sm: 'sm' }}
             bg="blue.600"
             color="white"
             _hover={{ bg: "blue.500" }}
+            flexShrink={0}
           >
             Scheduled
           </Button>
@@ -85,17 +86,17 @@ const Scheduler = () => {
           colorScheme="blue"
           variant="line"
         >
-          <TabList>
-            <Tab>One Time</Tab>
-            <Tab>Recurring</Tab>
+          <TabList overflowX="auto" py={1}>
+            <Tab fontSize={{ base: 'sm', md: 'md' }} whiteSpace="nowrap">One Time</Tab>
+            <Tab fontSize={{ base: 'sm', md: 'md' }} whiteSpace="nowrap">Recurring</Tab>
           </TabList>
 
           <TabPanels>
             {/* ---------------- ONE-TIME ---------------- */}
             <TabPanel px={0}>
               <VStack spacing={4} align="stretch">
-                <Flex gap={4} wrap="wrap" align="center">
-                  <Box flex="1">
+                <Flex gap={{ base: 3, md: 4 }} flexWrap="wrap">
+                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Frequency
                     </Text>
@@ -109,11 +110,11 @@ const Scheduler = () => {
                     </Select>
                   </Box>
 
-                  <Box flex="1">
+                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Days
                     </Text>
-                    <SimpleGrid columns={7} spacing={2}>
+                    <SimpleGrid columns={7} spacing={{ base: 1, md: 2 }}>
                       {fullDayMap.map((day, idx) => (
                         <Button
                           key={idx}
@@ -125,8 +126,9 @@ const Scheduler = () => {
                             selectedDays.includes(day) ? "blue" : "gray"
                           }
                           onClick={() => toggleDay(day)}
-                          w={"40px"}
-                          h={"40px"}
+                          w={{ base: '32px', md: '40px' }}
+                          h={{ base: '32px', md: '40px' }}
+                          minW={{ base: '32px', md: '40px' }}
                         >
                           {daysOfWeek[idx]}
                         </Button>
@@ -134,7 +136,7 @@ const Scheduler = () => {
                     </SimpleGrid>
                   </Box>
 
-                  <Box flex="1">
+                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Time
                     </Text>
@@ -149,11 +151,11 @@ const Scheduler = () => {
                   </Box>
                 </Flex>
 
-                <Box bg="textDark" px={4} py={3} rounded="md">
-                  <Text color="blue.300" fontSize="14px" fontWeight="semibold">
+                <Box bg="textDark" px={{ base: 3, md: 4 }} py={3} rounded="md" overflowX="auto">
+                  <Text color="blue.300" fontSize={{ base: 'xs', sm: 'sm' }} fontWeight="semibold" whiteSpace="nowrap">
                     Schedule Preview:
                   </Text>
-                  <Text fontSize="14px" color="text" mt={1}>
+                  <Text fontSize={{ base: 'xs', sm: 'sm' }} color="text" mt={1}>
                     {getSchedulePreview()}
                   </Text>
                 </Box>
@@ -163,8 +165,8 @@ const Scheduler = () => {
             {/* ---------------- RECURRING ---------------- */}
             <TabPanel px={0}>
               <VStack spacing={4} align="stretch">
-                <Flex gap={4} wrap="wrap">
-                  <Box flex="1">
+                <Flex gap={{ base: 3, md: 4 }} flexWrap="wrap">
+                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Frequency
                     </Text>
@@ -180,11 +182,11 @@ const Scheduler = () => {
                     </Select>
                   </Box>
 
-                  <Box flex="1">
+                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Days
                     </Text>
-                    <SimpleGrid columns={7} spacing={2}>
+                    <SimpleGrid columns={7} spacing={{ base: 1, md: 2 }}>
                       {fullDayMap.map((day, idx) => (
                         <Button
                           key={idx}
@@ -196,8 +198,9 @@ const Scheduler = () => {
                             selectedDays.includes(day) ? "blue" : "gray"
                           }
                           onClick={() => toggleDay(day)}
-                          w={"40px"}
-                          h={"40px"}
+                          w={{ base: '32px', md: '40px' }}
+                          h={{ base: '32px', md: '40px' }}
+                          minW={{ base: '32px', md: '40px' }}
                         >
                           {daysOfWeek[idx]}
                         </Button>
@@ -205,7 +208,7 @@ const Scheduler = () => {
                     </SimpleGrid>
                   </Box>
 
-                  <Box flex="1">
+                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Time
                     </Text>
@@ -220,8 +223,8 @@ const Scheduler = () => {
                   </Box>
                 </Flex>
 
-                <Flex gap={4} wrap="wrap">
-                  <Box flex="1">
+                <Flex gap={{ base: 3, md: 4 }} flexWrap="wrap">
+                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Duration
                     </Text>
@@ -241,7 +244,7 @@ const Scheduler = () => {
                     </Select>
                   </Box>
 
-                  <Box flex="1">
+                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Start Date
                     </Text>
@@ -251,6 +254,7 @@ const Scheduler = () => {
                       border="1px solid"
                       borderColor="border"
                       className="transparent-datepicker"
+                      w="100%"
                     >
                       <DatePicker
                         selected={startDate}
@@ -261,7 +265,7 @@ const Scheduler = () => {
                     </Box>
                   </Box>
 
-                  <Box flex="1">
+                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
                     <Text fontSize="sm" mb={1} color="mutedText">
                       End Date
                     </Text>
@@ -271,6 +275,7 @@ const Scheduler = () => {
                       border="1px solid"
                       borderColor="border"
                       className="transparent-datepicker"
+                      w="100%"
                     >
                       <DatePicker
                         selected={endDate}
@@ -282,11 +287,11 @@ const Scheduler = () => {
                   </Box>
                 </Flex>
 
-                <Box bg="brand.1000" px={4} py={3} rounded="md">
-                  <Text color="blue.300" fontSize="14px" fontWeight="semibold">
+                <Box bg="brand.1000" px={{ base: 3, md: 4 }} py={3} rounded="md" overflowX="auto">
+                  <Text color="blue.300" fontSize={{ base: 'xs', sm: 'sm' }} fontWeight="semibold" whiteSpace="nowrap">
                     Schedule Preview:
                   </Text>
-                  <Text fontSize="14px" color="gray.300" mt={1}>
+                  <Text fontSize={{ base: 'xs', sm: 'sm' }} color="gray.300" mt={1}>
                     {getSchedulePreview()}
                   </Text>
                 </Box>
