@@ -432,7 +432,7 @@ const LinkedinWorkflow = () => {
 
           {/* ================================================== */}
           {/* steps  */}
-          <TaskStepsList />
+          {/* <TaskStepsList /> */}
           {/* ================================================== */}
 
           {isGenerating && loadingMessage && (
