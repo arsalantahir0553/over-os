@@ -30,6 +30,7 @@ import WaitingList from "./pages/waiting-list";
 import HomeWorkflowDetails from "./pages/workflow-details";
 import { cleanExpiredUserMeta } from "./utils/helpers/auth.helper";
 import WorkflowTest from "./pages/test/WorkflowTest";
+import DjangoTest from "./pages/test/DjangoTest";
 
 const App = () => {
   useEffect(() => {
@@ -73,6 +74,7 @@ const App = () => {
           <Route element={<LinkedinLayout />}>
             <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
             <Route path="/workflow/linkedin-test" element={<WorkflowTest />} />
+            <Route path="/workflow/django" element={<DjangoTest />} />
             <Route
               path="/workflow/linkedin/:historyId"
               element={<LinkedinHistoryDetails />}
