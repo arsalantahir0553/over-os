@@ -35,7 +35,7 @@ import { PiRankingThin } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-import { useLoggedInUser, useLogout } from "@/utils/apis/auth.api";
+import { useLogout } from "@/utils/apis/auth.api";
 import { useWorkflowCategories } from "@/utils/apis/workflow.api";
 import LogoCollapsed from "../../assets/svgs/logo-collapsed.svg";
 import Logo from "@/assets/svgs/logo-beta.svg";
@@ -62,7 +62,9 @@ const DashboardTopbar = ({
 any) => {
   const { colorMode, toggleColorMode } = useColorMode();
   const navigate = useNavigate();
-  const { data: User } = useLoggedInUser();
+  const token = localStorage.getItem("token");
+  const userName = localStorage.getItem("user_name");
+  // const { data: User } = useLoggedInUser();
   const logout = useLogout();
   const { data: categories = [] } = useWorkflowCategories();
 
@@ -240,11 +242,11 @@ any) => {
               <Divider my={4} />
 
               {/* User Section */}
-              {User ? (
+              {token ? (
                 <Flex align="center" gap={3} px={2}>
-                  <Avatar size="sm" name={User.name} />
+                  <Avatar size="sm" name={userName || ""} />
                   <Flex direction="column">
-                    <Text fontSize="sm">{User.name}</Text>
+                    <Text fontSize="sm">{userName}</Text>
                     <Button
                       size="xs"
                       mt={1}

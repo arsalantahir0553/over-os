@@ -6,14 +6,25 @@ function GoogleLoginButton() {
   const navigate = useNavigate();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSuccess = async (credentialResponse: any) => {
+    console.log("credentialResponse", credentialResponse);
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/user/google`,
+        `${import.meta.env.VITE_DJANGO_URL}/google/`,
         {
-          token: credentialResponse.credential,
+          access_token: credentialResponse.credential,
         }
       );
-      localStorage.setItem("token", res.data.token);
+      console.log("res", res);
+      localStorage.setItem("token", res.data.data.access);
+      localStorage.setItem("refresh_token", res.data.data.refresh);
+      localStorage.setItem(
+        "is_linkedin_connected",
+        res.data.data.is_linkedin_connected
+      );
+      localStorage.setItem(
+        "user_name",
+        res.data.data.first_name + " " + res.data.data.last_name
+      );
       navigate("/dashboard");
     } catch (err) {
       console.error(err);

@@ -78,15 +78,15 @@ const getLoggedInUser = async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // Check for 401 Unauthorized
-    if (
-      axios.isAxiosError(error) &&
-      error.response?.status === 401 &&
-      error.response?.data?.message === "Invalid or expired token"
-    ) {
-      // Remove token and optionally reload or redirect
-      localStorage.removeItem("token");
-      window.location.href = "https://overos.xyz";
-    }
+    // if (
+    //   axios.isAxiosError(error) &&
+    //   error.response?.status === 401 &&
+    //   error.response?.data?.message === "Invalid or expired token"
+    // ) {
+    //   // Remove token and optionally reload or redirect
+    //   localStorage.removeItem("token");
+    //   window.location.href = "https://overos.xyz";
+    // }
 
     throw error; // Let React Query handle the error
   }

@@ -9,8 +9,8 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-  SkeletonCircle,
-  SkeletonText,
+  // SkeletonCircle,
+  // SkeletonText,
   Text,
   useBreakpointValue,
   VStack,
@@ -21,7 +21,7 @@ import {
   ChevronRightIcon,
   ChevronUpIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   FiBookOpen,
   FiLogOut,
@@ -38,10 +38,10 @@ import MyWorkflowsIcon from "../../../assets/svgs/my-workflows.svg";
 import NewMessageIcon from "../../../assets/svgs/new-message.svg";
 import SettingsIcon from "../../../assets/svgs/settings.svg";
 
-import { useLoggedInUser, useLogout } from "@/utils/apis/auth.api";
+import { useLogout } from "@/utils/apis/auth.api";
 
 import {
-  useGetUserHistory,
+  // useGetUserHistory,
   type HistoryResponse,
 } from "@/utils/apis/history.api";
 import { useWorkflowCategories } from "@/utils/apis/workflow.api";
@@ -71,33 +71,34 @@ const LinkedinSidebar = () => {
   const [historyOffset, setHistoryOffset] = useState(0);
   const [historyData, setHistoryData] = useState<HistoryResponse[]>([]);
   const [hasMoreHistory, setHasMoreHistory] = useState(true);
-
+  const token = localStorage.getItem("token");
+  const userName = localStorage.getItem("user_name");
   const responsiveIsExpanded = useBreakpointValue({
     base: false,
     md: isExpanded,
   });
 
-  const { data: User, isLoading: isUserLoading } = useLoggedInUser();
-  const { data: historyPage, isFetching: isFetchingHistory } =
-    useGetUserHistory(User?.id, historyLimit, historyOffset);
+  // const { data: User, isLoading: isUserLoading } = useLoggedInUser();
+  // const { data: historyPage, isFetching: isFetchingHistory } =
+  //   useGetUserHistory(User?.id, historyLimit, historyOffset);
   const handleNavigate = (category: string) => {
     navigate(`/workflow/category/${encodeURIComponent(category)}`);
   };
 
-  useEffect(() => {
-    if (historyPage?.data) {
-      setHistoryData((prev) =>
-        historyOffset === 0 ? historyPage.data : [...prev, ...historyPage.data]
-      );
+  // useEffect(() => {
+  //   if (historyPage?.data) {
+  //     setHistoryData((prev) =>
+  //       historyOffset === 0 ? historyPage.data : [...prev, ...historyPage.data]
+  //     );
 
-      const total = historyPage.pagination?.total || 0;
-      if (historyOffset + historyLimit >= total) {
-        setHasMoreHistory(false);
-      } else {
-        setHasMoreHistory(true);
-      }
-    }
-  }, [historyLimit, historyOffset, historyPage]);
+  //     const total = historyPage.pagination?.total || 0;
+  //     if (historyOffset + historyLimit >= total) {
+  //       setHasMoreHistory(false);
+  //     } else {
+  //       setHasMoreHistory(true);
+  //     }
+  //   }
+  // }, [historyLimit, historyOffset, historyPage]);
 
   const handleNewChat = () => {
     localStorage.removeItem("linkedin_prompt");
@@ -240,7 +241,7 @@ const LinkedinSidebar = () => {
                       bg: "transparent",
                     }}
                     width="100%"
-                    isLoading={isFetchingHistory}
+                    // isLoading={isFetchingHistory}
                   >
                     Show More
                   </Button>
@@ -259,8 +260,9 @@ const LinkedinSidebar = () => {
 
       {/* User Footer */}
       <UserMenu
-        User={User}
-        isLoading={isUserLoading}
+        User={userName}
+        token={token}
+        // isLoading={isUserLoading}
         isExpanded={responsiveIsExpanded}
       />
     </Box>
@@ -358,20 +360,20 @@ const SidebarSubItem = ({
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const UserMenu = ({ User, isLoading, isExpanded }: any) => {
+const UserMenu = ({ User, token, isExpanded }: any) => {
   const logout = useLogout();
   const navigate = useNavigate();
 
-  if (isLoading) {
-    return (
-      <Flex mx={2} mt={4} align="center" gap={3}>
-        <SkeletonCircle size="8" />
-        {isExpanded && <SkeletonText noOfLines={1} width="80px" />}
-      </Flex>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <Flex mx={2} mt={4} align="center" gap={3}>
+  //       <SkeletonCircle size="8" />
+  //       {isExpanded && <SkeletonText noOfLines={1} width="80px" />}
+  //     </Flex>
+  //   );
+  // }
 
-  if (!User) {
+  if (!token) {
     return (
       <Button
         size="sm"
@@ -404,8 +406,8 @@ const UserMenu = ({ User, isLoading, isExpanded }: any) => {
       >
         <Flex align="center" justifyContent={"space-between"}>
           <Flex align="center" gap={2}>
-            <Avatar size="sm" name={User.name} />
-            {isExpanded && <Text fontSize="sm">{User.name}</Text>}
+            <Avatar size="sm" name={User} />
+            {isExpanded && <Text fontSize="sm">{User}</Text>}
           </Flex>
           {isExpanded && <Image src={SettingsIcon} />}
         </Flex>

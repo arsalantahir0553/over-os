@@ -1,8 +1,19 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "./django-axios.interceptor";
 
 const API_WORKFLOW_URL = import.meta.env.VITE_DJANGO_URL;
 
+const oAuthInit = async () => {
+  const response = await api.get(`${API_WORKFLOW_URL}/linkedin/oauth/init/`);
+  return response.data;
+};
+
+export const useOAuthInit = () => {
+  return useQuery({
+    queryFn: () => oAuthInit(),
+    queryKey: ["oauth-init"],
+  });
+};
 const chat = async (prompt: string) => {
   const response = await api.post(`${API_WORKFLOW_URL}/chat/`, {
     prompt,
