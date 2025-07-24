@@ -7,25 +7,19 @@ const LinkedInCallback = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
+    const statusCode = params.get("status_code");
 
-    const userId = params.get("user_id");
-    const status = params.get("status");
-    const accessToken = params.get("access_token");
-    const refreshToken = params.get("refresh_token");
-    const tokenType = params.get("token_type");
+    if (statusCode === "200") {
+      // Update LinkedIn connection status in local storage
+      localStorage.setItem("is_linkedin_connected", "true");
+      console.log("✅ LinkedIn connection successful");
 
-    if (userId && accessToken && refreshToken && tokenType) {
-      localStorage.setItem("linkedin_user_id", userId);
-      localStorage.setItem("linkedin_status", status || "");
-      localStorage.setItem("linkedin_access_token", accessToken);
-      localStorage.setItem("linkedin_refresh_token", refreshToken);
-      localStorage.setItem("linkedin_token_type", tokenType);
-
-      console.log("✅ LinkedIn login data saved to localStorage");
-
+      // Redirect to LinkedIn workflow page
       navigate("/workflow/linkedin", { replace: true });
     } else {
-      console.error("❌ Missing one or more LinkedIn callback parameters");
+      console.error("❌ LinkedIn connection failed");
+      // Optionally redirect to an error page or back to the login
+      navigate("/workflow/linkedin", { replace: true });
     }
   }, [location.search, navigate]);
 

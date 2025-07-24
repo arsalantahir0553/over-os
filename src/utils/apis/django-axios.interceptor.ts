@@ -1,5 +1,4 @@
 import axios from "axios";
-import { refreshLinkedinToken } from "./linkedin.api";
 
 const API_WORKFLOW_URL = import.meta.env.VITE_DJANGO_URL;
 
@@ -23,21 +22,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
+    // const originalRequest = error.config;
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      localStorage.getItem("refresh_token")
-    ) {
-      originalRequest._retry = true;
-      try {
-        const newAccessToken = await refreshLinkedinToken();
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return api(originalRequest); // Retry original request
-      } catch (refreshError) {
-        return Promise.reject(refreshError);
-      }
+    if (error.response?.status === 401) {
+      // Clear all auth related data from localStorage
+      localStorage.removeItem("token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("is_linkedin_connected");
+      localStorage.removeItem("user_name");
+
+      // Redirect to login page
+      window.location.href = "/signin";
+      return Promise.reject(error);
     }
 
     return Promise.reject(error);

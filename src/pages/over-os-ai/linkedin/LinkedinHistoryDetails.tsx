@@ -1,5 +1,5 @@
 import { useCreateHistory, useGetHistoryById } from "@/utils/apis/history.api";
-import { useLoggedInUser } from "@/utils/apis/auth.api";
+// import { useLoggedInUser } from "@/utils/apis/auth.api";
 import { usePublishGeneratedPost } from "@/utils/apis/linkedin.api";
 import { queryClient } from "@/utils/apis/query.client";
 import {
@@ -26,7 +26,7 @@ const LinkedinHistoryDetails = () => {
 
   const [editablePost, setEditablePost] = useState<string>("");
 
-  const { data: user } = useLoggedInUser();
+  // const { data: user } = useLoggedInUser();
   const { data, isLoading, error } = useGetHistoryById(historyId ?? "");
   const { mutate: publishPost, isPending } = usePublishGeneratedPost();
   const { mutate: createHistory } = useCreateHistory();
@@ -80,27 +80,27 @@ const LinkedinHistoryDetails = () => {
           });
 
           // Create history after successful post
-          if (user?.id) {
-            createHistory(
-              {
-                user_id: user.id,
-                prompt: data?.prompt || "",
-                generated_post: editablePost,
-                image_url: data?.image_url || "",
-                meta: JSON.stringify({
-                  source: "LinkedInHistoryDetails",
-                  timestamp: new Date().toISOString(),
-                }),
-              },
-              {
-                onSuccess: () => {
-                  queryClient.invalidateQueries({
-                    queryKey: ["user-history", user.id, 10, 0],
-                  });
-                },
-              }
-            );
-          }
+          // if (user?.id) {
+          //   createHistory(
+          //     {
+          //       user_id: user.id,
+          //       prompt: data?.prompt || "",
+          //       generated_post: editablePost,
+          //       image_url: data?.image_url || "",
+          //       meta: JSON.stringify({
+          //         source: "LinkedInHistoryDetails",
+          //         timestamp: new Date().toISOString(),
+          //       }),
+          //     },
+          //     {
+          //       onSuccess: () => {
+          //         queryClient.invalidateQueries({
+          //           queryKey: ["user-history", user.id, 10, 0],
+          //         });
+          //       },
+          //     }
+          //   );
+          // }
         },
         onError: () => {
           toast({

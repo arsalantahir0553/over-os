@@ -1,5 +1,5 @@
 import { LoadingOverlay } from "@/components/LoadingOverlay";
-import { useLoggedInUser } from "@/utils/apis/auth.api";
+// import { useLoggedInUser } from "@/utils/apis/auth.api";
 import { useCreateHistory } from "@/utils/apis/history.api";
 import {
   useGenerateLinkedinPrompt,
@@ -61,7 +61,7 @@ const LinkedinWorkflow = () => {
   const loadingIndexRef = useRef<number>(0);
   const intervalRef = useRef<number | null>(null);
   const toast = useToast();
-  const { data: user } = useLoggedInUser();
+  // const { data: user } = useLoggedInUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
@@ -204,7 +204,7 @@ const LinkedinWorkflow = () => {
 
           createHistory(
             {
-              user_id: user.id,
+              user_id: "",
               prompt: userPrompt,
               generated_post: generatedText,
               image_url: imageUrls[0] || "",
@@ -216,7 +216,7 @@ const LinkedinWorkflow = () => {
             {
               onSuccess: () => {
                 queryClient.invalidateQueries({
-                  queryKey: ["user-history", user.id, 10, 0],
+                  queryKey: ["user-history", 10, 0],
                 });
               },
             }

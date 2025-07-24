@@ -64,41 +64,41 @@ export const useValidateEmail = () => {
   });
 };
 
-const getLoggedInUser = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("No authentication token found");
-  }
+// const getLoggedInUser = async () => {
+//   const token = localStorage.getItem("token");
+//   if (!token) {
+//     throw new Error("No authentication token found");
+//   }
 
-  try {
-    const response = await axios.get(`${API_BASE_URL}/user/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    // Check for 401 Unauthorized
-    // if (
-    //   axios.isAxiosError(error) &&
-    //   error.response?.status === 401 &&
-    //   error.response?.data?.message === "Invalid or expired token"
-    // ) {
-    //   // Remove token and optionally reload or redirect
-    //   localStorage.removeItem("token");
-    //   window.location.href = "https://overos.xyz";
-    // }
+//   try {
+//     const response = await axios.get(`${API_BASE_URL}/user/me`, {
+//       headers: { Authorization: `Bearer ${token}` },
+//     });
+//     return response.data;
+//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   } catch (error: any) {
+//     // Check for 401 Unauthorized
+//     // if (
+//     //   axios.isAxiosError(error) &&
+//     //   error.response?.status === 401 &&
+//     //   error.response?.data?.message === "Invalid or expired token"
+//     // ) {
+//     //   // Remove token and optionally reload or redirect
+//     //   localStorage.removeItem("token");
+//     //   window.location.href = "https://overos.xyz";
+//     // }
 
-    throw error; // Let React Query handle the error
-  }
-};
+//     throw error; // Let React Query handle the error
+//   }
+// };
 
-export const useLoggedInUser = () => {
-  return useQuery({
-    queryKey: ["loggedInUser"],
-    queryFn: getLoggedInUser,
-    enabled: !!localStorage.getItem("token"), // Only run if token exists
-  });
-};
+// export const useLoggedInUser = () => {
+//   return useQuery({
+//     queryKey: ["loggedInUser"],
+//     queryFn: getLoggedInUser,
+//     enabled: !!localStorage.getItem("token"), // Only run if token exists
+//   });
+// };
 
 // const logoutUser = async () => {
 //   try {

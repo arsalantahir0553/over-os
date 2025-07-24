@@ -27,6 +27,8 @@ import {
   useOAuthInit,
   usePostToLinkedin,
 } from "@/utils/apis/django.api";
+import { RiCalendarScheduleLine } from "react-icons/ri";
+import Scheduler from "@/components/Scheduler";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -47,12 +49,19 @@ const LOCAL_STORAGE_KEYS = {
   imageUrls: "linkedin_image_urls",
 };
 
+interface ScheduleData {
+  frequency: "once" | "weekly" | "monthly";
+  day_of_week: string;
+  time_of_day: string;
+}
+
 const LinkedinWorkflow = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userPrompt, setUserPrompt] = useState("");
   const [generatedText, setGeneratedText] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
   // const [linkedinUserId, setLinkedinUserId] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
@@ -61,7 +70,7 @@ const LinkedinWorkflow = () => {
   const toast = useToast();
   // const { data: user } = useLoggedInUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
-
+  const [showScheduler, setShowScheduler] = useState(false);
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -146,11 +155,28 @@ const LinkedinWorkflow = () => {
 
         clearInterval(intervalRef.current!);
         setLoadingMessage(null);
-        setGeneratedText(data.data.post_text);
-        localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-        localStorage.setItem(LOCAL_STORAGE_KEYS.response, data.data.post_text);
-        localStorage.setItem(LOCAL_STORAGE_KEYS.imageUrls, JSON.stringify([]));
-        setImageUrls([]);
+        if (data.data.post_text) {
+          setGeneratedText(data.data.post_text);
+          localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+          localStorage.setItem(
+            LOCAL_STORAGE_KEYS.response,
+            data.data.post_text
+          );
+          localStorage.setItem(
+            LOCAL_STORAGE_KEYS.imageUrls,
+            JSON.stringify([])
+          );
+          setImageUrls([]);
+        } else {
+          toast({
+            title: "Post Generation Failed",
+            description:
+              "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        }
       },
       onError: () => {
         clearInterval(intervalRef.current!);
@@ -168,7 +194,15 @@ const LinkedinWorkflow = () => {
 
     extractSchedule(userPrompt, {
       onSuccess: (data) => {
-        console.log("data", data);
+        if (data.data.day_of_week !== null) {
+          setScheduleData({
+            frequency: data.data.frequency,
+            day_of_week: data.data.day_of_week,
+            time_of_day: data.data.time_of_day,
+          });
+        } else {
+          setScheduleData(null);
+        }
       },
       onError: () => {
         console.log("error");
@@ -384,7 +418,22 @@ const LinkedinWorkflow = () => {
             pr="2.5rem"
             rows={1} // Start with 1 visible row
           />
-          <Flex justify="end" gap={3}>
+
+          <Flex justify="space-between" gap={3}>
+            <Button
+              bg={showScheduler ? "brand.400" : "surfaceButton"}
+              display={"flex"}
+              gap={2}
+              color="white"
+              _hover={{ bg: "brand.400" }}
+              size={{ md: "md", base: "xs" }}
+              onClick={() => setShowScheduler((prev) => !prev)}
+            >
+              Schedule{" "}
+              <Box as="span" mb={"-2px"}>
+                <RiCalendarScheduleLine />
+              </Box>
+            </Button>
             <Box display={"flex"} gap={2}>
               <Flex gap={2} align="center">
                 <Tooltip label="Upload images" rounded="md">
@@ -425,6 +474,11 @@ const LinkedinWorkflow = () => {
               </Button>
             </Box>
           </Flex>
+
+          {isGenerating ||
+            (scheduleData && generatedText && (
+              <Scheduler data={scheduleData} />
+            ))}
 
           {/* ================================================== */}
           {/* steps  */}

@@ -22,28 +22,100 @@ import { LuClock } from "react-icons/lu";
 const daysOfWeek = ["M", "T", "W", "T", "F", "S", "S"];
 const fullDayMap = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-const Scheduler = () => {
-  const [mode, setMode] = useState<"one-time" | "recurring">("one-time");
-  const [startDate, setStartDate] = useState(new Date("2024-12-30"));
-  const [endDate, setEndDate] = useState(new Date("2025-02-24"));
-  const [time, setTime] = useState("09:00");
-  const [selectedDays, setSelectedDays] = useState<string[]>([
-    "Mon",
-    "Wed",
-    "Fri",
-  ]);
-  const [recurrence, setRecurrence] = useState("weekly");
-  const [duration, setDuration] = useState("8 weeks");
+interface ScheduleData {
+  frequency: "once" | "weekly" | "monthly";
+  day_of_week: string;
+  time_of_day: string;
+}
+
+const Scheduler = ({ data }: { data: ScheduleData }) => {
+  // Set initial mode based on frequency
+  const [mode, setMode] = useState<"one-time" | "recurring">(
+    data.frequency === "once" ? "one-time" : "recurring"
+  );
+
+  // Format day of week to match fullDayMap format (Mon, Tue, etc.)
+  const formatDayOfWeek = (day: string) => {
+    const dayLower = day.toLowerCase();
+
+    if (dayLower === "today" || dayLower === "tomorrow") {
+      const date = new Date();
+      if (dayLower === "tomorrow") {
+        date.setDate(date.getDate() + 1);
+      }
+      // Get day index (0 = Sunday, 1 = Monday, etc.)
+      const dayIndex = date.getDay();
+      // Convert to Mon, Tue, etc. format
+      return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dayIndex];
+    }
+
+    // Handle full day names (e.g., 'Monday' -> 'Mon')
+    return day.slice(0, 3);
+  };
+
+  // Format time from 12-hour to 24-hour format if needed
+  const formatTime = (timeStr: string) => {
+    const [time, period] = timeStr.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+
+    if (period === "PM" && hours < 12) hours += 12;
+    if (period === "AM" && hours === 12) hours = 0;
+
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [endDate, setEndDate] = useState<Date>(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 7); // Default to 1 week from now
+    return date;
+  });
+
+  const [time, setTime] = useState<string>(() => {
+    if (data?.time_of_day) {
+      try {
+        return formatTime(data.time_of_day);
+      } catch (e) {
+        return "09:00";
+      }
+    }
+    return "09:00";
+  });
+
+  const [selectedDays, setSelectedDays] = useState<string[]>(() => {
+    if (data?.day_of_week) {
+      return [formatDayOfWeek(data.day_of_week)];
+    }
+    return [];
+  });
+
+  const [recurrence, setRecurrence] = useState<string>(
+    data?.frequency === "monthly" ? "monthly" : "weekly"
+  );
+
+  const [duration, setDuration] = useState("1 week");
 
   const toggleDay = (day: string) => {
-    setSelectedDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    );
+    if (mode === "one-time") {
+      // For one-time mode, replace the entire selection with the new day
+      setSelectedDays([day]);
+    } else {
+      // For recurring mode, keep the existing toggle behavior
+      setSelectedDays((prev) =>
+        prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+      );
+    }
   };
 
   const cardBg = useColorModeValue("white", "brand.900");
 
-  const getSchedulePreview = () => {
+  const getOneTimeSchedulePreview = () => {
+    const shortDays = selectedDays.map((d) => d.slice(0, 3)).join(", ");
+    return `Post ${selectedDays.length} time (${shortDays}) at ${time} AM EST`;
+  };
+  const getRecurringSchedulePreview = () => {
     const shortDays = selectedDays.map((d) => d.slice(0, 3)).join(", ");
     return `Post ${
       selectedDays.length
@@ -201,7 +273,7 @@ const Scheduler = () => {
                     Schedule Preview:
                   </Text>
                   <Text fontSize={{ base: "xs", sm: "sm" }} color="text" mt={1}>
-                    {getSchedulePreview()}
+                    {getOneTimeSchedulePreview()}
                   </Text>
                 </Box>
               </VStack>
@@ -407,7 +479,7 @@ const Scheduler = () => {
                     color="gray.300"
                     mt={1}
                   >
-                    {getSchedulePreview()}
+                    {getRecurringSchedulePreview()}
                   </Text>
                 </Box>
               </VStack>
