@@ -53,32 +53,32 @@ const App = () => {
         </Route>
 
         {/* Dashboard pages with OverOs layout */}
-        <Route element={<PrivateRoute />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<DashboardHome />} />
-            {/* Chat is not functional at the moment thats why using tempchat  */}
-            {/* <Route path="/chat" element={<Chat />} /> */}
-            <Route path="/chat" element={<TempChatResponse />} />
-            <Route path="/workflow/demo/:id" element={<DemoChat />} />
-            <Route path="/workflow/details/:id" element={<WorkflowDetails />} />
-            <Route
-              path="/workflow/category/:category"
-              element={<CategoryWorkflows />}
-            />
-            <Route path="/callback" element={<Callback />} />
-            <Route path="/linkedin/callback" element={<LinkedInCallback />} />
-            <Route path="/test" element={<Test />} />
-          </Route>
-
-          <Route element={<LinkedinLayout />}>
-            <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
-            <Route path="/workflow/linkedin-test" element={<WorkflowTest />} />
-            <Route
-              path="/workflow/linkedin/:historyId"
-              element={<LinkedinHistoryDetails />}
-            />
-          </Route>
+        {/* <Route element={<PrivateRoute />}> */}
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<DashboardHome />} />
+          {/* Chat is not functional at the moment thats why using tempchat  */}
+          {/* <Route path="/chat" element={<Chat />} /> */}
+          <Route path="/chat" element={<TempChatResponse />} />
+          <Route path="/workflow/demo/:id" element={<DemoChat />} />
+          <Route path="/workflow/details/:id" element={<WorkflowDetails />} />
+          <Route
+            path="/workflow/category/:category"
+            element={<CategoryWorkflows />}
+          />
+          <Route path="/callback" element={<Callback />} />
+          <Route path="/linkedin/callback" element={<LinkedInCallback />} />
+          <Route path="/test" element={<Test />} />
         </Route>
+
+        <Route element={<LinkedinLayout />}>
+          <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
+          <Route path="/workflow/linkedin-test" element={<WorkflowTest />} />
+          <Route
+            path="/workflow/linkedin/:historyId"
+            element={<LinkedinHistoryDetails />}
+          />
+        </Route>
+        {/* </Route> */}
         <Route element={<DashboardLayout />}>
           <Route path="/explore" element={<WorkflowLibrary />} />
         </Route>

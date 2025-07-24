@@ -203,10 +203,23 @@ export const TaskStep = ({
                     gap={2}
                   >
                     <Box>
-                      <Text textColor="brand.500">{td.title}</Text>
+                      <Text
+                        fontSize={{ md: "md", base: "xs" }}
+                        textColor="brand.500"
+                      >
+                        {td.title}
+                      </Text>
                       <Flex gap={4} mt={1} align="center">
-                        <Text textColor="#8974D0">{td.subTitle}</Text>
-                        <Text fontSize="14px" mt={1} textColor="gray.400">
+                        <Text
+                          fontSize={{ md: "sm", base: "xs" }}
+                          textColor="#8974D0"
+                        >
+                          {td.subTitle}
+                        </Text>
+                        <Text
+                          fontSize={{ md: "xs", base: "xs" }}
+                          textColor="gray.400"
+                        >
                           {td.date}
                         </Text>
                       </Flex>
@@ -218,7 +231,7 @@ export const TaskStep = ({
                       rounded="full"
                       bg="universalRed"
                     >
-                      <IoIosClose color="black" />
+                      <IoIosClose size={16} color="black" />
                     </Box>
                   </Box>
                 ))}

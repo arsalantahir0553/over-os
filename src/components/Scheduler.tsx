@@ -65,12 +65,16 @@ const Scheduler = () => {
         <Flex justify="space-between" align="center" flexWrap="wrap" gap={2}>
           <Flex align="center" gap={2} flexShrink={0}>
             <LuClock size={18} />
-            <Text fontSize={{ base: 'sm', md: 'md' }} fontWeight="medium" color="brand.500">
+            <Text
+              fontSize={{ base: "sm", md: "md" }}
+              fontWeight="medium"
+              color="brand.500"
+            >
               Schedule LinkedIn Publishing
             </Text>
           </Flex>
           <Button
-            size={{ base: 'xs', sm: 'sm' }}
+            size={{ base: "xs", sm: "sm" }}
             bg="blue.600"
             color="white"
             _hover={{ bg: "blue.500" }}
@@ -87,34 +91,47 @@ const Scheduler = () => {
           variant="line"
         >
           <TabList overflowX="auto" py={1}>
-            <Tab fontSize={{ base: 'sm', md: 'md' }} whiteSpace="nowrap">One Time</Tab>
-            <Tab fontSize={{ base: 'sm', md: 'md' }} whiteSpace="nowrap">Recurring</Tab>
+            <Tab fontSize={{ base: "sm", md: "md" }} whiteSpace="nowrap">
+              One Time
+            </Tab>
+            <Tab fontSize={{ base: "sm", md: "md" }} whiteSpace="nowrap">
+              Recurring
+            </Tab>
           </TabList>
 
           <TabPanels>
             {/* ---------------- ONE-TIME ---------------- */}
             <TabPanel px={0}>
               <VStack spacing={4} align="stretch">
-                <Flex gap={{ base: 3, md: 4 }} flexWrap="wrap">
-                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
-                    <Text fontSize="sm" mb={1} color="mutedText">
-                      Frequency
-                    </Text>
-                    <Select
-                      fontSize="sm"
-                      bg="surface"
-                      value="weekly"
-                      isReadOnly
-                    >
-                      <option value="weekly">Weekly</option>
-                    </Select>
-                  </Box>
-
-                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
+                <Flex
+                  flexDirection={{ base: "column", md: "row" }}
+                  gap={{ base: 3, md: 4 }}
+                  flexWrap="wrap"
+                >
+                  <Box
+                    flex={{ base: "1 1 100%", sm: "1" }}
+                    minW={{ base: "100%", sm: "auto" }}
+                  >
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Days
                     </Text>
-                    <SimpleGrid columns={7} spacing={{ base: 1, md: 2 }}>
+                    <SimpleGrid
+                      columns={7}
+                      spacing={{ base: 1, md: 2 }}
+                      w="100%"
+                      maxW="100%"
+                      overflowX="auto"
+                      pb={2}
+                      css={{
+                        "&::-webkit-scrollbar": {
+                          height: "4px",
+                        },
+                        "&::-webkit-scrollbar-thumb": {
+                          backgroundColor: "rgba(0, 0, 0, 0.2)",
+                          borderRadius: "4px",
+                        },
+                      }}
+                    >
                       {fullDayMap.map((day, idx) => (
                         <Button
                           key={idx}
@@ -126,9 +143,12 @@ const Scheduler = () => {
                             selectedDays.includes(day) ? "blue" : "gray"
                           }
                           onClick={() => toggleDay(day)}
-                          w={{ base: '32px', md: '40px' }}
-                          h={{ base: '32px', md: '40px' }}
-                          minW={{ base: '32px', md: '40px' }}
+                          w={{ base: "28px", sm: "32px", md: "40px" }}
+                          h={{ base: "28px", sm: "32px", md: "40px" }}
+                          minW={{ base: "28px", sm: "32px", md: "40px" }}
+                          p={0}
+                          flexShrink={0}
+                          fontSize={{ base: "xs", sm: "sm" }}
                         >
                           {daysOfWeek[idx]}
                         </Button>
@@ -136,7 +156,10 @@ const Scheduler = () => {
                     </SimpleGrid>
                   </Box>
 
-                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
+                  <Box
+                    flex={{ base: "1 1 100%", sm: "1" }}
+                    minW={{ base: "100%", sm: "auto" }}
+                  >
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Time
                     </Text>
@@ -151,11 +174,33 @@ const Scheduler = () => {
                   </Box>
                 </Flex>
 
-                <Box bg="textDark" px={{ base: 3, md: 4 }} py={3} rounded="md" overflowX="auto">
-                  <Text color="blue.300" fontSize={{ base: 'xs', sm: 'sm' }} fontWeight="semibold" whiteSpace="nowrap">
+                <Box
+                  bg="textDark"
+                  px={{ base: 3, md: 4 }}
+                  py={3}
+                  rounded="md"
+                  overflowX="auto"
+                  width="100%"
+                  maxWidth="100%"
+                  sx={{
+                    "&::-webkit-scrollbar": {
+                      height: "4px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: "rgba(255, 255, 255, 0.2)",
+                      borderRadius: "4px",
+                    },
+                  }}
+                >
+                  <Text
+                    color="blue.300"
+                    fontSize={{ base: "xs", sm: "sm" }}
+                    fontWeight="semibold"
+                    whiteSpace="nowrap"
+                  >
                     Schedule Preview:
                   </Text>
-                  <Text fontSize={{ base: 'xs', sm: 'sm' }} color="text" mt={1}>
+                  <Text fontSize={{ base: "xs", sm: "sm" }} color="text" mt={1}>
                     {getSchedulePreview()}
                   </Text>
                 </Box>
@@ -165,8 +210,16 @@ const Scheduler = () => {
             {/* ---------------- RECURRING ---------------- */}
             <TabPanel px={0}>
               <VStack spacing={4} align="stretch">
-                <Flex gap={{ base: 3, md: 4 }} flexWrap="wrap">
-                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
+                <Flex
+                  gap={{ base: 3, md: 4 }}
+                  flexWrap="wrap"
+                  alignItems="flex-start"
+                >
+                  <Box
+                    flex={{ base: "1 1 100%", sm: "1" }}
+                    minW={{ base: "100%", sm: "200px" }}
+                    maxW="100%"
+                  >
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Frequency
                     </Text>
@@ -182,11 +235,32 @@ const Scheduler = () => {
                     </Select>
                   </Box>
 
-                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
+                  <Flex direction={"column"} gap={{ base: 3, md: 4 }}></Flex>
+
+                  <Box
+                    flex={{ base: "1 1 100%", lg: "1" }}
+                    minW={{ base: "100%", lg: "auto" }}
+                  >
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Days
                     </Text>
-                    <SimpleGrid columns={7} spacing={{ base: 1, md: 2 }}>
+                    <SimpleGrid
+                      columns={7}
+                      spacing={{ base: 1, md: 2 }}
+                      w="100%"
+                      maxW="100%"
+                      overflowX="auto"
+                      pb={2}
+                      css={{
+                        "&::-webkit-scrollbar": {
+                          height: "4px",
+                        },
+                        "&::-webkit-scrollbar-thumb": {
+                          backgroundColor: "rgba(0, 0, 0, 0.2)",
+                          borderRadius: "4px",
+                        },
+                      }}
+                    >
                       {fullDayMap.map((day, idx) => (
                         <Button
                           key={idx}
@@ -198,9 +272,12 @@ const Scheduler = () => {
                             selectedDays.includes(day) ? "blue" : "gray"
                           }
                           onClick={() => toggleDay(day)}
-                          w={{ base: '32px', md: '40px' }}
-                          h={{ base: '32px', md: '40px' }}
-                          minW={{ base: '32px', md: '40px' }}
+                          w={{ base: "28px", sm: "32px", md: "40px" }}
+                          h={{ base: "28px", sm: "32px", md: "40px" }}
+                          minW={{ base: "28px", sm: "32px", md: "40px" }}
+                          p={0}
+                          flexShrink={0}
+                          fontSize={{ base: "xs", sm: "sm" }}
                         >
                           {daysOfWeek[idx]}
                         </Button>
@@ -208,7 +285,10 @@ const Scheduler = () => {
                     </SimpleGrid>
                   </Box>
 
-                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
+                  <Box
+                    flex={{ base: "1 1 100%", sm: "1" }}
+                    minW={{ base: "100%", sm: "auto" }}
+                  >
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Time
                     </Text>
@@ -224,7 +304,10 @@ const Scheduler = () => {
                 </Flex>
 
                 <Flex gap={{ base: 3, md: 4 }} flexWrap="wrap">
-                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
+                  <Box
+                    flex={{ base: "1 1 100%", sm: "1" }}
+                    minW={{ base: "100%", sm: "auto" }}
+                  >
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Duration
                     </Text>
@@ -244,7 +327,10 @@ const Scheduler = () => {
                     </Select>
                   </Box>
 
-                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
+                  <Box
+                    flex={{ base: "1 1 100%", sm: "1" }}
+                    minW={{ base: "100%", sm: "auto" }}
+                  >
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Start Date
                     </Text>
@@ -265,7 +351,10 @@ const Scheduler = () => {
                     </Box>
                   </Box>
 
-                  <Box flex={{ base: '1 1 100%', sm: '1' }} minW={{ base: '100%', sm: 'auto' }}>
+                  <Box
+                    flex={{ base: "1 1 100%", sm: "1" }}
+                    minW={{ base: "100%", sm: "auto" }}
+                  >
                     <Text fontSize="sm" mb={1} color="mutedText">
                       End Date
                     </Text>
@@ -287,11 +376,37 @@ const Scheduler = () => {
                   </Box>
                 </Flex>
 
-                <Box bg="brand.1000" px={{ base: 3, md: 4 }} py={3} rounded="md" overflowX="auto">
-                  <Text color="blue.300" fontSize={{ base: 'xs', sm: 'sm' }} fontWeight="semibold" whiteSpace="nowrap">
+                <Box
+                  bg="brand.1000"
+                  px={{ base: 3, md: 4 }}
+                  py={3}
+                  rounded="md"
+                  overflowX="auto"
+                  width="100%"
+                  maxWidth="100%"
+                  sx={{
+                    "&::-webkit-scrollbar": {
+                      height: "4px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: "rgba(255, 255, 255, 0.2)",
+                      borderRadius: "4px",
+                    },
+                  }}
+                >
+                  <Text
+                    color="blue.300"
+                    fontSize={{ base: "xs", sm: "sm" }}
+                    fontWeight="semibold"
+                    whiteSpace="nowrap"
+                  >
                     Schedule Preview:
                   </Text>
-                  <Text fontSize={{ base: 'xs', sm: 'sm' }} color="gray.300" mt={1}>
+                  <Text
+                    fontSize={{ base: "xs", sm: "sm" }}
+                    color="gray.300"
+                    mt={1}
+                  >
                     {getSchedulePreview()}
                   </Text>
                 </Box>
