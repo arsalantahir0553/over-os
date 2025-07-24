@@ -100,25 +100,32 @@ export const useLoggedInUser = () => {
   });
 };
 
-const logoutUser = async () => {
-  try {
-    await axios.post(
-      `${API_BASE_URL}/user/logout`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      }
-    );
-  } catch (error) {
-    console.error("Logout failed:", error);
-  } finally {
-    localStorage.removeItem("token"); // Clear token on logout
-  }
+// const logoutUser = async () => {
+//   try {
+//     await axios.post(
+//       `${API_BASE_URL}/user/logout`,
+//       {},
+//       {
+//         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+//       }
+//     );
+//   } catch (error) {
+//     console.error("Logout failed:", error);
+//   } finally {
+//     localStorage.removeItem("token"); // Clear token on logout
+//   }
+// };
+
+const tempLogoutUser = async () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user_name");
+  localStorage.removeItem("refresh_token");
+  localStorage.removeItem("is_linkedin_connected");
 };
 
 export const useLogout = () => {
   return useMutation({
-    mutationFn: logoutUser,
+    mutationFn: tempLogoutUser,
     onSuccess: () => {
       window.location.href = "/"; // Redirect to home after logout
     },

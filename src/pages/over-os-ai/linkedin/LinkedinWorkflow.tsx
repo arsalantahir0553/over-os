@@ -1,7 +1,4 @@
 import { LoadingOverlay } from "@/components/LoadingOverlay";
-import { useLoggedInUser } from "@/utils/apis/auth.api";
-import { useCreateHistory } from "@/utils/apis/history.api";
-import { queryClient } from "@/utils/apis/query.client";
 
 import {
   Box,
@@ -26,6 +23,7 @@ import { LinkedinLoginModal } from "./LinkedinLoginModal";
 // import TaskStepsList from "./TaskStepList";
 import {
   useChat,
+  useExtractSchedule,
   useOAuthInit,
   usePostToLinkedin,
 } from "@/utils/apis/django.api";
@@ -55,13 +53,13 @@ const LinkedinWorkflow = () => {
   const [generatedText, setGeneratedText] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [linkedinUserId, setLinkedinUserId] = useState<string | null>(null);
+  // const [linkedinUserId, setLinkedinUserId] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
   const loadingIndexRef = useRef<number>(0);
   const intervalRef = useRef<number | null>(null);
   const toast = useToast();
-  const { data: user } = useLoggedInUser();
+  // const { data: user } = useLoggedInUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
@@ -88,14 +86,15 @@ const LinkedinWorkflow = () => {
   // const { mutate: publishPost, isPending: isPublishing } =
   //   usePublishGeneratedPost();
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
+  const { mutate: extractSchedule } = useExtractSchedule();
   // const { refetch, isFetching } = useGetLinkedinAuthUrl();
   const { refetch, isFetching } = useOAuthInit();
 
-  const { mutate: createHistory } = useCreateHistory();
+  // const { mutate: createHistory } = useCreateHistory();
 
   useEffect(() => {
-    const id = localStorage.getItem("linkedin_user_id");
-    setLinkedinUserId(id || null);
+    // const id = localStorage.getItem("linkedin_user_id");
+    // setLinkedinUserId(id || null);
 
     const savedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.prompt);
     const savedResponse = localStorage.getItem(LOCAL_STORAGE_KEYS.response);
@@ -166,6 +165,15 @@ const LinkedinWorkflow = () => {
         });
       },
     });
+
+    extractSchedule(userPrompt, {
+      onSuccess: (data) => {
+        console.log("data", data);
+      },
+      onError: () => {
+        console.log("error");
+      },
+    });
   };
 
   const handleSubmit = () => {
@@ -191,25 +199,25 @@ const LinkedinWorkflow = () => {
           isClosable: true,
         });
 
-        createHistory(
-          {
-            user_id: user.id,
-            prompt: userPrompt,
-            generated_post: generatedText,
-            image_url: imageUrls[0] || "",
-            meta: JSON.stringify({
-              source: "LinkedInWorkflow",
-              timestamp: new Date().toISOString(),
-            }),
-          },
-          {
-            onSuccess: () => {
-              queryClient.invalidateQueries({
-                queryKey: ["user-history", user.id, 10, 0],
-              });
-            },
-          }
-        );
+        // createHistory(
+        //   {
+        //     user_id: user.id,
+        //     prompt: userPrompt,
+        //     generated_post: generatedText,
+        //     image_url: imageUrls[0] || "",
+        //     meta: JSON.stringify({
+        //       source: "LinkedInWorkflow",
+        //       timestamp: new Date().toISOString(),
+        //     }),
+        //   },
+        //   {
+        //     onSuccess: () => {
+        //       queryClient.invalidateQueries({
+        //         queryKey: ["user-history", user.id, 10, 0],
+        //       });
+        //     },
+        //   }
+        // );
 
         localStorage.removeItem(LOCAL_STORAGE_KEYS.prompt);
         localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
