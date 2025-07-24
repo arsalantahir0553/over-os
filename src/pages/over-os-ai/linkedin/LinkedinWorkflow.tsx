@@ -1,12 +1,4 @@
 import { LoadingOverlay } from "@/components/LoadingOverlay";
-import { useLoggedInUser } from "@/utils/apis/auth.api";
-import { useCreateHistory } from "@/utils/apis/history.api";
-import {
-  useGenerateLinkedinPrompt,
-  useGetLinkedinAuthUrl,
-  usePublishGeneratedPost,
-} from "@/utils/apis/linkedin.api";
-import { queryClient } from "@/utils/apis/query.client";
 
 import {
   Box,
@@ -28,7 +20,13 @@ import { PlusIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
-import TaskStepsList from "./TaskStepList";
+// import TaskStepsList from "./TaskStepList";
+import {
+  useChat,
+  useExtractSchedule,
+  useOAuthInit,
+  usePostToLinkedin,
+} from "@/utils/apis/django.api";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -55,13 +53,13 @@ const LinkedinWorkflow = () => {
   const [generatedText, setGeneratedText] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [linkedinUserId, setLinkedinUserId] = useState<string | null>(null);
+  // const [linkedinUserId, setLinkedinUserId] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
-
+  const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
   const loadingIndexRef = useRef<number>(0);
   const intervalRef = useRef<number | null>(null);
   const toast = useToast();
-  const { data: user } = useLoggedInUser();
+  // const { data: user } = useLoggedInUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
@@ -82,16 +80,21 @@ const LinkedinWorkflow = () => {
     }
   }, [generatedText]);
 
-  const { mutate: generatePrompt, isPending: isGenerating } =
-    useGenerateLinkedinPrompt();
-  const { mutate: publishPost, isPending: isPublishing } =
-    usePublishGeneratedPost();
-  const { refetch, isFetching } = useGetLinkedinAuthUrl();
-  const { mutate: createHistory } = useCreateHistory();
+  // const { mutate: generatePrompt, isPending: isGenerating } =
+  //   useGenerateLinkedinPrompt();
+  const { mutate: generatePrompt, isPending: isGenerating } = useChat();
+  // const { mutate: publishPost, isPending: isPublishing } =
+  //   usePublishGeneratedPost();
+  const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
+  const { mutate: extractSchedule } = useExtractSchedule();
+  // const { refetch, isFetching } = useGetLinkedinAuthUrl();
+  const { refetch, isFetching } = useOAuthInit();
+
+  // const { mutate: createHistory } = useCreateHistory();
 
   useEffect(() => {
-    const id = localStorage.getItem("linkedin_user_id");
-    setLinkedinUserId(id || null);
+    // const id = localStorage.getItem("linkedin_user_id");
+    // setLinkedinUserId(id || null);
 
     const savedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.prompt);
     const savedResponse = localStorage.getItem(LOCAL_STORAGE_KEYS.response);
@@ -124,36 +127,10 @@ const LinkedinWorkflow = () => {
       setLoadingMessage(loadingMessages[loadingIndexRef.current]);
     }, 3500);
 
-    generatePrompt(
-      { prompt: userPrompt },
-      {
-        onSuccess: (data) => {
-          if (data === null) {
-            clearInterval(intervalRef.current!);
-            setLoadingMessage(null);
-            toast({
-              title: "Post Generation Failed",
-              description:
-                "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
-              status: "error",
-              duration: 3000,
-              isClosable: true,
-            });
-            return;
-          }
-
-          clearInterval(intervalRef.current!);
-          setLoadingMessage(null);
-          setGeneratedText(data.post_text);
-          localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-          localStorage.setItem(LOCAL_STORAGE_KEYS.response, data.post_text);
-          localStorage.setItem(
-            LOCAL_STORAGE_KEYS.imageUrls,
-            JSON.stringify([])
-          );
-          setImageUrls([]);
-        },
-        onError: () => {
+    generatePrompt(userPrompt, {
+      onSuccess: (data) => {
+        console.log("data", data);
+        if (data === null) {
           clearInterval(intervalRef.current!);
           setLoadingMessage(null);
           toast({
@@ -164,13 +141,43 @@ const LinkedinWorkflow = () => {
             duration: 3000,
             isClosable: true,
           });
-        },
-      }
-    );
+          return;
+        }
+
+        clearInterval(intervalRef.current!);
+        setLoadingMessage(null);
+        setGeneratedText(data.data.post_text);
+        localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+        localStorage.setItem(LOCAL_STORAGE_KEYS.response, data.data.post_text);
+        localStorage.setItem(LOCAL_STORAGE_KEYS.imageUrls, JSON.stringify([]));
+        setImageUrls([]);
+      },
+      onError: () => {
+        clearInterval(intervalRef.current!);
+        setLoadingMessage(null);
+        toast({
+          title: "Post Generation Failed",
+          description:
+            "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      },
+    });
+
+    extractSchedule(userPrompt, {
+      onSuccess: (data) => {
+        console.log("data", data);
+      },
+      onError: () => {
+        console.log("error");
+      },
+    });
   };
 
   const handleSubmit = () => {
-    if (!linkedinUserId) return onOpen();
+    if (!isLinkedinConnected) return onOpen();
     if (!userPrompt.trim() || !generatedText.trim()) {
       toast({
         title: "Missing Data",
@@ -182,67 +189,56 @@ const LinkedinWorkflow = () => {
       return;
     }
 
-    publishPost(
-      {
-        // user_id: linkedinUserId,
-        user_prompt: userPrompt,
-        post: {
-          text: generatedText,
-          image_path: imageUrls[0] || "",
-          url: "",
-        },
+    publishPost(generatedText, {
+      onSuccess: () => {
+        toast({
+          title: "Success!",
+          description: "Post successfully published to LinkedIn.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+
+        // createHistory(
+        //   {
+        //     user_id: user.id,
+        //     prompt: userPrompt,
+        //     generated_post: generatedText,
+        //     image_url: imageUrls[0] || "",
+        //     meta: JSON.stringify({
+        //       source: "LinkedInWorkflow",
+        //       timestamp: new Date().toISOString(),
+        //     }),
+        //   },
+        //   {
+        //     onSuccess: () => {
+        //       queryClient.invalidateQueries({
+        //         queryKey: ["user-history", user.id, 10, 0],
+        //       });
+        //     },
+        //   }
+        // );
+
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.prompt);
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
       },
-      {
-        onSuccess: () => {
-          toast({
-            title: "Success!",
-            description: "Post successfully published to LinkedIn.",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
-
-          createHistory(
-            {
-              user_id: user.id,
-              prompt: userPrompt,
-              generated_post: generatedText,
-              image_url: imageUrls[0] || "",
-              meta: JSON.stringify({
-                source: "LinkedInWorkflow",
-                timestamp: new Date().toISOString(),
-              }),
-            },
-            {
-              onSuccess: () => {
-                queryClient.invalidateQueries({
-                  queryKey: ["user-history", user.id, 10, 0],
-                });
-              },
-            }
-          );
-
-          localStorage.removeItem(LOCAL_STORAGE_KEYS.prompt);
-          localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
-          localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
-        },
-        onError: () => {
-          toast({
-            title: "Error",
-            description: "Failed to publish post.",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
-        },
-      }
-    );
+      onError: () => {
+        toast({
+          title: "Error",
+          description: "Failed to publish post.",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      },
+    });
   };
 
   const handleLogin = async () => {
     try {
       const { data } = await refetch();
-      const originalUrl = data?.linkedin_login_url || data?.url;
+      const originalUrl = data?.data.auth_url || data?.url;
       if (originalUrl) window.location.href = originalUrl;
     } catch (err) {
       console.error("Failed to fetch LinkedIn auth URL:", err);

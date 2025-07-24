@@ -9,8 +9,8 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-  SkeletonCircle,
-  SkeletonText,
+  // SkeletonCircle,
+  // SkeletonText,
   Text,
   useBreakpointValue,
   VStack,
@@ -38,7 +38,7 @@ import MyWorkflowsIcon from "../../assets/svgs/my-workflows.svg";
 import NewMessageIcon from "../../assets/svgs/new-message.svg";
 import SettingsIcon from "../../assets/svgs/settings.svg";
 
-import { useLoggedInUser, useLogout } from "@/utils/apis/auth.api";
+import { useLogout } from "@/utils/apis/auth.api";
 
 import { AiOutlineProduct } from "react-icons/ai";
 import { PiRankingThin } from "react-icons/pi";
@@ -63,13 +63,14 @@ const DashboardSidebar = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showExplore, setShowExplore] = useState(false);
   const [showMyWorkflows, setShowMyWorkflows] = useState(false);
-
+  const token = localStorage.getItem("token");
+  const userName = localStorage.getItem("user_name");
   const responsiveIsExpanded = useBreakpointValue({
     base: false,
     md: isExpanded,
   });
 
-  const { data: User, isLoading: isUserLoading } = useLoggedInUser();
+  // const { data: User, isLoading: isUserLoading } = useLoggedInUser();
 
   const handleNavigate = (category: string) => {
     navigate(`/workflow/category/${encodeURIComponent(category)}`);
@@ -210,8 +211,9 @@ const DashboardSidebar = () => {
 
       {/* User Footer */}
       <UserMenu
-        User={User}
-        isLoading={isUserLoading}
+        User={userName}
+        token={token}
+        // isLoading={isUserLoading}
         isExpanded={responsiveIsExpanded}
       />
     </Box>
@@ -302,20 +304,20 @@ const SidebarSubItem = ({ label }: { label: string }) => (
 );
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const UserMenu = ({ User, isLoading, isExpanded }: any) => {
+const UserMenu = ({ User, token, isExpanded }: any) => {
   const logout = useLogout();
   const navigate = useNavigate();
 
-  if (isLoading) {
-    return (
-      <Flex mx={2} mt={4} align="center" gap={3}>
-        <SkeletonCircle size="8" />
-        {isExpanded && <SkeletonText noOfLines={1} width="80px" />}
-      </Flex>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <Flex mx={2} mt={4} align="center" gap={3}>
+  //       <SkeletonCircle size="8" />
+  //       {isExpanded && <SkeletonText noOfLines={1} width="80px" />}
+  //     </Flex>
+  //   );
+  // }
 
-  if (!User) {
+  if (!token || !User) {
     return (
       <Button
         size="sm"
@@ -348,8 +350,8 @@ const UserMenu = ({ User, isLoading, isExpanded }: any) => {
       >
         <Flex align="center" justifyContent={"space-between"}>
           <Flex align="center" gap={2}>
-            <Avatar size="sm" name={User.name} />
-            {isExpanded && <Text fontSize="sm">{User.name}</Text>}
+            <Avatar size="sm" name={User} />
+            {isExpanded && <Text fontSize="sm">{User}</Text>}
           </Flex>
           {isExpanded && <Image src={SettingsIcon} />}
         </Flex>
