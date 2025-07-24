@@ -109,14 +109,14 @@ const Scheduler = () => {
                   flexWrap="wrap"
                 >
                   <Box
-                    flex={{ base: "1 1 100%", sm: "1" }}
-                    minW={{ base: "100%", sm: "auto" }}
+                    flex={{ base: "1 1 100%", lg: "1" }}
+                    minW={{ base: "100%", lg: "auto" }}
                   >
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Days
                     </Text>
                     <SimpleGrid
-                      columns={7}
+                      columns={{ base: 7, lg: 10 }}
                       spacing={{ base: 1, md: 2 }}
                       w="100%"
                       maxW="100%"

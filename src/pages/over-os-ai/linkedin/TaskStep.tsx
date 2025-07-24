@@ -204,7 +204,7 @@ export const TaskStep = ({
                   >
                     <Box>
                       <Text
-                        fontSize={{ md: "md", base: "xs" }}
+                        fontSize={{ md: "lg", base: "xs" }}
                         textColor="brand.500"
                       >
                         {td.title}
