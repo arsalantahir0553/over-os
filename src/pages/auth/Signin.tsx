@@ -50,7 +50,9 @@ const Signin = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
+    const refresh_token = localStorage.getItem("refresh_token");
+    const user_name = localStorage.getItem("user_name");
+    if (token && refresh_token && user_name) {
       navigate("/dashboard");
     }
   }, [navigate]);
