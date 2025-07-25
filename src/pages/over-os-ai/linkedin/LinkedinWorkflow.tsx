@@ -16,19 +16,24 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { PlusIcon, Upload } from "lucide-react";
+import { CalendarIcon, PlusIcon, SendIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
 // import TaskStepsList from "./TaskStepList";
+import Scheduler from "@/components/Scheduler";
 import {
   useChat,
+  useCreateUserSchedules,
   useExtractSchedule,
   useOAuthInit,
   usePostToLinkedin,
 } from "@/utils/apis/django.api";
 import { RiCalendarScheduleLine } from "react-icons/ri";
-import Scheduler from "@/components/Scheduler";
+import {
+  convertLocalTimeToUTC,
+  getFullDayName,
+} from "@/utils/helpers/functions.helper";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -96,6 +101,7 @@ const LinkedinWorkflow = () => {
   //   usePublishGeneratedPost();
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
+  const { mutate: createUserSchedules } = useCreateUserSchedules();
   // const { refetch, isFetching } = useGetLinkedinAuthUrl();
   const { refetch, isFetching } = useOAuthInit();
 
@@ -267,6 +273,56 @@ const LinkedinWorkflow = () => {
         });
       },
     });
+  };
+
+  const handleSchedule = () => {
+    if (!isLinkedinConnected) return onOpen();
+    if (!scheduleData || !generatedText.trim()) {
+      toast({
+        title: "Missing Data",
+        description: "Schedule and generated post text are required.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Convert local time to UTC
+    const utcTime = convertLocalTimeToUTC(scheduleData.time_of_day);
+
+    createUserSchedules(
+      {
+        prompt: userPrompt,
+        schedules: [
+          {
+            frequency: scheduleData.frequency,
+            day_of_week: getFullDayName(scheduleData.day_of_week),
+            time_of_day: utcTime,
+          },
+        ],
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: "Post successfully scheduled to LinkedIn.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+        },
+        onError: () => {
+          toast({
+            title: "Error",
+            description: "Failed to schedule post.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        },
+      }
+    );
   };
 
   const handleLogin = async () => {
@@ -477,7 +533,12 @@ const LinkedinWorkflow = () => {
 
           {isGenerating ||
             (scheduleData && generatedText && (
-              <Scheduler data={scheduleData} />
+              <Scheduler
+                data={scheduleData}
+                onScheduleChange={(updatedData) => {
+                  setScheduleData(updatedData);
+                }}
+              />
             ))}
 
           {/* ================================================== */}
@@ -514,16 +575,29 @@ const LinkedinWorkflow = () => {
 
         {/* Submit */}
         {generatedText && (
-          <Flex justify="flex-end">
+          <Flex justify="flex-end" gap={2}>
             <Button
               onClick={handleSubmit}
-              bg="primary"
+              bg={scheduleData ? "surface2" : "primary"}
               color="white"
               isLoading={isPublishing}
-              _hover={{ bg: "brand.400" }}
+              _hover={{ bg: "gray.600" }}
+              leftIcon={<SendIcon size={15} />}
             >
-              Post to LinkedIn
+              {scheduleData ? "Post Now" : "Post to LinkedIn"}
             </Button>
+            {scheduleData && (
+              <Button
+                onClick={handleSchedule}
+                bg="primary"
+                color="white"
+                isLoading={isPublishing}
+                _hover={{ bg: "brand.400" }}
+                leftIcon={<CalendarIcon size={16} />}
+              >
+                Schedule Post
+              </Button>
+            )}
           </Flex>
         )}
       </VStack>

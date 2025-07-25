@@ -14,7 +14,7 @@ import {
   VStack,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { LuClock } from "react-icons/lu";
@@ -28,7 +28,12 @@ interface ScheduleData {
   time_of_day: string;
 }
 
-const Scheduler = ({ data }: { data: ScheduleData }) => {
+interface SchedulerProps {
+  data: ScheduleData;
+  onScheduleChange?: (data: ScheduleData) => void;
+}
+
+const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
   // Set initial mode based on frequency
   const [mode, setMode] = useState<"one-time" | "recurring">(
     data.frequency === "once" ? "one-time" : "recurring"
@@ -97,6 +102,13 @@ const Scheduler = ({ data }: { data: ScheduleData }) => {
 
   const [duration, setDuration] = useState("1 week");
 
+  const prevValuesRef = useRef({
+    mode,
+    recurrence,
+    selectedDays: selectedDays[0] || "",
+    time,
+  });
+
   const toggleDay = (day: string) => {
     if (mode === "one-time") {
       // For one-time mode, replace the entire selection with the new day
@@ -110,6 +122,39 @@ const Scheduler = ({ data }: { data: ScheduleData }) => {
   };
 
   const cardBg = useColorModeValue("white", "brand.900");
+
+  useEffect(() => {
+    const currentValues = {
+      mode,
+      recurrence,
+      selectedDay: selectedDays[0] || "",
+      time,
+    };
+
+    const prevValues = prevValuesRef.current;
+
+    if (
+      currentValues.mode !== prevValues.mode ||
+      currentValues.recurrence !== prevValues.recurrence ||
+      currentValues.selectedDay !== prevValues.selectedDays ||
+      currentValues.time !== prevValues.time
+    ) {
+      if (onScheduleChange) {
+        onScheduleChange({
+          frequency:
+            mode === "one-time" ? "once" : (recurrence as "weekly" | "monthly"),
+          day_of_week: selectedDays[0] || "",
+          time_of_day: time,
+        });
+      }
+      prevValuesRef.current = {
+        mode,
+        recurrence,
+        selectedDays: selectedDays[0] || "",
+        time,
+      };
+    }
+  }, [mode, recurrence, selectedDays, time, onScheduleChange]);
 
   const getOneTimeSchedulePreview = () => {
     const shortDays = selectedDays.map((d) => d.slice(0, 3)).join(", ");

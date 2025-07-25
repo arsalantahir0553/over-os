@@ -53,11 +53,15 @@ export const usePostToLinkedin = () => {
   });
 };
 
+export interface ScheduleItem {
+  frequency: "once" | "weekly" | "monthly";
+  day_of_week: string;
+  time_of_day: string; // format: HH:mm:ss
+}
+
 export interface UserScheduleInput {
   prompt: string;
-  frequency: "once" | "weekly" | "monthly"; // adjust values as needed
-  day_of_week: string; // could use enum for stricter typing
-  time_of_day: string; // format: HH:mm:ss
+  schedules: ScheduleItem[];
 }
 
 const createUserSchedules = async (data: UserScheduleInput) => {
