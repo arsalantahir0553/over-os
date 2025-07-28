@@ -124,6 +124,7 @@ const tempLogoutUser = async () => {
   localStorage.removeItem("user_name");
   localStorage.removeItem("refresh_token");
   localStorage.removeItem("is_linkedin_connected");
+  localStorage.removeItem("user_id");
 };
 
 export const useLogout = () => {

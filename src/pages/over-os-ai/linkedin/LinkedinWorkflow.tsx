@@ -32,6 +32,7 @@ import {
   useChat,
   useCreateUserSchedules,
   useExtractSchedule,
+  useGetMySchedules,
   useOAuthInit,
   usePostToLinkedin,
 } from "@/utils/apis/django.api";
@@ -108,6 +109,8 @@ const LinkedinWorkflow = () => {
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
   const { mutate: createUserSchedules } = useCreateUserSchedules();
+  const { data: mySchedules } = useGetMySchedules();
+  console.log("mySchedules", mySchedules);
   // const { refetch, isFetching } = useGetLinkedinAuthUrl();
   const { refetch, isFetching } = useOAuthInit();
 
@@ -269,7 +272,8 @@ const LinkedinWorkflow = () => {
         localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
         localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
       },
-      onError: () => {
+      onError: (error: any) => {
+        console.log("error", error.response.data.message);
         toast({
           title: "Error",
           description: "Failed to publish post.",
@@ -277,6 +281,9 @@ const LinkedinWorkflow = () => {
           duration: 3000,
           isClosable: true,
         });
+        if (error.response.data.message === "No LinkedIn account connected.") {
+          onOpen();
+        }
       },
     });
   };

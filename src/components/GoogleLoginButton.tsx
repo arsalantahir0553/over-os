@@ -16,6 +16,7 @@ function GoogleLoginButton() {
       );
       console.log("res", res);
       localStorage.setItem("token", res.data.data.access);
+      localStorage.setItem("user_id", res.data.data.id);
       localStorage.setItem("refresh_token", res.data.data.refresh);
       localStorage.setItem(
         "is_linkedin_connected",
