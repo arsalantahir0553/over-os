@@ -38,7 +38,12 @@ const inputStyle = {
 };
 
 const Signin = () => {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    first_name: "",
+    last_name: "",
+  });
   const [step, setStep] = useState<"email" | "login" | "signup">("email");
   const toast = useToast();
   const [showPassword, setShowPassword] = useState(false);
@@ -176,19 +181,36 @@ const Signin = () => {
           </HStack>
 
           {step === "signup" && (
-            <FormControl id="name">
-              <FormLabel fontSize="sm" color="gray.700">
-                Name
-              </FormLabel>
-              <Input
-                {...inputStyle}
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="John Doe"
-              />
-            </FormControl>
+            <>
+              <FormControl id="first_name">
+                <FormLabel fontSize="sm" color="gray.700">
+                  First Name
+                </FormLabel>
+                <Input
+                  {...inputStyle}
+                  type="text"
+                  name="first_name"
+                  value={form.first_name}
+                  onChange={handleChange}
+                  color={"black"}
+                  placeholder="John Doe"
+                />
+              </FormControl>
+              <FormControl id="last_name">
+                <FormLabel fontSize="sm" color="gray.700">
+                  Last Name
+                </FormLabel>
+                <Input
+                  {...inputStyle}
+                  type="text"
+                  name="last_name"
+                  value={form.last_name}
+                  onChange={handleChange}
+                  color={"black"}
+                  placeholder="Doe"
+                />
+              </FormControl>
+            </>
           )}
 
           <FormControl id="email">
@@ -201,6 +223,7 @@ const Signin = () => {
               name="email"
               value={form.email}
               placeholder="name@email.com"
+              color={"black"}
               onChange={handleChange}
               isDisabled={step !== "email"}
             />
@@ -218,6 +241,7 @@ const Signin = () => {
                   name="password"
                   value={form.password}
                   onChange={handleChange}
+                  color={"black"}
                   placeholder="********"
                 />
                 <InputRightElement h="full" pr={3}>

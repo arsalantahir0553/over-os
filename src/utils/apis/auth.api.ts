@@ -1,11 +1,11 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_DJANGO_URL;
 
 // Login API
 const loginUser = async (credentials: { email: string; password: string }) => {
-  const response = await axios.post(`${API_BASE_URL}/user/login`, credentials);
+  const response = await axios.post(`${API_BASE_URL}/login/`, credentials);
   return response.data;
 };
 
@@ -19,9 +19,10 @@ export const useLogin = () => {
 const signupUser = async (userData: {
   email: string;
   password: string;
-  name: string;
+  first_name: string;
+  last_name: string;
 }) => {
-  const response = await axios.post(`${API_BASE_URL}/user/signup`, userData);
+  const response = await axios.post(`${API_BASE_URL}/register/`, userData);
   return response.data;
 };
 
@@ -33,7 +34,7 @@ export const useSignup = () => {
 
 const verifyEmail = async (email: string) => {
   const response = await axios.get(
-    `${API_BASE_URL}/user/verify-email?email=${email}`
+    `http://localhost:3000/api/user/verify-email?email=${email}`
   );
   return response.data;
 };
@@ -100,21 +101,23 @@ export const useValidateEmail = () => {
 //   });
 // };
 
-// const logoutUser = async () => {
-//   try {
-//     await axios.post(
-//       `${API_BASE_URL}/user/logout`,
-//       {},
-//       {
-//         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//       }
-//     );
-//   } catch (error) {
-//     console.error("Logout failed:", error);
-//   } finally {
-//     localStorage.removeItem("token"); // Clear token on logout
-//   }
-// };
+const logoutUser = async () => {
+  try {
+    await axios.post(
+      `${API_BASE_URL}/logout/`,
+      {
+        refresh_token: localStorage.getItem("refresh_token"),
+      },
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }
+    );
+  } catch (error) {
+    console.error("Logout failed:", error);
+  } finally {
+    tempLogoutUser();
+  }
+};
 
 const tempLogoutUser = async () => {
   localStorage.removeItem("token");
@@ -125,9 +128,9 @@ const tempLogoutUser = async () => {
 
 export const useLogout = () => {
   return useMutation({
-    mutationFn: tempLogoutUser,
+    mutationFn: logoutUser,
     onSuccess: () => {
-      window.location.href = "/"; // Redirect to home after logout
+      window.location.href = "/signin"; // Redirect to home after logout
     },
   });
 };

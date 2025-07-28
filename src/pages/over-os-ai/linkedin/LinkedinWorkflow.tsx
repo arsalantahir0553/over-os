@@ -16,7 +16,13 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { CalendarIcon, PlusIcon, SendIcon, Upload } from "lucide-react";
+import {
+  CalendarIcon,
+  ListChecks,
+  PlusIcon,
+  SendIcon,
+  Upload,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
@@ -29,11 +35,11 @@ import {
   useOAuthInit,
   usePostToLinkedin,
 } from "@/utils/apis/django.api";
-import { RiCalendarScheduleLine } from "react-icons/ri";
 import {
   convertLocalTimeToUTC,
   getFullDayName,
 } from "@/utils/helpers/functions.helper";
+import { RiCalendarScheduleLine } from "react-icons/ri";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -357,6 +363,10 @@ const LinkedinWorkflow = () => {
     deleteSpeed: 10,
   });
 
+  const handleSchedules = () => {
+    console.log("handleSchedules");
+  };
+
   return (
     <Box
       maxW="1260px"
@@ -366,7 +376,20 @@ const LinkedinWorkflow = () => {
       px={[0, 6]}
       backdropFilter="blur(16px)"
       borderRadius="xl"
+      position="relative"
     >
+      <Button
+        position="absolute"
+        fontSize={{ base: "10px", md: "sm" }}
+        top={{ base: "0", md: "-2" }}
+        right={{ base: "0", md: "5" }}
+        onClick={handleSchedules}
+        leftIcon={<ListChecks size={18} color="#00FFF7" />}
+        border={"1px solid rgba(0, 255, 247, 0.35)"}
+        size={{ base: "xs", md: "sm" }}
+      >
+        My Schedules
+      </Button>
       <VStack spacing={10} align="stretch">
         {/* Heading */}
         <Box textAlign="center">
