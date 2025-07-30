@@ -81,7 +81,8 @@ const Signin = () => {
     }
     try {
       const res = await verifyEmail.mutateAsync(form.email);
-      setStep(res.isNewUser ? "signup" : "login");
+      console.log(res);
+      setStep(res.data.is_new_user ? "signup" : "login");
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       toast({
@@ -101,7 +102,9 @@ const Signin = () => {
           email: form.email,
           password: form.password,
         });
-        localStorage.setItem("token", res.token);
+        localStorage.setItem("token", res.access);
+        localStorage.setItem("refresh_token", res.refresh);
+
         toast({ title: "Login successful", status: "success" });
         navigate("/dashboard");
       } else {
@@ -111,7 +114,7 @@ const Signin = () => {
             "Signup Successful, Please check your inbox for verification email",
           status: "success",
         });
-        navigate("/verify");
+        navigate(`/verify/${form.email}`);
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {

@@ -31,6 +31,7 @@ import HomeWorkflowDetails from "./pages/workflow-details";
 import { cleanExpiredUserMeta } from "./utils/helpers/auth.helper";
 import WorkflowTest from "./pages/test/WorkflowTest";
 import DjangoTest from "./pages/test/DjangoTest";
+import MySchedules from "./pages/over-os-ai/schedules";
 
 const App = () => {
   useEffect(() => {
@@ -73,6 +74,10 @@ const App = () => {
 
           <Route element={<LinkedinLayout />}>
             <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
+            <Route
+              path="/workflow/linkedin/schedules"
+              element={<MySchedules />}
+            />
             <Route path="/workflow/linkedin-test" element={<WorkflowTest />} />
             <Route path="/workflow/django" element={<DjangoTest />} />
             <Route
@@ -99,7 +104,7 @@ const App = () => {
         <Route path="request-reset" element={<ResetPassword />} />
         <Route path="reset-password" element={<ResetPasswordPage />} />
         <Route path="verify-email" element={<VerifyEmailPage />} />
-        <Route path="verify" element={<PleaseVerifyEmail />} />
+        <Route path="verify/:email" element={<PleaseVerifyEmail />} />
       </Routes>
     </Router>
   );

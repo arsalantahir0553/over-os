@@ -80,7 +80,7 @@ const getMySchedules = async () => {
   const response = await api.get(
     `${API_WORKFLOW_URL}/user-schedules/${userId}/`
   );
-  return response.data;
+  return response;
 };
 
 export const useGetMySchedules = () => {

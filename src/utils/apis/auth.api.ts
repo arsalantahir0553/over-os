@@ -33,15 +33,29 @@ export const useSignup = () => {
 };
 
 const verifyEmail = async (email: string) => {
-  const response = await axios.get(
-    `http://localhost:3000/api/user/verify-email?email=${email}`
-  );
+  const response = await axios.post(`${API_BASE_URL}/user-check/`, {
+    email,
+  });
   return response.data;
 };
 
 export const useVerifyEmail = () => {
   return useMutation({
     mutationFn: verifyEmail,
+  });
+};
+
+const verifyOtp = async ({ email, otp }: { email: string; otp: number }) => {
+  const response = await axios.post(`${API_BASE_URL}/verify-email/`, {
+    email,
+    otp,
+  });
+  return response.data;
+};
+
+export const useVerifyOtp = () => {
+  return useMutation({
+    mutationFn: verifyOtp,
   });
 };
 

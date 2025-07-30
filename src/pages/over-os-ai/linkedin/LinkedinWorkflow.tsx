@@ -32,7 +32,6 @@ import {
   useChat,
   useCreateUserSchedules,
   useExtractSchedule,
-  useGetMySchedules,
   useOAuthInit,
   usePostToLinkedin,
 } from "@/utils/apis/django.api";
@@ -41,6 +40,7 @@ import {
   getFullDayName,
 } from "@/utils/helpers/functions.helper";
 import { RiCalendarScheduleLine } from "react-icons/ri";
+import { useNavigate } from "react-router-dom";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -109,11 +109,10 @@ const LinkedinWorkflow = () => {
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
   const { mutate: createUserSchedules } = useCreateUserSchedules();
-  const { data: mySchedules } = useGetMySchedules();
-  console.log("mySchedules", mySchedules);
+
   // const { refetch, isFetching } = useGetLinkedinAuthUrl();
   const { refetch, isFetching } = useOAuthInit();
-
+  const navigate = useNavigate();
   // const { mutate: createHistory } = useCreateHistory();
 
   useEffect(() => {
@@ -371,7 +370,7 @@ const LinkedinWorkflow = () => {
   });
 
   const handleSchedules = () => {
-    console.log("handleSchedules");
+    navigate("/workflow/linkedin/schedules");
   };
 
   return (
