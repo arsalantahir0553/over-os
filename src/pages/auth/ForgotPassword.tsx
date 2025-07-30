@@ -1,4 +1,4 @@
-import { useRequestPasswordReset } from "@/utils/apis/auth.api";
+import { useForgotPassword } from "@/utils/apis/auth.api";
 import {
   Box,
   Button,
@@ -19,7 +19,7 @@ const ResetPasswordRequestPage = () => {
   const [email, setEmail] = useState(() => searchParams.get("email") || "");
   const toast = useToast();
   const navigate = useNavigate();
-  const { mutate: sendResetEmail, isPending } = useRequestPasswordReset();
+  const { mutate: sendResetEmail, isPending } = useForgotPassword();
 
   useEffect(() => {
     const emailFromUrl = searchParams.get("email") || "";
@@ -30,7 +30,7 @@ const ResetPasswordRequestPage = () => {
     sendResetEmail(email, {
       onSuccess: (data) => {
         toast({
-          title: "Reset link sent",
+          title: "OTP sent",
           description: data.message,
           status: "success",
           duration: 3000,
@@ -41,8 +41,7 @@ const ResetPasswordRequestPage = () => {
       onError: (error: any) => {
         toast({
           title: "Error",
-          description:
-            error?.response?.data?.message || "Failed to send reset link",
+          description: error?.response?.data?.message || "Failed to send OTP",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -67,6 +66,7 @@ const ResetPasswordRequestPage = () => {
             fontSize="30px"
             fontWeight={400}
             letterSpacing={"8%"}
+            color={"black"}
             fontFamily={"Joan"}
           >
             Reset Your Password
@@ -83,6 +83,7 @@ const ResetPasswordRequestPage = () => {
               border="1px solid"
               borderColor="gray.300"
               bg="white"
+              color={"black"}
               fontSize="sm"
               boxShadow="sm"
               _placeholder={{ color: "gray.400" }}
@@ -102,7 +103,7 @@ const ResetPasswordRequestPage = () => {
             isDisabled={!email}
             borderRadius="md"
           >
-            Send Reset Link
+            Send OTP
           </Button>
         </VStack>
       </Flex>

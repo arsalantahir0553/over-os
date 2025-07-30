@@ -137,7 +137,7 @@ const logoutUser = async () => {
     await axios.post(
       `${API_BASE_URL}/logout/`,
       {
-        refresh_token: localStorage.getItem("refresh_token"),
+        refresh: localStorage.getItem("refresh_token"),
       },
       {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -182,11 +182,71 @@ export const useRequestPasswordReset = () => {
 };
 
 // Reset Password (using token + new password)
-const resetPassword = async (data: { token: string; newPassword: string }) => {
+// const resetPassword = async (data: { token: string; newPassword: string }) => {
+//   const response = await axios.post(
+//     `${API_BASE_URL}/user/reset-password`,
+//     data
+//   );
+//   return response.data;
+// };
+
+// export const useResetPassword = () => {
+//   return useMutation({
+//     mutationFn: resetPassword,
+//   });
+// };
+
+//new forgot password
+const forgotPassword = async (email: string) => {
+  const response = await axios.post(`${API_BASE_URL}/forgot-password/`, {
+    email,
+  });
+  return response.data;
+};
+
+export const useForgotPassword = () => {
+  return useMutation({
+    mutationFn: forgotPassword,
+  });
+};
+
+const verifyPasswordOtp = async ({
+  email,
+  otp,
+}: {
+  email: string;
+  otp: number;
+}) => {
   const response = await axios.post(
-    `${API_BASE_URL}/user/reset-password`,
-    data
+    `${API_BASE_URL}/verify-password-reset-otp/`,
+    {
+      email,
+      otp,
+    }
   );
+  return response.data;
+};
+
+export const useVerifyPasswordOtp = () => {
+  return useMutation({
+    mutationFn: verifyPasswordOtp,
+  });
+};
+
+const resetPassword = async ({
+  email,
+  otp,
+  new_password,
+}: {
+  email: string;
+  otp: number;
+  new_password: string;
+}) => {
+  const response = await axios.post(`${API_BASE_URL}/reset-password/`, {
+    email,
+    otp,
+    new_password,
+  });
   return response.data;
 };
 

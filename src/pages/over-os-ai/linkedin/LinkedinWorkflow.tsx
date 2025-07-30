@@ -384,18 +384,20 @@ const LinkedinWorkflow = () => {
       borderRadius="xl"
       position="relative"
     >
-      <Button
-        position="absolute"
-        fontSize={{ base: "10px", md: "sm" }}
-        top={{ base: "0", md: "-2" }}
-        right={{ base: "0", md: "5" }}
-        onClick={handleSchedules}
-        leftIcon={<ListChecks size={18} color="#00FFF7" />}
-        border={"1px solid rgba(0, 255, 247, 0.35)"}
-        size={{ base: "xs", md: "sm" }}
-      >
-        My Schedules
-      </Button>
+      {isLinkedinConnected && (
+        <Button
+          position="absolute"
+          fontSize={{ base: "10px", md: "sm" }}
+          top={{ base: "0", md: "-2" }}
+          right={{ base: "0", md: "5" }}
+          onClick={handleSchedules}
+          leftIcon={<ListChecks size={18} color="#00FFF7" />}
+          border={"1px solid rgba(0, 255, 247, 0.35)"}
+          size={{ base: "xs", md: "sm" }}
+        >
+          My Schedules
+        </Button>
+      )}
       <VStack spacing={10} align="stretch">
         {/* Heading */}
         <Box textAlign="center">

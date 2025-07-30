@@ -5,7 +5,7 @@ const API_WORKFLOW_URL = import.meta.env.VITE_DJANGO_URL;
 const userId = localStorage.getItem("user_id");
 
 const oAuthInit = async () => {
-  const response = await api.get(`${API_WORKFLOW_URL}/linkedin/oauth/init/`);
+  const response = await api.get(`${API_WORKFLOW_URL}init//linkedin/oauth/`);
   return response.data;
 };
 
@@ -80,7 +80,7 @@ const getMySchedules = async () => {
   const response = await api.get(
     `${API_WORKFLOW_URL}/user-schedules/${userId}/`
   );
-  return response;
+  return response.data;
 };
 
 export const useGetMySchedules = () => {

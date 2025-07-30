@@ -317,7 +317,7 @@ const UserMenu = ({ User, token, isExpanded }: any) => {
   //   );
   // }
 
-  if (!token || !User) {
+  if (!token) {
     return (
       <Button
         size="sm"
@@ -351,7 +351,7 @@ const UserMenu = ({ User, token, isExpanded }: any) => {
         <Flex align="center" justifyContent={"space-between"}>
           <Flex align="center" gap={2}>
             <Avatar size="sm" name={User} />
-            {isExpanded && <Text fontSize="sm">{User}</Text>}
+            {isExpanded && <Text fontSize="sm">{User || "User"}</Text>}
           </Flex>
           {isExpanded && <Image src={SettingsIcon} />}
         </Flex>
