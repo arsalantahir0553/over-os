@@ -59,6 +59,23 @@ export const useVerifyOtp = () => {
   });
 };
 
+export const refreshToken = async (): Promise<string> => {
+  const refresh = localStorage.getItem("refresh_token");
+  if (!refresh) throw new Error("No refresh token available.");
+
+  const response = await axios.post(`${API_BASE_URL}/token/refresh/`, {
+    refresh,
+  });
+
+  const { access, refresh: newRefresh } = response.data;
+
+  // Optional: update tokens in localStorage
+  localStorage.setItem("token", access);
+  localStorage.setItem("refresh_token", newRefresh);
+
+  return access; // ✅ return only the access token
+};
+
 const validateEmail = async ({
   token,
   email,

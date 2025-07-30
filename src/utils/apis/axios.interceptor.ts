@@ -1,5 +1,5 @@
 import axios from "axios";
-import { refreshLinkedinToken } from "./linkedin.api";
+import { refreshToken } from "./auth.api";
 
 const API_WORKFLOW_URL = import.meta.env.VITE_API_OVEROS_URL;
 
@@ -10,7 +10,7 @@ const api = axios.create({
 // Attach access token before each request
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("linkedin_access_token");
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,11 +28,11 @@ api.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      localStorage.getItem("linkedin_refresh_token")
+      localStorage.getItem("refresh_token")
     ) {
       originalRequest._retry = true;
       try {
-        const newAccessToken = await refreshLinkedinToken();
+        const newAccessToken = await refreshToken();
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest); // Retry original request
       } catch (refreshError) {

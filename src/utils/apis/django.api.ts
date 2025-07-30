@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import api from "./django-axios.interceptor";
+import api from "./axios.interceptor";
 
 const API_WORKFLOW_URL = import.meta.env.VITE_DJANGO_URL;
 const userId = localStorage.getItem("user_id");
