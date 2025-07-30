@@ -20,7 +20,6 @@ const ResetPasswordRequestPage = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const { mutate: sendResetEmail, isPending } = useForgotPassword();
-
   useEffect(() => {
     const emailFromUrl = searchParams.get("email") || "";
     setEmail(emailFromUrl);
@@ -36,6 +35,7 @@ const ResetPasswordRequestPage = () => {
           duration: 3000,
           isClosable: true,
         });
+        navigate(`/verify-otp/${email}`);
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (error: any) => {

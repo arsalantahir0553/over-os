@@ -65,6 +65,7 @@ interface ScheduleData {
   frequency: "once" | "weekly" | "monthly";
   day_of_week: string;
   time_of_day: string;
+  end_date?: string;
 }
 
 const LinkedinWorkflow = () => {
@@ -213,6 +214,7 @@ const LinkedinWorkflow = () => {
             frequency: data.data.frequency,
             day_of_week: data.data.day_of_week,
             time_of_day: data.data.time_of_day,
+            end_date: data.data.end_date,
           });
         } else {
           setScheduleData(null);

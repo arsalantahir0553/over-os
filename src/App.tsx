@@ -32,6 +32,7 @@ import { cleanExpiredUserMeta } from "./utils/helpers/auth.helper";
 import WorkflowTest from "./pages/test/WorkflowTest";
 import DjangoTest from "./pages/test/DjangoTest";
 import MySchedules from "./pages/over-os-ai/schedules";
+import VerifyPasswordOtp from "./pages/auth/VerifyPasswordOtp";
 
 const App = () => {
   useEffect(() => {
@@ -103,6 +104,7 @@ const App = () => {
         <Route path="signin" element={<Signin />} />
         <Route path="request-reset" element={<ResetPassword />} />
         <Route path="reset-password" element={<ResetPasswordPage />} />
+        <Route path="verify-otp/:email" element={<VerifyPasswordOtp />} />
         <Route path="verify-email" element={<VerifyEmailPage />} />
         <Route path="verify/:email" element={<PleaseVerifyEmail />} />
       </Routes>

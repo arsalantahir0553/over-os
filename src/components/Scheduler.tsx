@@ -1,4 +1,8 @@
 import {
+  calculateDurationFromDates,
+  calculateEndDateFromDuration,
+} from "@/utils/helpers/functions.helper";
+import {
   Box,
   Button,
   Flex,
@@ -26,6 +30,7 @@ interface ScheduleData {
   frequency: "once" | "weekly" | "monthly";
   day_of_week: string;
   time_of_day: string;
+  end_date?: string; // <-- Add this
 }
 
 interface SchedulerProps {
@@ -73,9 +78,12 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
 
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date>(() => {
-    const date = new Date();
-    date.setDate(date.getDate() + 7); // Default to 1 week from now
-    return date;
+    if (data?.end_date) {
+      return new Date(data.end_date);
+    }
+    const fallback = new Date();
+    fallback.setDate(fallback.getDate() + 7);
+    return fallback;
   });
 
   const [time, setTime] = useState<string>(() => {
@@ -100,7 +108,13 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
     data?.frequency === "monthly" ? "monthly" : "weekly"
   );
 
-  const [duration, setDuration] = useState("1 week");
+  const [duration, setDuration] = useState(() => {
+    if (data?.end_date) {
+      const parsedEnd = new Date(data.end_date);
+      return calculateDurationFromDates(startDate, parsedEnd);
+    }
+    return "1 week";
+  });
 
   const prevValuesRef = useRef({
     mode,
@@ -120,6 +134,16 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
       );
     }
   };
+
+  useEffect(() => {
+    const newEndDate = calculateEndDateFromDuration(startDate, duration);
+    setEndDate(newEndDate);
+  }, [duration, startDate]);
+
+  useEffect(() => {
+    const newDuration = calculateDurationFromDates(startDate, endDate);
+    setDuration(newDuration);
+  }, [endDate, startDate]);
 
   const cardBg = useColorModeValue("white", "brand.900");
 
@@ -166,6 +190,14 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
       selectedDays.length
     } times per week (${shortDays}) at ${time} AM EST for ${duration} (${startDate.toDateString()} - ${endDate.toDateString()})`;
   };
+
+  useEffect(() => {
+    if (data?.end_date) {
+      const parsedEnd = new Date(data.end_date);
+      setEndDate(parsedEnd);
+      setDuration(calculateDurationFromDates(startDate, parsedEnd));
+    }
+  }, [data?.end_date, startDate]);
 
   return (
     <Box

@@ -1,4 +1,3 @@
-import { useResetPassword } from "@/utils/apis/auth.api";
 import {
   Box,
   Button,
@@ -14,10 +13,12 @@ import {
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import OverOsLogo from "../../assets/svgs/overos-ai-beta-auth-logo.svg";
+import { useResetPassword } from "@/utils/apis/auth.api";
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get("token") || "";
+  const email = searchParams.get("email") || "";
+  const otp = Number(searchParams.get("otp")) || 0;
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const toast = useToast();
@@ -31,19 +32,22 @@ const ResetPasswordPage = () => {
     if (!passwordsMatch) return;
 
     resetPassword(
-      { token, newPassword },
+      {
+        email,
+        otp,
+        new_password: newPassword,
+      },
       {
         onSuccess: (data) => {
           toast({
             title: "Success",
-            description: data.message,
+            description: data.message || "Password reset successfully.",
             status: "success",
             duration: 3000,
             isClosable: true,
           });
           navigate("/signin");
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (error: any) => {
           toast({
             title: "Error",
@@ -70,7 +74,7 @@ const ResetPasswordPage = () => {
 
       <Flex minH="85vh" align="center" justify="center" bg="#f5f5f5">
         <VStack spacing={6} w="full" maxW="469px" px={6}>
-          <Text fontSize="30px" fontWeight={700}>
+          <Text fontSize="30px" fontWeight={700} color="black">
             Set New Password
           </Text>
 
@@ -86,6 +90,7 @@ const ResetPasswordPage = () => {
               border="1px solid"
               borderColor="gray.300"
               bg="white"
+              color="black"
               fontSize="sm"
               boxShadow="sm"
               _placeholder={{ color: "gray.400" }}
@@ -108,6 +113,7 @@ const ResetPasswordPage = () => {
               border="1px solid"
               borderColor="gray.300"
               bg="white"
+              color="black"
               fontSize="sm"
               boxShadow="sm"
               _placeholder={{ color: "gray.400" }}
@@ -125,7 +131,7 @@ const ResetPasswordPage = () => {
             h="55px"
             onClick={handleReset}
             isLoading={isPending}
-            isDisabled={!newPassword || !confirmPassword || !token}
+            isDisabled={!newPassword || !confirmPassword || !email || !otp}
             borderRadius="md"
           >
             Reset Password

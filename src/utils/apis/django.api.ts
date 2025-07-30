@@ -5,7 +5,7 @@ const API_WORKFLOW_URL = import.meta.env.VITE_DJANGO_URL;
 const userId = localStorage.getItem("user_id");
 
 const oAuthInit = async () => {
-  const response = await api.get(`${API_WORKFLOW_URL}init//linkedin/oauth/`);
+  const response = await api.get(`${API_WORKFLOW_URL}/linkedin/oauth/init/`);
   return response.data;
 };
 
