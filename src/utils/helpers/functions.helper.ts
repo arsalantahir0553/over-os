@@ -17,14 +17,30 @@ export const convertLocalTimeToUTC = (localTime: string): string => {
   if (!localTime) return "00:00:00";
 
   try {
-    // Parse the local time (HH:mm)
-    const [hours, minutes] = localTime.split(":").map(Number);
+    // Match 12-hour format like "10:40 PM" or "03:15 am"
+    const timeMatch = localTime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
 
-    // Create a date object with today's date and the specified local time
+    if (!timeMatch) {
+      console.error("Invalid time format. Use HH:mm AM/PM format.");
+      return "00:00:00";
+    }
+
+    let [_, hourStr, minuteStr, meridiem] = timeMatch;
+    let hours = parseInt(hourStr, 10);
+    const minutes = parseInt(minuteStr, 10);
+
+    // Convert to 24-hour format
+    if (meridiem.toUpperCase() === "PM" && hours !== 12) {
+      hours += 12;
+    } else if (meridiem.toUpperCase() === "AM" && hours === 12) {
+      hours = 0;
+    }
+
+    // Create date object with local time
     const date = new Date();
     date.setHours(hours, minutes, 0, 0);
 
-    // Convert to UTC and format as HH:mm:ss
+    // Convert to UTC
     const utcHours = date.getUTCHours().toString().padStart(2, "0");
     const utcMinutes = date.getUTCMinutes().toString().padStart(2, "0");
 
@@ -35,9 +51,10 @@ export const convertLocalTimeToUTC = (localTime: string): string => {
   }
 };
 
-
-
-export const calculateEndDateFromDuration = (start: Date, duration: string): Date => {
+export const calculateEndDateFromDuration = (
+  start: Date,
+  duration: string
+): Date => {
   const newDate = new Date(start);
   switch (duration) {
     case "1 week":
@@ -64,9 +81,10 @@ export const calculateEndDateFromDuration = (start: Date, duration: string): Dat
   return newDate;
 };
 
-
 export const calculateDurationFromDates = (start: Date, end: Date): string => {
-  const daysDiff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const daysDiff = Math.round(
+    (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+  );
 
   if (daysDiff <= 7) return "1 week";
   if (daysDiff <= 14) return "2 weeks";

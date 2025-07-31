@@ -77,9 +77,7 @@ export const useCreateUserSchedules = () => {
 };
 
 const getMySchedules = async () => {
-  const response = await api.get(
-    `${API_WORKFLOW_URL}/user-schedules/${userId}/`
-  );
+  const response = await api.get(`${API_WORKFLOW_URL}/user-schedules/`);
   return response.data;
 };
 

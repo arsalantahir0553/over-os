@@ -386,7 +386,7 @@ const LinkedinWorkflow = () => {
       borderRadius="xl"
       position="relative"
     >
-      {isLinkedinConnected && (
+      {/* {isLinkedinConnected && (
         <Button
           position="absolute"
           fontSize={{ base: "10px", md: "sm" }}
@@ -399,7 +399,7 @@ const LinkedinWorkflow = () => {
         >
           My Schedules
         </Button>
-      )}
+      )} */}
       <VStack spacing={10} align="stretch">
         {/* Heading */}
         <Box textAlign="center">
