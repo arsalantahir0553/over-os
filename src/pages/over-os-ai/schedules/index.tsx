@@ -1,32 +1,32 @@
-import {
-  Box,
-  Text,
-  VStack,
-  HStack,
-  Badge,
-  useColorModeValue,
-  Icon,
-  Flex,
-  Spinner,
-  useDisclosure,
-  Button,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-} from "@chakra-ui/react";
-import { FiClock, FiCalendar, FiTrash2, FiEdit } from "react-icons/fi";
-import { useGetMySchedules, useDeleteSchedule } from "@/utils/apis/django.api";
-import { useState } from "react";
-import { format } from "date-fns";
+import CustomModal from "@/components/modals/CustomModal";
+import { useDeleteSchedule, useGetMySchedules } from "@/utils/apis/django.api";
 import type { UserSchedule } from "@/utils/types/types";
+import {
+  Badge,
+  Box,
+  Button,
+  Flex,
+  HStack,
+  Icon,
+  Spinner,
+  Text,
+  useColorModeValue,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react";
+import { format } from "date-fns";
+import { useState } from "react";
+import { FiCalendar, FiClock, FiEdit, FiTrash2 } from "react-icons/fi";
 
 const MySchedules = () => {
-  const { data: mySchedules, isLoading } = useGetMySchedules();
-  const deleteSchedule = useDeleteSchedule();
+  const { data: mySchedules, isLoading, refetch } = useGetMySchedules();
+  const { mutate: deleteSchedule } = useDeleteSchedule();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isOpenUpdate,
+    onOpen: onOpenUpdate,
+    onClose: onCloseUpdate,
+  } = useDisclosure();
   const [selectedSchedule, setSelectedSchedule] = useState<UserSchedule | null>(
     null
   );
@@ -42,14 +42,14 @@ const MySchedules = () => {
 
   const confirmDelete = () => {
     console.log("selectedSchedule", selectedSchedule);
-    // if (selectedSchedule) {
-    //   deleteSchedule.mutate(selectedSchedule.id, {
-    //     onSuccess: () => {
-    //       onClose();
-    //       // Optionally refetch schedules
-    //     },
-    //   });
-    // }
+    if (selectedSchedule) {
+      deleteSchedule(selectedSchedule.id.toString(), {
+        onSuccess: () => {
+          onClose();
+          refetch();
+        },
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -124,7 +124,8 @@ const MySchedules = () => {
                 variant="ghost"
                 leftIcon={<Icon as={FiEdit} />}
                 onClick={() => {
-                  // Handle edit
+                  onOpenUpdate();
+                  setSelectedSchedule(schedule);
                 }}
               >
                 Edit
@@ -182,28 +183,32 @@ const MySchedules = () => {
         </Box>
       ))}
 
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Delete Schedule</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <Text>Are you sure you want to delete this schedule?</Text>
-            <Flex justify="flex-end" mt={6} gap={3}>
-              <Button variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button
-                colorScheme="red"
-                onClick={confirmDelete}
-                // isLoading={deleteSchedule.isLoading}
-              >
-                Delete
-              </Button>
-            </Flex>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+      <CustomModal
+        isOpen={isOpen}
+        onClose={onClose}
+        onSubmit={confirmDelete}
+        onCancel={onClose}
+        header="Delete Schedule"
+        submitText="Delete"
+        cancelText="Cancel"
+        submitButtonColor="red"
+      >
+        <Text>Are you sure you want to delete this schedule?</Text>
+      </CustomModal>
+
+      {/* update one time schedule */}
+      <CustomModal
+        isOpen={isOpenUpdate}
+        onClose={onCloseUpdate}
+        onSubmit={confirmDelete}
+        onCancel={onCloseUpdate}
+        header="Update Schedule"
+        submitText="Update"
+        cancelText="Cancel"
+        submitButtonColor="brand.500"
+      >
+        <Text>Are you sure you want to update this schedule?</Text>
+      </CustomModal>
     </VStack>
   );
 };

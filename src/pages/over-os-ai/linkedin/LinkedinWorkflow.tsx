@@ -30,6 +30,7 @@ import { LinkedinLoginModal } from "./LinkedinLoginModal";
 import Scheduler from "@/components/Scheduler";
 import {
   useChat,
+  // useCreateChatSession,
   useCreateUserSchedules,
   useExtractSchedule,
   useOAuthInit,
@@ -102,24 +103,16 @@ const LinkedinWorkflow = () => {
     }
   }, [generatedText]);
 
-  // const { mutate: generatePrompt, isPending: isGenerating } =
-  //   useGenerateLinkedinPrompt();
   const { mutate: generatePrompt, isPending: isGenerating } = useChat();
-  // const { mutate: publishPost, isPending: isPublishing } =
-  //   usePublishGeneratedPost();
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
   const { mutate: createUserSchedules } = useCreateUserSchedules();
+  // const { mutate: createChatSession } = useCreateChatSession();
 
-  // const { refetch, isFetching } = useGetLinkedinAuthUrl();
   const { refetch, isFetching } = useOAuthInit();
   const navigate = useNavigate();
-  // const { mutate: createHistory } = useCreateHistory();
 
   useEffect(() => {
-    // const id = localStorage.getItem("linkedin_user_id");
-    // setLinkedinUserId(id || null);
-
     const savedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.prompt);
     const savedResponse = localStorage.getItem(LOCAL_STORAGE_KEYS.response);
     const savedImageUrls = localStorage.getItem(LOCAL_STORAGE_KEYS.imageUrls);
@@ -150,6 +143,13 @@ const LinkedinWorkflow = () => {
         (loadingIndexRef.current + 1) % loadingMessages.length;
       setLoadingMessage(loadingMessages[loadingIndexRef.current]);
     }, 3500);
+    // const sessionTitle = userPrompt.slice(0, 30);
+
+    // createChatSession(sessionTitle, {
+    //   onSuccess: (data) => {
+    //     console.log("data", data);
+    //   },
+    // });
 
     generatePrompt(userPrompt, {
       onSuccess: (data) => {
@@ -248,27 +248,6 @@ const LinkedinWorkflow = () => {
           duration: 3000,
           isClosable: true,
         });
-
-        // createHistory(
-        //   {
-        //     user_id: user.id,
-        //     prompt: userPrompt,
-        //     generated_post: generatedText,
-        //     image_url: imageUrls[0] || "",
-        //     meta: JSON.stringify({
-        //       source: "LinkedInWorkflow",
-        //       timestamp: new Date().toISOString(),
-        //     }),
-        //   },
-        //   {
-        //     onSuccess: () => {
-        //       queryClient.invalidateQueries({
-        //         queryKey: ["user-history", user.id, 10, 0],
-        //       });
-        //     },
-        //   }
-        // );
-
         localStorage.removeItem(LOCAL_STORAGE_KEYS.prompt);
         localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
         localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
@@ -386,7 +365,7 @@ const LinkedinWorkflow = () => {
       borderRadius="xl"
       position="relative"
     >
-      {/* {isLinkedinConnected && (
+      {isLinkedinConnected && (
         <Button
           position="absolute"
           fontSize={{ base: "10px", md: "sm" }}
@@ -399,7 +378,7 @@ const LinkedinWorkflow = () => {
         >
           My Schedules
         </Button>
-      )} */}
+      )}
       <VStack spacing={10} align="stretch">
         {/* Heading */}
         <Box textAlign="center">

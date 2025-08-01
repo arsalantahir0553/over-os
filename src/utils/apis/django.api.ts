@@ -15,6 +15,20 @@ export const useOAuthInit = () => {
     queryKey: ["oauth-init"],
   });
 };
+
+const createChatSession = async (title: string) => {
+  const response = await api.post(`${API_WORKFLOW_URL}/chat-sessions/`, {
+    title,
+  });
+  return response.data;
+};
+
+export const useCreateChatSession = () => {
+  return useMutation({
+    mutationFn: (title: string) => createChatSession(title),
+  });
+};
+
 const chat = async (prompt: string) => {
   const response = await api.post(`${API_WORKFLOW_URL}/chat/`, {
     prompt,
@@ -88,22 +102,31 @@ export const useGetMySchedules = () => {
   });
 };
 
-const deleteSchedule = async () => {
+const deleteSchedule = async (id: string) => {
   const response = await api.delete(
-    `${API_WORKFLOW_URL}/user-schedules/${userId}/`
+    `${API_WORKFLOW_URL}/user-schedules/${id}/`
   );
   return response.data;
 };
 
 export const useDeleteSchedule = () => {
   return useMutation({
-    mutationFn: () => deleteSchedule(),
+    mutationFn: (id: string) => deleteSchedule(id),
   });
 };
 
-const updateSchedule = async (data: ScheduleItem) => {
+export interface UpdateScheduleItem {
+  id: string;
+  prompt: string;
+  frequency: "once" | "weekly" | "monthly";
+  day_of_week: string;
+  time_of_day: string; // format: HH:mm:ss
+  end_date: string;
+}
+
+const updateSchedule = async (data: UpdateScheduleItem) => {
   const response = await api.put(
-    `${API_WORKFLOW_URL}/user-schedules/${userId}/`,
+    `${API_WORKFLOW_URL}/user-schedules/${data.id}/`,
     data
   );
   return response.data;
@@ -111,6 +134,6 @@ const updateSchedule = async (data: ScheduleItem) => {
 
 export const useUpdateSchedule = () => {
   return useMutation({
-    mutationFn: (data: ScheduleItem) => updateSchedule(data),
+    mutationFn: (data: UpdateScheduleItem) => updateSchedule(data),
   });
 };
