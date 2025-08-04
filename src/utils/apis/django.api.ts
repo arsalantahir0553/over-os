@@ -45,6 +45,8 @@ export interface ScheduleItem {
   frequency: "once" | "weekly" | "monthly";
   day_of_week: string;
   time_of_day: string; // format: HH:mm:ss
+  chat_session?: number;
+  flag?: 1;
 }
 
 export interface UserScheduleInput {

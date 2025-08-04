@@ -40,12 +40,9 @@ import {
 } from "@/utils/helpers/functions.helper";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
-import {
-  useChat,
-  useCreateChatSession,
-  useGetAllChatSessions,
-} from "@/utils/apis/chat-sessions";
+import { useChat, useCreateChatSession } from "@/utils/apis/chat-sessions";
 import { useChatSession } from "@/context/ChatSessionContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -80,13 +77,11 @@ const LinkedinWorkflow = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
-  // const [linkedinUserId, setLinkedinUserId] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
   const loadingIndexRef = useRef<number>(0);
   const intervalRef = useRef<number | null>(null);
   const toast = useToast();
-  // const { data: user } = useLoggedInUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showScheduler, setShowScheduler] = useState(false);
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
@@ -107,16 +102,19 @@ const LinkedinWorkflow = () => {
     }
   }, [generatedText]);
 
+  // const { mutate: generatePrompt, isPending: isGenerating } =
+  //   useGenerateLinkedinPrompt();
   const { mutate: generatePrompt, isPending: isGenerating } = useChat();
+  // const { mutate: publishPost, isPending: isPublishing } =
+  //   usePublishGeneratedPost();
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
-  const { refetch: refetchChatSessions } = useGetAllChatSessions();
   const { mutate: createUserSchedules } = useCreateUserSchedules();
   const { mutate: createChatSession } = useCreateChatSession();
   const { activeSessionId, setActiveSessionId } = useChatSession();
   const { refetch, isFetching } = useOAuthInit();
   const navigate = useNavigate();
-
+  const queryClient = useQueryClient();
   useEffect(() => {
     const savedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.prompt);
     const savedResponse = localStorage.getItem(LOCAL_STORAGE_KEYS.response);
@@ -148,17 +146,17 @@ const LinkedinWorkflow = () => {
         (loadingIndexRef.current + 1) % loadingMessages.length;
       setLoadingMessage(loadingMessages[loadingIndexRef.current]);
     }, 3500);
-    const sessionTitle = userPrompt.slice(0, 30);
 
-    if (!activeSessionId) {
-      createChatSession(sessionTitle, {
-        onSuccess: (data) => {
-          console.log("data", data);
-          refetchChatSessions();
-          setActiveSessionId(data.id);
-        },
-      });
-    }
+    createChatSession(userPrompt, {
+      onSuccess: (data) => {
+        console.log("chat session created:", data.data);
+        setActiveSessionId(data.data.id);
+        queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
+      },
+      onError: (error) => {
+        console.error("chat session creation failed", error);
+      },
+    });
 
     generatePrompt(
       {
@@ -167,7 +165,7 @@ const LinkedinWorkflow = () => {
       },
       {
         onSuccess: (data) => {
-          console.log("data", data.data);
+          console.log("data", data);
           if (data.data === null) {
             clearInterval(intervalRef.current!);
             setLoadingMessage(null);
@@ -222,23 +220,23 @@ const LinkedinWorkflow = () => {
       }
     );
 
-    // extractSchedule(userPrompt, {
-    //   onSuccess: (data) => {
-    //     if (data.data.day_of_week !== null) {
-    //       setScheduleData({
-    //         frequency: data.data.frequency,
-    //         day_of_week: data.data.day_of_week,
-    //         time_of_day: data.data.time_of_day,
-    //         end_date: data.data.end_date,
-    //       });
-    //     } else {
-    //       setScheduleData(null);
-    //     }
-    //   },
-    //   onError: () => {
-    //     console.log("error");
-    //   },
-    // });
+    extractSchedule(userPrompt, {
+      onSuccess: (data) => {
+        if (data.data.day_of_week !== null) {
+          setScheduleData({
+            frequency: data.data.frequency,
+            day_of_week: data.data.day_of_week,
+            time_of_day: data.data.time_of_day,
+            end_date: data.data.end_date,
+          });
+        } else {
+          setScheduleData(null);
+        }
+      },
+      onError: () => {
+        console.log("error");
+      },
+    });
   };
 
   const handleSubmit = () => {
@@ -263,6 +261,7 @@ const LinkedinWorkflow = () => {
           duration: 3000,
           isClosable: true,
         });
+
         localStorage.removeItem(LOCAL_STORAGE_KEYS.prompt);
         localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
         localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
@@ -307,6 +306,8 @@ const LinkedinWorkflow = () => {
             frequency: scheduleData.frequency,
             day_of_week: getFullDayName(scheduleData.day_of_week),
             time_of_day: utcTime,
+            chat_session: activeSessionId,
+            flag: 1,
           },
         ],
       },

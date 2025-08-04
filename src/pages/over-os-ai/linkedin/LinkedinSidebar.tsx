@@ -22,11 +22,12 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronUpIcon,
-  MessageCircle,
+  MessageSquareText,
 } from "lucide-react";
 import { useState } from "react";
 import {
   FiBookOpen,
+  FiClock,
   FiLogOut,
   FiMonitor,
   FiTarget,
@@ -43,11 +44,11 @@ import SettingsIcon from "../../../assets/svgs/settings.svg";
 
 import { useLoggedInUser, useLogout } from "@/utils/apis/auth.api";
 
+import { useChatSession } from "@/context/ChatSessionContext";
 import { useGetAllChatSessions } from "@/utils/apis/chat-sessions";
 import { useWorkflowCategories } from "@/utils/apis/workflow.api";
 import { AiOutlineProduct } from "react-icons/ai";
 import { PiRankingThin } from "react-icons/pi";
-import { useChatSession } from "@/context/ChatSessionContext";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const categoryIcons: Record<string, any> = {
@@ -189,7 +190,7 @@ const LinkedinSidebar = () => {
         </SidebarDropdown>
 
         <SidebarDropdown
-          label="My Workflows"
+          label="My Agents"
           icon={MyWorkflowsIcon}
           isExpanded={responsiveIsExpanded}
           isOpen={showMyWorkflows}
@@ -216,25 +217,26 @@ const LinkedinSidebar = () => {
                   onClick={
                     () =>
                       session.id === activeSessionId
-                        ? setActiveSessionId(null) // 👈 toggle off if already selected
-                        : setActiveSessionId(session.id) // 👈 set new active
+                        ? setActiveSessionId(null) // toggle off if already selected
+                        : setActiveSessionId(session.id) // set new active
                   }
                 >
                   <Flex gap={2} align="start" w="full">
                     <Box mt={0.5}>
-                      <MessageCircle size={16} />
+                      <MessageSquareText size={16} />
                     </Box>
-                    <Box w="full">
-                      <Text fontSize="sm" noOfLines={1} w="full">
+                    <Box
+                      w="full"
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Text fontSize="sm" maxW="150px" noOfLines={1}>
                         {session.title}
                       </Text>
-                      <Text fontSize="xs" color="gray.400">
-                        {session.messages_count > 0
-                          ? `${session.messages_count} message${
-                              session.messages_count > 1 ? "s" : ""
-                            }`
-                          : "No messages"}
-                      </Text>
+                      {session.is_contain_schedules && (
+                        <FiClock size={16} color="gray.400" />
+                      )}
                     </Box>
                   </Flex>
                 </Flex>

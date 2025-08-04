@@ -33,7 +33,7 @@ const createChatSession = async (title: string) => {
   const response = await api.post(`${API_WORKFLOW_URL}/chat-sessions/`, {
     title,
   });
-  return response.data;
+  return response;
 };
 
 export const useCreateChatSession = () => {
