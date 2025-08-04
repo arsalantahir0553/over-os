@@ -33,6 +33,7 @@ import WorkflowTest from "./pages/test/WorkflowTest";
 import DjangoTest from "./pages/test/DjangoTest";
 import MySchedules from "./pages/over-os-ai/schedules";
 import VerifyPasswordOtp from "./pages/auth/VerifyPasswordOtp";
+import LinkedinWorkflowBySession from "./pages/over-os-ai/linkedin/LinkedinWorkflowBySession";
 
 const App = () => {
   useEffect(() => {
@@ -75,6 +76,10 @@ const App = () => {
 
           <Route element={<LinkedinLayout />}>
             <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
+            <Route
+              path="/workflow/linkedin/:sessionId"
+              element={<LinkedinWorkflowBySession />}
+            />
             <Route
               path="/workflow/linkedin/schedules"
               element={<MySchedules />}

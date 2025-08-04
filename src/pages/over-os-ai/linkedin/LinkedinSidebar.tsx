@@ -214,12 +214,14 @@ const LinkedinSidebar = () => {
                   cursor="pointer"
                   align="center"
                   justifyContent="space-between"
-                  onClick={
-                    () =>
-                      session.id === activeSessionId
-                        ? setActiveSessionId(null) // toggle off if already selected
-                        : setActiveSessionId(session.id) // set new active
-                  }
+                  onClick={() => {
+                    if (session.id === activeSessionId) {
+                      setActiveSessionId(null);
+                    } else {
+                      setActiveSessionId(session.id);
+                      navigate(`/workflow/linkedin/${session.id}`);
+                    }
+                  }}
                 >
                   <Flex gap={2} align="start" w="full">
                     <Box mt={0.5}>
