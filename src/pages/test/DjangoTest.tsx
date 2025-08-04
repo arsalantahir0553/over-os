@@ -1,4 +1,4 @@
-import { useChat } from "@/utils/apis/django.api";
+import { useChat } from "@/utils/apis/chat-sessions";
 import { Button, Spinner, Text } from "@chakra-ui/react"; // Optional: Chakra UI components
 
 const DjangoTest = () => {

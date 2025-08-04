@@ -22,6 +22,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronUpIcon,
+  MessageCircle,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -42,13 +43,11 @@ import SettingsIcon from "../../../assets/svgs/settings.svg";
 
 import { useLoggedInUser, useLogout } from "@/utils/apis/auth.api";
 
-import {
-  // useGetUserHistory,
-  type HistoryResponse,
-} from "@/utils/apis/history.api";
+import { useGetAllChatSessions } from "@/utils/apis/chat-sessions";
 import { useWorkflowCategories } from "@/utils/apis/workflow.api";
 import { AiOutlineProduct } from "react-icons/ai";
 import { PiRankingThin } from "react-icons/pi";
+import { useChatSession } from "@/context/ChatSessionContext";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const categoryIcons: Record<string, any> = {
@@ -69,16 +68,15 @@ const LinkedinSidebar = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showExplore, setShowExplore] = useState(false);
   const [showMyWorkflows, setShowMyWorkflows] = useState(false);
-  const [historyLimit] = useState(10);
-  const [historyOffset, setHistoryOffset] = useState(0);
-  const [historyData, setHistoryData] = useState<HistoryResponse[]>([]);
-  const [hasMoreHistory, setHasMoreHistory] = useState(true);
+  const { activeSessionId, setActiveSessionId } = useChatSession();
   const responsiveIsExpanded = useBreakpointValue({
     base: false,
     md: isExpanded,
   });
 
   const { data: UserData, isLoading: isUserLoading } = useLoggedInUser();
+  const { data: SessionData } = useGetAllChatSessions();
+  console.log("SessionData", SessionData);
   const User = UserData?.data;
   const handleNavigate = (category: string) => {
     navigate(`/workflow/category/${encodeURIComponent(category)}`);
@@ -179,9 +177,10 @@ const LinkedinSidebar = () => {
                 align="center"
                 gap={2}
                 onClick={() => handleNavigate(item)}
+                w="full"
               >
                 <Icon size={16} />
-                <Text fontSize="sm" noOfLines={1}>
+                <Text fontSize="sm" noOfLines={1} w="full">
                   {item}
                 </Text>
               </Flex>
@@ -190,55 +189,62 @@ const LinkedinSidebar = () => {
         </SidebarDropdown>
 
         <SidebarDropdown
-          label="My Agents"
+          label="My Workflows"
           icon={MyWorkflowsIcon}
           isExpanded={responsiveIsExpanded}
           isOpen={showMyWorkflows}
           toggle={() => setShowMyWorkflows((prev) => !prev)}
         >
-          {historyData.length > 0 ? (
-            <SidebarSection>
-              {historyData.map((h: HistoryResponse) => (
-                <SidebarSubItem
-                  key={h.id}
-                  label={`Linkedin Post: ${h.prompt}`}
-                  historyId={h.id}
-                />
-              ))}
-              {hasMoreHistory && (
+          <SidebarSection>
+            {SessionData?.results?.length > 0 ? (
+              SessionData.results.map((session: any) => (
                 <Flex
-                  justify={"center"}
-                  align={"center"}
-                  px={10}
-                  bg={"border"}
-                  rounded="8px"
-                  cursor={"pointer"}
-                  onClick={() =>
-                    setHistoryOffset((prev) => prev + historyLimit)
+                  key={session.id}
+                  px={2}
+                  py={2}
+                  w="full"
+                  rounded="md"
+                  bg={
+                    session.id === activeSessionId
+                      ? "whiteAlpha.300"
+                      : "transparent"
+                  }
+                  _hover={{ bg: "whiteAlpha.200" }}
+                  cursor="pointer"
+                  align="center"
+                  justifyContent="space-between"
+                  onClick={
+                    () =>
+                      session.id === activeSessionId
+                        ? setActiveSessionId(null) // 👈 toggle off if already selected
+                        : setActiveSessionId(session.id) // 👈 set new active
                   }
                 >
-                  <ChevronDownIcon />
-                  <Button
-                    size="sm"
-                    bg={"transparent"}
-                    _hover={{
-                      bg: "transparent",
-                    }}
-                    width="100%"
-                    // isLoading={isFetchingHistory}
-                  >
-                    Show More
-                  </Button>
+                  <Flex gap={2} align="start" w="full">
+                    <Box mt={0.5}>
+                      <MessageCircle size={16} />
+                    </Box>
+                    <Box w="full">
+                      <Text fontSize="sm" noOfLines={1} w="full">
+                        {session.title}
+                      </Text>
+                      <Text fontSize="xs" color="gray.400">
+                        {session.messages_count > 0
+                          ? `${session.messages_count} message${
+                              session.messages_count > 1 ? "s" : ""
+                            }`
+                          : "No messages"}
+                      </Text>
+                    </Box>
+                  </Flex>
                 </Flex>
-              )}
-            </SidebarSection>
-          ) : (
-            <SidebarSection>
+              ))
+            ) : (
               <Text fontSize="sm" color="gray.400">
-                No prompts found
+                No sessions yet
               </Text>
-            </SidebarSection>
-          )}
+            )}
+          </SidebarSection>
         </SidebarDropdown>
       </VStack>
 
@@ -317,30 +323,6 @@ const SidebarSection = ({ children }: any) => (
     </VStack>
   </Box>
 );
-
-const SidebarSubItem = ({
-  label,
-  historyId,
-}: {
-  label: string;
-  historyId: string;
-}) => {
-  const navigate = useNavigate();
-  return (
-    <Text
-      fontSize="sm"
-      px={2}
-      py={1}
-      rounded="md"
-      cursor="pointer"
-      _hover={{ bg: "whiteAlpha.200" }}
-      noOfLines={1}
-      onClick={() => navigate(`workflow/linkedin/${historyId}`)}
-    >
-      {label}
-    </Text>
-  );
-};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const UserMenu = ({ User, isExpanded, isLoading }: any) => {

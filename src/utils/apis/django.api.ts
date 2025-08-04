@@ -2,7 +2,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "./axios.interceptor";
 
 const API_WORKFLOW_URL = import.meta.env.VITE_DJANGO_URL;
-const userId = localStorage.getItem("user_id");
 
 const oAuthInit = async () => {
   const response = await api.get(`${API_WORKFLOW_URL}/linkedin/oauth/init/`);
@@ -13,32 +12,6 @@ export const useOAuthInit = () => {
   return useQuery({
     queryFn: () => oAuthInit(),
     queryKey: ["oauth-init"],
-  });
-};
-
-const createChatSession = async (title: string) => {
-  const response = await api.post(`${API_WORKFLOW_URL}/chat-sessions/`, {
-    title,
-  });
-  return response.data;
-};
-
-export const useCreateChatSession = () => {
-  return useMutation({
-    mutationFn: (title: string) => createChatSession(title),
-  });
-};
-
-const chat = async (prompt: string) => {
-  const response = await api.post(`${API_WORKFLOW_URL}/chat/`, {
-    prompt,
-  });
-  return response.data;
-};
-
-export const useChat = () => {
-  return useMutation({
-    mutationFn: (prompt: string) => chat(prompt),
   });
 };
 
@@ -115,18 +88,20 @@ export const useDeleteSchedule = () => {
   });
 };
 
-export interface UpdateScheduleItem {
-  id: string;
+interface UpdateSchedulePayload {
   prompt: string;
   frequency: "once" | "weekly" | "monthly";
-  day_of_week: string;
-  time_of_day: string; // format: HH:mm:ss
-  end_date: string;
+  day_of_week?: string;
+  time_of_day: string;
+  end_date?: string;
 }
 
-const updateSchedule = async (data: UpdateScheduleItem) => {
+export const updateSchedule = async (
+  id: string,
+  data: UpdateSchedulePayload
+) => {
   const response = await api.put(
-    `${API_WORKFLOW_URL}/user-schedules/${data.id}/`,
+    `${API_WORKFLOW_URL}/user-schedules/${id}/`,
     data
   );
   return response.data;
@@ -134,6 +109,12 @@ const updateSchedule = async (data: UpdateScheduleItem) => {
 
 export const useUpdateSchedule = () => {
   return useMutation({
-    mutationFn: (data: UpdateScheduleItem) => updateSchedule(data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Parameters<typeof updateSchedule>[1];
+    }) => updateSchedule(id, data),
   });
 };

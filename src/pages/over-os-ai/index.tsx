@@ -27,6 +27,11 @@ import {
 import { AiOutlineProduct } from "react-icons/ai";
 import { FiBookOpen, FiMonitor, FiTarget, FiTrendingUp } from "react-icons/fi";
 import { PiRankingThin } from "react-icons/pi";
+import {
+  useCreateChatSession,
+  useGetAllChatSessions,
+} from "@/utils/apis/chat-sessions";
+import { useChatSession } from "@/context/ChatSessionContext";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const categoryIcons: Record<string, any> = {
@@ -66,6 +71,9 @@ const DashboardHome = () => {
   const workflowId = searchParams.get("id") || "";
 
   const { data: workflowDetails } = useGetWorkflowById(workflowId);
+  const { mutate: createChatSession } = useCreateChatSession();
+  const { setActiveSessionId } = useChatSession();
+  const { refetch: refetchChatSessions } = useGetAllChatSessions();
 
   useEffect(() => {
     if (workflowDetails?.prompt) {
@@ -101,8 +109,28 @@ const DashboardHome = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (userInput.trim() !== "") {
-        navigate("/chat");
+        createChatSession(userInput, {
+          onSuccess: (data) => {
+            console.log("data", data);
+            refetchChatSessions();
+            setActiveSessionId(data.id);
+            navigate(`/chat/${data.id}`);
+          },
+        });
       }
+    }
+  };
+
+  const handleSubmit = () => {
+    if (userInput.trim() !== "") {
+      createChatSession(userInput, {
+        onSuccess: (data) => {
+          console.log("data", data);
+          refetchChatSessions();
+          setActiveSessionId(data.id);
+          navigate(`/chat/${data.id}`);
+        },
+      });
     }
   };
 
@@ -230,12 +258,7 @@ const DashboardHome = () => {
                     bg={iconBg}
                     color={iconColor}
                     _hover={{ bg: iconHoverBg }}
-                    onClick={() => {
-                      if (userInput.trim() !== "") {
-                        localStorage.setItem("runWorkflow", "true");
-                        navigate("/chat");
-                      }
-                    }}
+                    onClick={handleSubmit}
                   />
                 </Tooltip>
               )}

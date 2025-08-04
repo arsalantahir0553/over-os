@@ -16,17 +16,13 @@ import {
 } from "@chakra-ui/react";
 import { format } from "date-fns";
 import { useState } from "react";
-import { FiCalendar, FiClock, FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiCalendar, FiClock, FiTrash2 } from "react-icons/fi";
 
 const MySchedules = () => {
   const { data: mySchedules, isLoading, refetch } = useGetMySchedules();
   const { mutate: deleteSchedule } = useDeleteSchedule();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const {
-    isOpen: isOpenUpdate,
-    onOpen: onOpenUpdate,
-    onClose: onCloseUpdate,
-  } = useDisclosure();
+
   const [selectedSchedule, setSelectedSchedule] = useState<UserSchedule | null>(
     null
   );
@@ -122,17 +118,6 @@ const MySchedules = () => {
               <Button
                 size="sm"
                 variant="ghost"
-                leftIcon={<Icon as={FiEdit} />}
-                onClick={() => {
-                  onOpenUpdate();
-                  setSelectedSchedule(schedule);
-                }}
-              >
-                Edit
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
                 colorScheme="red"
                 leftIcon={<Icon as={FiTrash2} />}
                 onClick={() => handleDelete(schedule)}
@@ -194,20 +179,6 @@ const MySchedules = () => {
         submitButtonColor="red"
       >
         <Text>Are you sure you want to delete this schedule?</Text>
-      </CustomModal>
-
-      {/* update one time schedule */}
-      <CustomModal
-        isOpen={isOpenUpdate}
-        onClose={onCloseUpdate}
-        onSubmit={confirmDelete}
-        onCancel={onCloseUpdate}
-        header="Update Schedule"
-        submitText="Update"
-        cancelText="Cancel"
-        submitButtonColor="brand.500"
-      >
-        <Text>Are you sure you want to update this schedule?</Text>
       </CustomModal>
     </VStack>
   );

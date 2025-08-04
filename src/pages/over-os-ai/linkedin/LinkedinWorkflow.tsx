@@ -29,8 +29,6 @@ import { LinkedinLoginModal } from "./LinkedinLoginModal";
 // import TaskStepsList from "./TaskStepList";
 import Scheduler from "@/components/Scheduler";
 import {
-  useChat,
-  // useCreateChatSession,
   useCreateUserSchedules,
   useExtractSchedule,
   useOAuthInit,
@@ -42,6 +40,12 @@ import {
 } from "@/utils/helpers/functions.helper";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
+import {
+  useChat,
+  useCreateChatSession,
+  useGetAllChatSessions,
+} from "@/utils/apis/chat-sessions";
+import { useChatSession } from "@/context/ChatSessionContext";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -106,9 +110,10 @@ const LinkedinWorkflow = () => {
   const { mutate: generatePrompt, isPending: isGenerating } = useChat();
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
+  const { refetch: refetchChatSessions } = useGetAllChatSessions();
   const { mutate: createUserSchedules } = useCreateUserSchedules();
-  // const { mutate: createChatSession } = useCreateChatSession();
-
+  const { mutate: createChatSession } = useCreateChatSession();
+  const { activeSessionId, setActiveSessionId } = useChatSession();
   const { refetch, isFetching } = useOAuthInit();
   const navigate = useNavigate();
 
@@ -143,18 +148,66 @@ const LinkedinWorkflow = () => {
         (loadingIndexRef.current + 1) % loadingMessages.length;
       setLoadingMessage(loadingMessages[loadingIndexRef.current]);
     }, 3500);
-    // const sessionTitle = userPrompt.slice(0, 30);
+    const sessionTitle = userPrompt.slice(0, 30);
 
-    // createChatSession(sessionTitle, {
-    //   onSuccess: (data) => {
-    //     console.log("data", data);
-    //   },
-    // });
+    if (!activeSessionId) {
+      createChatSession(sessionTitle, {
+        onSuccess: (data) => {
+          console.log("data", data);
+          refetchChatSessions();
+          setActiveSessionId(data.id);
+        },
+      });
+    }
 
-    generatePrompt(userPrompt, {
-      onSuccess: (data) => {
-        console.log("data", data);
-        if (data === null) {
+    generatePrompt(
+      {
+        session: activeSessionId,
+        message: userPrompt,
+      },
+      {
+        onSuccess: (data) => {
+          console.log("data", data.data);
+          if (data.data === null) {
+            clearInterval(intervalRef.current!);
+            setLoadingMessage(null);
+            toast({
+              title: "Post Generation Failed",
+              description:
+                "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
+              status: "error",
+              duration: 3000,
+              isClosable: true,
+            });
+            return;
+          }
+
+          clearInterval(intervalRef.current!);
+          setLoadingMessage(null);
+          if (data.data.content) {
+            setGeneratedText(data.data.content);
+            localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+            localStorage.setItem(
+              LOCAL_STORAGE_KEYS.response,
+              data.data.content
+            );
+            localStorage.setItem(
+              LOCAL_STORAGE_KEYS.imageUrls,
+              JSON.stringify([])
+            );
+            setImageUrls([]);
+          } else {
+            toast({
+              title: "Post Generation Failed",
+              description:
+                "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
+              status: "error",
+              duration: 3000,
+              isClosable: true,
+            });
+          }
+        },
+        onError: () => {
           clearInterval(intervalRef.current!);
           setLoadingMessage(null);
           toast({
@@ -165,65 +218,27 @@ const LinkedinWorkflow = () => {
             duration: 3000,
             isClosable: true,
           });
-          return;
-        }
+        },
+      }
+    );
 
-        clearInterval(intervalRef.current!);
-        setLoadingMessage(null);
-        if (data.data.post_text) {
-          setGeneratedText(data.data.post_text);
-          localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-          localStorage.setItem(
-            LOCAL_STORAGE_KEYS.response,
-            data.data.post_text
-          );
-          localStorage.setItem(
-            LOCAL_STORAGE_KEYS.imageUrls,
-            JSON.stringify([])
-          );
-          setImageUrls([]);
-        } else {
-          toast({
-            title: "Post Generation Failed",
-            description:
-              "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
-        }
-      },
-      onError: () => {
-        clearInterval(intervalRef.current!);
-        setLoadingMessage(null);
-        toast({
-          title: "Post Generation Failed",
-          description:
-            "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      },
-    });
-
-    extractSchedule(userPrompt, {
-      onSuccess: (data) => {
-        if (data.data.day_of_week !== null) {
-          setScheduleData({
-            frequency: data.data.frequency,
-            day_of_week: data.data.day_of_week,
-            time_of_day: data.data.time_of_day,
-            end_date: data.data.end_date,
-          });
-        } else {
-          setScheduleData(null);
-        }
-      },
-      onError: () => {
-        console.log("error");
-      },
-    });
+    // extractSchedule(userPrompt, {
+    //   onSuccess: (data) => {
+    //     if (data.data.day_of_week !== null) {
+    //       setScheduleData({
+    //         frequency: data.data.frequency,
+    //         day_of_week: data.data.day_of_week,
+    //         time_of_day: data.data.time_of_day,
+    //         end_date: data.data.end_date,
+    //       });
+    //     } else {
+    //       setScheduleData(null);
+    //     }
+    //   },
+    //   onError: () => {
+    //     console.log("error");
+    //   },
+    // });
   };
 
   const handleSubmit = () => {

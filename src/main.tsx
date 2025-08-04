@@ -9,6 +9,7 @@ import { UserInputProvider } from "./context/chat.provider.tsx";
 import customTheme from "./assets/theme/theme.ts";
 import { AuthProvider } from "./context/AuthProvider.tsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { ChatSessionProvider } from "./context/ChatSessionContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -17,7 +18,9 @@ createRoot(document.getElementById("root")!).render(
         <ChakraProvider theme={customTheme}>
           <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
             <UserInputProvider>
-              <App />
+              <ChatSessionProvider>
+                <App />
+              </ChatSessionProvider>
             </UserInputProvider>
           </GoogleOAuthProvider>
         </ChakraProvider>
