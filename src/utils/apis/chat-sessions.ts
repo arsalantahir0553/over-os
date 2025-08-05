@@ -60,3 +60,30 @@ export const useChat = () => {
     mutationFn: (data: chatInput) => chat(data),
   });
 };
+
+interface UpdateChatMessageInput {
+  messageId: number;
+  session: number;
+  message: string;
+}
+
+const updateChatMessage = async ({
+  messageId,
+  session,
+  message,
+}: UpdateChatMessageInput) => {
+  const response = await api.patch(
+    `${API_WORKFLOW_URL}/chat-messages/${messageId}/`,
+    {
+      session,
+      message,
+    }
+  );
+  return response.data;
+};
+
+export const useUpdateChatMessage = () => {
+  return useMutation({
+    mutationFn: (data: UpdateChatMessageInput) => updateChatMessage(data),
+  });
+};

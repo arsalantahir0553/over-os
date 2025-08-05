@@ -44,6 +44,7 @@ import {
   useChat,
   useCreateChatSession,
   useGetSessionChatMessages,
+  useUpdateChatMessage,
 } from "@/utils/apis/chat-sessions";
 import { useChatSession } from "@/context/ChatSessionContext";
 import { useQueryClient } from "@tanstack/react-query";
@@ -90,6 +91,10 @@ const LinkedinWorkflowBySession = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showScheduler, setShowScheduler] = useState(false);
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
+  const [userMessageId, setUserMessageId] = useState<number | null>(null);
+  const [generatedMessageId, setGeneratedMessageId] = useState<number | null>(
+    null
+  );
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const filesArray = Array.from(e.target.files);
@@ -111,6 +116,7 @@ const LinkedinWorkflowBySession = () => {
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
   const { mutate: createUserSchedules } = useCreateUserSchedules();
+  const { mutate: updateChatMessage } = useUpdateChatMessage();
   const { refetch, isFetching } = useOAuthInit();
   const navigate = useNavigate();
 
@@ -122,11 +128,19 @@ const LinkedinWorkflowBySession = () => {
     if (ChatSessionData) {
       setUserPrompt(ChatSessionData[1]?.content || "");
       setGeneratedText(ChatSessionData[0]?.content || "");
+      setUserMessageId(ChatSessionData[1]?.id || null);
+      setGeneratedMessageId(ChatSessionData[0]?.id || null);
     }
   }, [ChatSessionData]);
 
   const handleGenerate = () => {
     if (!userPrompt.trim()) return;
+
+    updateChatMessage({
+      messageId: userMessageId!,
+      session: Number(sessionId!),
+      message: userPrompt,
+    });
 
     loadingIndexRef.current = 0;
     setLoadingMessage(loadingMessages[0]);
@@ -161,6 +175,11 @@ const LinkedinWorkflowBySession = () => {
           clearInterval(intervalRef.current!);
           setLoadingMessage(null);
           if (data.data.content) {
+            updateChatMessage({
+              messageId: generatedMessageId!,
+              session: Number(sessionId!),
+              message: data.data.content,
+            });
             setGeneratedText(data.data.content);
             localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
             localStorage.setItem(

@@ -152,73 +152,75 @@ const LinkedinWorkflow = () => {
         console.log("chat session created:", data.data);
         setActiveSessionId(data.data.id);
         queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
+
+        generatePrompt(
+          {
+            session: data.data.id,
+            message: userPrompt,
+          },
+          {
+            onSuccess: (data) => {
+              console.log("data", data);
+              if (data.data === null) {
+                clearInterval(intervalRef.current!);
+                setLoadingMessage(null);
+                toast({
+                  title: "Post Generation Failed",
+                  description:
+                    "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
+                  status: "error",
+                  duration: 3000,
+                  isClosable: true,
+                });
+                return;
+              }
+
+              clearInterval(intervalRef.current!);
+              setLoadingMessage(null);
+              if (data.data.content) {
+                setGeneratedText(data.data.content);
+                localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+                localStorage.setItem(
+                  LOCAL_STORAGE_KEYS.response,
+                  data.data.content
+                );
+                localStorage.setItem(
+                  LOCAL_STORAGE_KEYS.imageUrls,
+                  JSON.stringify([])
+                );
+                setImageUrls([]);
+              } else {
+                toast({
+                  title: "Post Generation Failed",
+                  description:
+                    "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
+                  status: "error",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              }
+            },
+            onError: () => {
+              clearInterval(intervalRef.current!);
+              setLoadingMessage(null);
+              toast({
+                title: "Post Generation Failed",
+                description:
+                  "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+              });
+            },
+          }
+        );
       },
       onError: (error) => {
         console.error("chat session creation failed", error);
       },
     });
 
-    generatePrompt(
-      {
-        session: activeSessionId,
-        message: userPrompt,
-      },
-      {
-        onSuccess: (data) => {
-          console.log("data", data);
-          if (data.data === null) {
-            clearInterval(intervalRef.current!);
-            setLoadingMessage(null);
-            toast({
-              title: "Post Generation Failed",
-              description:
-                "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
-              status: "error",
-              duration: 3000,
-              isClosable: true,
-            });
-            return;
-          }
-
-          clearInterval(intervalRef.current!);
-          setLoadingMessage(null);
-          if (data.data.content) {
-            setGeneratedText(data.data.content);
-            localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-            localStorage.setItem(
-              LOCAL_STORAGE_KEYS.response,
-              data.data.content
-            );
-            localStorage.setItem(
-              LOCAL_STORAGE_KEYS.imageUrls,
-              JSON.stringify([])
-            );
-            setImageUrls([]);
-          } else {
-            toast({
-              title: "Post Generation Failed",
-              description:
-                "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
-              status: "error",
-              duration: 3000,
-              isClosable: true,
-            });
-          }
-        },
-        onError: () => {
-          clearInterval(intervalRef.current!);
-          setLoadingMessage(null);
-          toast({
-            title: "Post Generation Failed",
-            description:
-              "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
-        },
-      }
-    );
+    console.log("activeSessionId", activeSessionId);
 
     extractSchedule(userPrompt, {
       onSuccess: (data) => {
