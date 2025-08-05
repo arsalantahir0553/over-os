@@ -28,11 +28,7 @@ import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
 // import TaskStepsList from "./TaskStepList";
 import Scheduler from "@/components/Scheduler";
-import {
-  useChat,
-  useGetSessionChatMessages,
-  useUpdateChatMessage,
-} from "@/utils/apis/chat-sessions";
+import { useChat } from "@/utils/apis/chat-sessions";
 import {
   useCreateUserSchedules,
   useExtractSchedule,
@@ -72,7 +68,7 @@ interface ScheduleData {
   end_date?: string;
 }
 
-const LinkedinWorkflowBySession = () => {
+const LinkedinWorkflowFirst = () => {
   const { sessionId } = useParams();
   console.log(sessionId);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -88,10 +84,7 @@ const LinkedinWorkflowBySession = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showScheduler, setShowScheduler] = useState(false);
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
-  const [userMessageId, setUserMessageId] = useState<number | null>(null);
-  const [generatedMessageId, setGeneratedMessageId] = useState<number | null>(
-    null
-  );
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const filesArray = Array.from(e.target.files);
@@ -113,33 +106,27 @@ const LinkedinWorkflowBySession = () => {
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
   const { mutate: createUserSchedules } = useCreateUserSchedules();
-  const { mutate: updateChatMessage } = useUpdateChatMessage();
   const { refetch, isFetching } = useOAuthInit();
   const navigate = useNavigate();
 
-  const { data: ChatSessionData, isLoading } = useGetSessionChatMessages(
-    sessionId!
-  );
-
-  useEffect(() => {}, []);
+  const autoGenerateIfFirstTime = () => {
+    const firstTime = localStorage.getItem("linkedin_first_time");
+    const storedPrompt = localStorage.getItem("linkedin_prompt");
+    if (firstTime && storedPrompt) {
+      setUserPrompt(storedPrompt);
+      setTimeout(() => {
+        handleGenerate(storedPrompt);
+        localStorage.removeItem("linkedin_first_time");
+      }, 200);
+    }
+  };
 
   useEffect(() => {
-    if (ChatSessionData) {
-      setUserPrompt(ChatSessionData[1]?.content || "");
-      setGeneratedText(ChatSessionData[0]?.content || "");
-      setUserMessageId(ChatSessionData[1]?.id || null);
-      setGeneratedMessageId(ChatSessionData[0]?.id || null);
-    }
-  }, [ChatSessionData]);
+    autoGenerateIfFirstTime();
+  }, []);
 
-  const handleGenerate = () => {
-    if (!userPrompt.trim()) return;
-
-    updateChatMessage({
-      messageId: userMessageId!,
-      session: Number(sessionId!),
-      message: userPrompt,
-    });
+  const handleGenerate = (prompt?: string) => {
+    console.log("user prompt", userPrompt);
 
     loadingIndexRef.current = 0;
     setLoadingMessage(loadingMessages[0]);
@@ -152,7 +139,7 @@ const LinkedinWorkflowBySession = () => {
     generatePrompt(
       {
         session: Number(sessionId!),
-        message: userPrompt,
+        message: prompt || userPrompt,
       },
       {
         onSuccess: (data) => {
@@ -174,11 +161,6 @@ const LinkedinWorkflowBySession = () => {
           clearInterval(intervalRef.current!);
           setLoadingMessage(null);
           if (data.data.content) {
-            updateChatMessage({
-              messageId: generatedMessageId!,
-              session: Number(sessionId!),
-              message: data.data.content,
-            });
             setGeneratedText(data.data.content);
             localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
             localStorage.setItem(
@@ -211,7 +193,7 @@ const LinkedinWorkflowBySession = () => {
       }
     );
 
-    extractSchedule(userPrompt, {
+    extractSchedule(prompt || userPrompt, {
       onSuccess: (data) => {
         if (data.data.day_of_week !== null) {
           setScheduleData({
@@ -360,10 +342,6 @@ const LinkedinWorkflowBySession = () => {
   const handleSchedules = () => {
     navigate("/workflow/linkedin/schedules");
   };
-
-  if (isLoading) {
-    return <LoadingOverlay message="" />;
-  }
 
   return (
     <Box
@@ -542,7 +520,7 @@ const LinkedinWorkflowBySession = () => {
                 )}
               </Flex>
               <Button
-                onClick={handleGenerate}
+                onClick={() => handleGenerate()}
                 isLoading={isGenerating}
                 bg="surfaceButton"
                 color="white"
@@ -634,4 +612,4 @@ const LinkedinWorkflowBySession = () => {
   );
 };
 
-export default LinkedinWorkflowBySession;
+export default LinkedinWorkflowFirst;

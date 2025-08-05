@@ -1,219 +1,67 @@
-import { LoadingOverlay } from "@/components/LoadingOverlay";
-
 import {
   Box,
   Button,
   Flex,
   IconButton,
-  Image,
   Input,
   Text,
   Textarea,
   Tooltip,
   useColorModeValue,
   useDisclosure,
-  useToast,
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import {
-  CalendarIcon,
-  ListChecks,
-  PlusIcon,
-  SendIcon,
-  Upload,
-} from "lucide-react";
+import { ListChecks, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
 // import TaskStepsList from "./TaskStepList";
-import Scheduler from "@/components/Scheduler";
-import {
-  useCreateUserSchedules,
-  useExtractSchedule,
-  useOAuthInit,
-  usePostToLinkedin,
-} from "@/utils/apis/django.api";
-import {
-  convertLocalTimeToUTC,
-  getFullDayName,
-} from "@/utils/helpers/functions.helper";
-import { RiCalendarScheduleLine } from "react-icons/ri";
-import { useNavigate } from "react-router-dom";
-import { useChat, useCreateChatSession } from "@/utils/apis/chat-sessions";
 import { useChatSession } from "@/context/ChatSessionContext";
+import { useCreateChatSession } from "@/utils/apis/chat-sessions";
+import { useOAuthInit } from "@/utils/apis/django.api";
 import { useQueryClient } from "@tanstack/react-query";
-
-const loadingMessages = [
-  "Just a moment — we’re working on something great for you…",
-  "Hang tight, generating your content…",
-  "Creating something worth sharing…",
-  "We’re writing this up for you…",
-  "Putting your words together…",
-  "One sec — we’re making this sound amazing…",
-  "Composing your message…",
-  "Working on it — this won’t take long…",
-  "Giving your prompt the attention it deserves…",
-  "Almost there — polishing your response…",
-];
+import { useNavigate } from "react-router-dom";
 
 const LOCAL_STORAGE_KEYS = {
   prompt: "linkedin_prompt",
-  response: "linkedin_response",
-  imageUrls: "linkedin_image_urls",
+  firstTime: "linkedin_first_time",
 };
-
-interface ScheduleData {
-  frequency: "once" | "weekly" | "monthly";
-  day_of_week: string;
-  time_of_day: string;
-  end_date?: string;
-}
 
 const LinkedinWorkflow = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userPrompt, setUserPrompt] = useState("");
-  const [generatedText, setGeneratedText] = useState("");
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
-  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
-  const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
-  const loadingIndexRef = useRef<number>(0);
-  const intervalRef = useRef<number | null>(null);
-  const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [showScheduler, setShowScheduler] = useState(false);
-  const generatedTextRef = useRef<HTMLTextAreaElement>(null);
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const filesArray = Array.from(e.target.files);
-    setSelectedImages((prev) => [...prev, ...filesArray]);
-  };
 
-  const removeImage = (index: number) => {
-    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  useEffect(() => {
-    if (generatedTextRef.current) {
-      generatedTextRef.current.style.height = "auto"; // Reset height
-      generatedTextRef.current.style.height = `${generatedTextRef.current.scrollHeight}px`; // Set to full content height
-    }
-  }, [generatedText]);
-
-  // const { mutate: generatePrompt, isPending: isGenerating } =
-  //   useGenerateLinkedinPrompt();
-  const { mutate: generatePrompt, isPending: isGenerating } = useChat();
-  // const { mutate: publishPost, isPending: isPublishing } =
-  //   usePublishGeneratedPost();
-  const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
-  const { mutate: extractSchedule } = useExtractSchedule();
-  const { mutate: createUserSchedules } = useCreateUserSchedules();
   const { mutate: createChatSession } = useCreateChatSession();
   const { activeSessionId, setActiveSessionId } = useChatSession();
   const { refetch, isFetching } = useOAuthInit();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
+
   useEffect(() => {
     const savedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.prompt);
-    const savedResponse = localStorage.getItem(LOCAL_STORAGE_KEYS.response);
-    const savedImageUrls = localStorage.getItem(LOCAL_STORAGE_KEYS.imageUrls);
 
     if (savedPrompt) setUserPrompt(savedPrompt);
-    if (savedResponse) setGeneratedText(savedResponse);
-    if (savedImageUrls) {
-      try {
-        const parsed = JSON.parse(savedImageUrls);
-        if (Array.isArray(parsed)) setImageUrls(parsed);
-      } catch {
-        setImageUrls([]);
-      }
-    }
 
     localStorage.removeItem(LOCAL_STORAGE_KEYS.prompt);
-    localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
-    localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
   }, []);
 
   const handleGenerate = () => {
     if (!userPrompt.trim()) return;
 
-    loadingIndexRef.current = 0;
-    setLoadingMessage(loadingMessages[0]);
-    intervalRef.current = setInterval(() => {
-      loadingIndexRef.current =
-        (loadingIndexRef.current + 1) % loadingMessages.length;
-      setLoadingMessage(loadingMessages[loadingIndexRef.current]);
-    }, 3500);
+    if (!isLinkedinConnected) return onOpen();
+
+    localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.firstTime, "true");
 
     createChatSession(userPrompt, {
       onSuccess: (data) => {
         console.log("chat session created:", data.data);
         setActiveSessionId(data.data.id);
         queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
-
-        generatePrompt(
-          {
-            session: data.data.id,
-            message: userPrompt,
-          },
-          {
-            onSuccess: (data) => {
-              console.log("data", data);
-              if (data.data === null) {
-                clearInterval(intervalRef.current!);
-                setLoadingMessage(null);
-                toast({
-                  title: "Post Generation Failed",
-                  description:
-                    "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
-                  status: "error",
-                  duration: 3000,
-                  isClosable: true,
-                });
-                return;
-              }
-
-              clearInterval(intervalRef.current!);
-              setLoadingMessage(null);
-              if (data.data.content) {
-                setGeneratedText(data.data.content);
-                localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
-                localStorage.setItem(
-                  LOCAL_STORAGE_KEYS.response,
-                  data.data.content
-                );
-                localStorage.setItem(
-                  LOCAL_STORAGE_KEYS.imageUrls,
-                  JSON.stringify([])
-                );
-                setImageUrls([]);
-              } else {
-                toast({
-                  title: "Post Generation Failed",
-                  description:
-                    "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
-                  status: "error",
-                  duration: 3000,
-                  isClosable: true,
-                });
-              }
-            },
-            onError: () => {
-              clearInterval(intervalRef.current!);
-              setLoadingMessage(null);
-              toast({
-                title: "Post Generation Failed",
-                description:
-                  "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-              });
-            },
-          }
-        );
+        navigate(`/workflow/linkedin/n/${data.data.id}`);
       },
       onError: (error) => {
         console.error("chat session creation failed", error);
@@ -221,119 +69,6 @@ const LinkedinWorkflow = () => {
     });
 
     console.log("activeSessionId", activeSessionId);
-
-    extractSchedule(userPrompt, {
-      onSuccess: (data) => {
-        if (data.data.day_of_week !== null) {
-          setScheduleData({
-            frequency: data.data.frequency,
-            day_of_week: data.data.day_of_week,
-            time_of_day: data.data.time_of_day,
-            end_date: data.data.end_date,
-          });
-        } else {
-          setScheduleData(null);
-        }
-      },
-      onError: () => {
-        console.log("error");
-      },
-    });
-  };
-
-  const handleSubmit = () => {
-    if (!isLinkedinConnected) return onOpen();
-    if (!userPrompt.trim() || !generatedText.trim()) {
-      toast({
-        title: "Missing Data",
-        description: "Prompt and generated post text are required.",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    publishPost(generatedText, {
-      onSuccess: () => {
-        toast({
-          title: "Success!",
-          description: "Post successfully published to LinkedIn.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-
-        localStorage.removeItem(LOCAL_STORAGE_KEYS.prompt);
-        localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
-        localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
-      },
-      onError: (error: any) => {
-        console.log("error", error.response.data.message);
-        toast({
-          title: "Error",
-          description: "Failed to publish post.",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-        if (error.response.data.message === "No LinkedIn account connected.") {
-          onOpen();
-        }
-      },
-    });
-  };
-
-  const handleSchedule = () => {
-    if (!isLinkedinConnected) return onOpen();
-    if (!scheduleData || !generatedText.trim()) {
-      toast({
-        title: "Missing Data",
-        description: "Schedule and generated post text are required.",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    // Convert local time to UTC
-    const utcTime = convertLocalTimeToUTC(scheduleData.time_of_day);
-
-    createUserSchedules(
-      {
-        prompt: userPrompt,
-        schedules: [
-          {
-            frequency: scheduleData.frequency,
-            day_of_week: getFullDayName(scheduleData.day_of_week),
-            time_of_day: utcTime,
-            chat_session: activeSessionId,
-            flag: 1,
-          },
-        ],
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: "Success!",
-            description: "Post successfully scheduled to LinkedIn.",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
-        },
-        onError: () => {
-          toast({
-            title: "Error",
-            description: "Failed to schedule post.",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
-        },
-      }
-    );
   };
 
   const handleLogin = async () => {
@@ -345,12 +80,6 @@ const LinkedinWorkflow = () => {
       console.error("Failed to fetch LinkedIn auth URL:", err);
     }
   };
-
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
 
   const MotionText = motion(Text);
   const iconBg = useColorModeValue("gray.100", "gray.700");
@@ -419,48 +148,6 @@ const LinkedinWorkflow = () => {
           </MotionText>
         </Box>
 
-        {/* Image Previews */}
-        {selectedImages.length > 0 && (
-          <Flex mt={-2} gap={3} flexWrap="wrap" justify="flex-start">
-            {selectedImages.map((file, index) => (
-              <Box
-                key={index}
-                position="relative"
-                w="60px"
-                h="60px"
-                borderRadius="md"
-                overflow="hidden"
-                boxShadow="0 0 0 1px var(--chakra-colors-accent)"
-              >
-                <Image
-                  src={URL.createObjectURL(file)}
-                  alt={`upload-${index}`}
-                  boxSize="100%"
-                  objectFit="cover"
-                  border="1px solid"
-                  borderColor="border"
-                />
-                <IconButton
-                  icon={<PlusIcon style={{ transform: "rotate(45deg)" }} />}
-                  size="xs"
-                  position="absolute"
-                  top="-6px"
-                  right="-6px"
-                  aria-label="Remove image"
-                  onClick={() => removeImage(index)}
-                  bg="red.500"
-                  color="white"
-                  borderRadius="full"
-                  h="16px"
-                  w="16px"
-                  minW="16px"
-                  zIndex={1}
-                />
-              </Box>
-            ))}
-          </Flex>
-        )}
-
         {/* Prompt Input + Generate */}
         <Flex direction="column" gap={3}>
           <Text fontSize="sm" color="mutedText">
@@ -506,7 +193,7 @@ const LinkedinWorkflow = () => {
           />
 
           <Flex justify="space-between" gap={3}>
-            <Button
+            {/* <Button
               bg={showScheduler ? "brand.400" : "surfaceButton"}
               display={"flex"}
               gap={2}
@@ -519,7 +206,7 @@ const LinkedinWorkflow = () => {
               <Box as="span" mb={"-2px"}>
                 <RiCalendarScheduleLine />
               </Box>
-            </Button>
+            </Button> */}
             <Box display={"flex"} gap={2}>
               <Flex gap={2} align="center">
                 <Tooltip label="Upload images" rounded="md">
@@ -538,19 +225,11 @@ const LinkedinWorkflow = () => {
                   accept="image/*"
                   multiple
                   ref={fileInputRef}
-                  onChange={handleImageUpload}
                   style={{ display: "none" }}
                 />
-                {selectedImages.length > 0 && (
-                  <Text color="mutedText" fontSize="sm">
-                    {selectedImages.length} image
-                    {selectedImages.length > 1 ? "s" : ""} selected
-                  </Text>
-                )}
               </Flex>
               <Button
                 onClick={handleGenerate}
-                isLoading={isGenerating}
                 bg="surfaceButton"
                 color="white"
                 _hover={{ bg: "brand.400" }}
@@ -560,76 +239,7 @@ const LinkedinWorkflow = () => {
               </Button>
             </Box>
           </Flex>
-
-          {isGenerating ||
-            (scheduleData && generatedText && (
-              <Scheduler
-                data={scheduleData}
-                onScheduleChange={(updatedData) => {
-                  setScheduleData(updatedData);
-                }}
-              />
-            ))}
-
-          {/* ================================================== */}
-          {/* steps  */}
-          {/* <TaskStepsList /> */}
-          {/* ================================================== */}
-
-          {isGenerating && loadingMessage && (
-            <LoadingOverlay message={loadingMessage} />
-          )}
         </Flex>
-
-        {/* Generated Text Area */}
-        {generatedText && (
-          <Textarea
-            ref={generatedTextRef}
-            value={generatedText}
-            onChange={(e) => setGeneratedText(e.target.value)}
-            placeholder="AI-generated post will appear here"
-            fontSize="md"
-            minHeight="180px"
-            p={0}
-            color="text"
-            resize="none"
-            border="none"
-            overflow="hidden"
-            _placeholder={{ color: "gray.500" }}
-            _focus={{
-              border: "none",
-              boxShadow: "none",
-            }}
-          />
-        )}
-
-        {/* Submit */}
-        {generatedText && (
-          <Flex justify="flex-end" gap={2}>
-            <Button
-              onClick={handleSubmit}
-              bg={scheduleData ? "surface2" : "primary"}
-              color="white"
-              isLoading={isPublishing}
-              _hover={{ bg: "gray.600" }}
-              leftIcon={<SendIcon size={15} />}
-            >
-              {scheduleData ? "Post Now" : "Post to LinkedIn"}
-            </Button>
-            {scheduleData && (
-              <Button
-                onClick={handleSchedule}
-                bg="primary"
-                color="white"
-                isLoading={isPublishing}
-                _hover={{ bg: "brand.400" }}
-                leftIcon={<CalendarIcon size={16} />}
-              >
-                Schedule Post
-              </Button>
-            )}
-          </Flex>
-        )}
       </VStack>
       <LinkedinLoginModal
         isOpen={isOpen}
