@@ -207,7 +207,12 @@ const LinkedinWorkflow = () => {
                 <RiCalendarScheduleLine />
               </Box>
             </Button> */}
-            <Box display={"flex"} gap={2}>
+            <Box
+              display={"flex"}
+              gap={2}
+              w={"full"}
+              justifyContent={"space-between"}
+            >
               <Flex gap={2} align="center">
                 <Tooltip label="Upload images" rounded="md">
                   <IconButton
