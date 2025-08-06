@@ -76,14 +76,28 @@ const LinkedinWorkflowFirst = () => {
   const [generatedText, setGeneratedText] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
+  const [manualScheduleData, setManualScheduleData] =
+    useState<ScheduleData | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
   const loadingIndexRef = useRef<number>(0);
   const intervalRef = useRef<number | null>(null);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [showScheduler, setShowScheduler] = useState(false);
+  const [showManualScheduler, setShowManualScheduler] = useState(false);
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
+  const showScheduler = localStorage.getItem("linkedin_manual_schedule");
+  const savedScheduleData = localStorage.getItem("linkedin_schedule_data");
+
+  useEffect(() => {
+    if (showScheduler) {
+      setShowManualScheduler(true);
+    }
+    localStorage.removeItem("linkedin_manual_schedule");
+    if (savedScheduleData) {
+      setManualScheduleData(JSON.parse(savedScheduleData));
+    }
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -307,6 +321,58 @@ const LinkedinWorkflowFirst = () => {
     );
   };
 
+  const handleManualSchedule = () => {
+    if (!isLinkedinConnected) return onOpen();
+    if (!manualScheduleData || !generatedText.trim()) {
+      toast({
+        title: "Missing Data",
+        description: "Schedule and generated post text are required.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Convert local time to UTC
+    const utcTime = convertLocalTimeToUTC(manualScheduleData.time_of_day);
+
+    createUserSchedules(
+      {
+        prompt: userPrompt,
+        schedules: [
+          {
+            frequency: manualScheduleData.frequency,
+            day_of_week: getFullDayName(manualScheduleData.day_of_week),
+            time_of_day: utcTime,
+            chat_session: Number(sessionId!),
+            flag: 1,
+          },
+        ],
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: "Post successfully scheduled to LinkedIn.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+        },
+        onError: () => {
+          toast({
+            title: "Error",
+            description: "Failed to schedule post.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        },
+      }
+    );
+  };
+
   const handleLogin = async () => {
     try {
       const { data } = await refetch();
@@ -478,13 +544,13 @@ const LinkedinWorkflowFirst = () => {
 
           <Flex justify="space-between" gap={3}>
             <Button
-              bg={showScheduler ? "brand.400" : "surfaceButton"}
+              bg={showManualScheduler ? "brand.400" : "surfaceButton"}
               display={"flex"}
               gap={2}
               color="white"
               _hover={{ bg: "brand.400" }}
               size={{ md: "md", base: "xs" }}
-              onClick={() => setShowScheduler((prev) => !prev)}
+              onClick={() => setShowManualScheduler((prev) => !prev)}
             >
               Schedule{" "}
               <Box as="span" mb={"-2px"}>
@@ -531,6 +597,15 @@ const LinkedinWorkflowFirst = () => {
               </Button>
             </Box>
           </Flex>
+
+          {!scheduleData && showManualScheduler && (
+            <Scheduler
+              data={manualScheduleData}
+              onScheduleChange={(updatedData) => {
+                setManualScheduleData(updatedData);
+              }}
+            />
+          )}
 
           {isGenerating ||
             (scheduleData && generatedText && (
@@ -579,17 +654,21 @@ const LinkedinWorkflowFirst = () => {
           <Flex justify="flex-end" gap={2}>
             <Button
               onClick={handleSubmit}
-              bg={scheduleData ? "surface2" : "primary"}
+              bg={scheduleData || manualScheduleData ? "surface2" : "primary"}
               color="white"
               isLoading={isPublishing}
               _hover={{ bg: "gray.600" }}
               leftIcon={<SendIcon size={15} />}
             >
-              {scheduleData ? "Post Now" : "Post to LinkedIn"}
+              {scheduleData || manualScheduleData
+                ? "Post Now"
+                : "Post to LinkedIn"}
             </Button>
-            {scheduleData && (
+            {(scheduleData || manualScheduleData) && (
               <Button
-                onClick={handleSchedule}
+                onClick={
+                  manualScheduleData ? handleManualSchedule : handleSchedule
+                }
                 bg="primary"
                 color="white"
                 isLoading={isPublishing}

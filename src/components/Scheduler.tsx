@@ -26,7 +26,7 @@ import { LuClock } from "react-icons/lu";
 const daysOfWeek = ["M", "T", "W", "T", "F", "S", "S"];
 const fullDayMap = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-interface ScheduleData {
+export interface ScheduleData {
   frequency: "once" | "weekly" | "monthly";
   day_of_week: string;
   time_of_day: string;
@@ -34,14 +34,16 @@ interface ScheduleData {
 }
 
 interface SchedulerProps {
-  data: ScheduleData;
+  data?: ScheduleData | null;
   onScheduleChange?: (data: ScheduleData) => void;
 }
 
 const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
   // Set initial mode based on frequency
   const [mode, setMode] = useState<"one-time" | "recurring">(
-    data.frequency === "once" ? "one-time" : "recurring"
+    data?.frequency === "weekly" || data?.frequency === "monthly"
+      ? "recurring"
+      : "one-time"
   );
 
   // Format day of week to match fullDayMap format (Mon, Tue, etc.)
@@ -182,13 +184,13 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
 
   const getOneTimeSchedulePreview = () => {
     const shortDays = selectedDays.map((d) => d.slice(0, 3)).join(", ");
-    return `Post ${selectedDays.length} time (${shortDays}) at ${time} AM EST`;
+    return `Post ${selectedDays.length} time (${shortDays}) at ${time} AM`;
   };
   const getRecurringSchedulePreview = () => {
     const shortDays = selectedDays.map((d) => d.slice(0, 3)).join(", ");
     return `Post ${
       selectedDays.length
-    } times per week (${shortDays}) at ${time} AM EST for ${duration} (${startDate.toDateString()} - ${endDate.toDateString()})`;
+    } times per week (${shortDays}) at ${time} AM for ${duration} (${startDate.toDateString()} - ${endDate.toDateString()})`;
   };
 
   useEffect(() => {

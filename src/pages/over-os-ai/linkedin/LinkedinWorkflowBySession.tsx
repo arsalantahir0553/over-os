@@ -80,15 +80,17 @@ const LinkedinWorkflowBySession = () => {
   const [generatedText, setGeneratedText] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
+  const [manualScheduleData, setManualScheduleData] =
+    useState<ScheduleData | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
   const loadingIndexRef = useRef<number>(0);
   const intervalRef = useRef<number | null>(null);
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [showScheduler, setShowScheduler] = useState(false);
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
   const [userMessageId, setUserMessageId] = useState<number | null>(null);
+  const [showManualScheduler, setShowManualScheduler] = useState(false);
   const [generatedMessageId, setGeneratedMessageId] = useState<number | null>(
     null
   );
@@ -500,13 +502,13 @@ const LinkedinWorkflowBySession = () => {
 
           <Flex justify="space-between" gap={3}>
             <Button
-              bg={showScheduler ? "brand.400" : "surfaceButton"}
+              bg={showManualScheduler ? "brand.400" : "surfaceButton"}
               display={"flex"}
               gap={2}
               color="white"
               _hover={{ bg: "brand.400" }}
               size={{ md: "md", base: "xs" }}
-              onClick={() => setShowScheduler((prev) => !prev)}
+              onClick={() => setShowManualScheduler((prev) => !prev)}
             >
               Schedule{" "}
               <Box as="span" mb={"-2px"}>
@@ -553,6 +555,15 @@ const LinkedinWorkflowBySession = () => {
               </Button>
             </Box>
           </Flex>
+
+          {showManualScheduler && (
+            <Scheduler
+              data={manualScheduleData}
+              onScheduleChange={(updatedData) => {
+                setManualScheduleData(updatedData);
+              }}
+            />
+          )}
 
           {isGenerating ||
             (scheduleData && generatedText && (

@@ -2,18 +2,14 @@ import {
   Box,
   Button,
   Flex,
-  IconButton,
-  Input,
   Text,
   Textarea,
-  Tooltip,
-  useColorModeValue,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { ListChecks, Upload } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ListChecks } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
 // import TaskStepsList from "./TaskStepList";
@@ -21,15 +17,19 @@ import { useChatSession } from "@/context/ChatSessionContext";
 import { useCreateChatSession } from "@/utils/apis/chat-sessions";
 import { useOAuthInit } from "@/utils/apis/django.api";
 import { useQueryClient } from "@tanstack/react-query";
+import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
+import Scheduler, { type ScheduleData } from "@/components/Scheduler";
 
 const LOCAL_STORAGE_KEYS = {
   prompt: "linkedin_prompt",
   firstTime: "linkedin_first_time",
+  manualSchedule: "linkedin_manual_schedule",
+  scheduleData: "linkedin_schedule_data",
 };
 
 const LinkedinWorkflow = () => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // const fileInputRef = useRef<HTMLInputElement>(null);
   const [userPrompt, setUserPrompt] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -39,6 +39,8 @@ const LinkedinWorkflow = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
+  const [showScheduler, setShowScheduler] = useState(false);
+  const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
 
   useEffect(() => {
     const savedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.prompt);
@@ -55,6 +57,11 @@ const LinkedinWorkflow = () => {
 
     localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
     localStorage.setItem(LOCAL_STORAGE_KEYS.firstTime, "true");
+    localStorage.setItem(LOCAL_STORAGE_KEYS.manualSchedule, "true");
+    localStorage.setItem(
+      LOCAL_STORAGE_KEYS.scheduleData,
+      JSON.stringify(scheduleData)
+    );
 
     createChatSession(userPrompt, {
       onSuccess: (data) => {
@@ -82,9 +89,9 @@ const LinkedinWorkflow = () => {
   };
 
   const MotionText = motion(Text);
-  const iconBg = useColorModeValue("gray.100", "gray.700");
-  const iconHoverBg = useColorModeValue("gray.200", "gray.600");
-  const iconColor = useColorModeValue("gray.700", "accent");
+  // const iconBg = useColorModeValue("gray.100", "gray.700");
+  // const iconHoverBg = useColorModeValue("gray.200", "gray.600");
+  // const iconColor = useColorModeValue("gray.700", "accent");
 
   const [typewriterText] = useTypewriter({
     words: [
@@ -193,20 +200,6 @@ const LinkedinWorkflow = () => {
           />
 
           <Flex justify="space-between" gap={3}>
-            {/* <Button
-              bg={showScheduler ? "brand.400" : "surfaceButton"}
-              display={"flex"}
-              gap={2}
-              color="white"
-              _hover={{ bg: "brand.400" }}
-              size={{ md: "md", base: "xs" }}
-              onClick={() => setShowScheduler((prev) => !prev)}
-            >
-              Schedule{" "}
-              <Box as="span" mb={"-2px"}>
-                <RiCalendarScheduleLine />
-              </Box>
-            </Button> */}
             <Box
               display={"flex"}
               gap={2}
@@ -214,7 +207,21 @@ const LinkedinWorkflow = () => {
               justifyContent={"space-between"}
             >
               <Flex gap={2} align="center">
-                <Tooltip label="Upload images" rounded="md">
+                <Button
+                  bg={showScheduler ? "brand.400" : "surfaceButton"}
+                  display={"flex"}
+                  gap={2}
+                  color="white"
+                  _hover={{ bg: "brand.400" }}
+                  size={{ md: "md", base: "xs" }}
+                  onClick={() => setShowScheduler((prev) => !prev)}
+                >
+                  Schedule{" "}
+                  <Box as="span" mb={"-2px"}>
+                    <RiCalendarScheduleLine />
+                  </Box>
+                </Button>
+                {/* <Tooltip label="Upload images" rounded="md">
                   <IconButton
                     icon={<Upload size={16} />}
                     aria-label="Upload"
@@ -231,7 +238,7 @@ const LinkedinWorkflow = () => {
                   multiple
                   ref={fileInputRef}
                   style={{ display: "none" }}
-                />
+                />*/}
               </Flex>
               <Button
                 onClick={handleGenerate}
@@ -245,6 +252,14 @@ const LinkedinWorkflow = () => {
             </Box>
           </Flex>
         </Flex>
+        {showScheduler && (
+          <Scheduler
+            data={scheduleData}
+            onScheduleChange={(updatedData) => {
+              setScheduleData(updatedData);
+            }}
+          />
+        )}
       </VStack>
       <LinkedinLoginModal
         isOpen={isOpen}
