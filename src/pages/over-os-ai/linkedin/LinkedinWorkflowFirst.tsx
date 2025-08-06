@@ -75,9 +75,10 @@ const LinkedinWorkflowFirst = () => {
   const [userPrompt, setUserPrompt] = useState("");
   const [generatedText, setGeneratedText] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
-  const [manualScheduleData, setManualScheduleData] =
-    useState<ScheduleData | null>(null);
+  const [scheduleData, setScheduleData] = useState<ScheduleData[] | null>(null);
+  const [manualScheduleData, setManualScheduleData] = useState<
+    ScheduleData[] | null
+  >(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
   const loadingIndexRef = useRef<number>(0);
@@ -210,12 +211,14 @@ const LinkedinWorkflowFirst = () => {
     extractSchedule(prompt || userPrompt, {
       onSuccess: (data) => {
         if (data.data.day_of_week !== null) {
-          setScheduleData({
-            frequency: data.data.frequency,
-            day_of_week: data.data.day_of_week,
-            time_of_day: data.data.time_of_day,
-            end_date: data.data.end_date,
-          });
+          setScheduleData([
+            {
+              frequency: data.data.frequency,
+              day_of_week: data.data.day_of_week,
+              time_of_day: data.data.time_of_day,
+              end_date: data.data.end_date,
+            },
+          ]);
         } else {
           setScheduleData(null);
         }
@@ -271,7 +274,9 @@ const LinkedinWorkflowFirst = () => {
 
   const handleSchedule = () => {
     if (!isLinkedinConnected) return onOpen();
-    if (!scheduleData || !generatedText.trim()) {
+    if (!scheduleData) return;
+
+    if (!scheduleData.length || !generatedText.trim()) {
       toast({
         title: "Missing Data",
         description: "Schedule and generated post text are required.",
@@ -282,21 +287,18 @@ const LinkedinWorkflowFirst = () => {
       return;
     }
 
-    // Convert local time to UTC
-    const utcTime = convertLocalTimeToUTC(scheduleData.time_of_day);
+    const formattedSchedules = scheduleData.map((schedule) => ({
+      frequency: schedule.frequency,
+      day_of_week: getFullDayName(schedule.day_of_week),
+      time_of_day: convertLocalTimeToUTC(schedule.time_of_day),
+      chat_session: Number(sessionId!),
+      flag: 1 as const,
+    }));
 
     createUserSchedules(
       {
         prompt: userPrompt,
-        schedules: [
-          {
-            frequency: scheduleData.frequency,
-            day_of_week: getFullDayName(scheduleData.day_of_week),
-            time_of_day: utcTime,
-            chat_session: Number(sessionId!),
-            flag: 1,
-          },
-        ],
+        schedules: formattedSchedules,
       },
       {
         onSuccess: () => {
@@ -320,13 +322,18 @@ const LinkedinWorkflowFirst = () => {
       }
     );
   };
+
+  console.log("scheduleData", scheduleData);
+  console.log("manuakl schedule data", manualScheduleData);
 
   const handleManualSchedule = () => {
     if (!isLinkedinConnected) return onOpen();
-    if (!manualScheduleData || !generatedText.trim()) {
+    if (!manualScheduleData) return;
+
+    if (!manualScheduleData.length || !generatedText.trim()) {
       toast({
         title: "Missing Data",
-        description: "Schedule and generated post text are required.",
+        description: "Schedule Manual and generated post text are required.",
         status: "warning",
         duration: 3000,
         isClosable: true,
@@ -334,21 +341,18 @@ const LinkedinWorkflowFirst = () => {
       return;
     }
 
-    // Convert local time to UTC
-    const utcTime = convertLocalTimeToUTC(manualScheduleData.time_of_day);
+    const formattedSchedules = manualScheduleData.map((schedule) => ({
+      frequency: schedule.frequency,
+      day_of_week: getFullDayName(schedule.day_of_week),
+      time_of_day: convertLocalTimeToUTC(schedule.time_of_day),
+      chat_session: Number(sessionId!),
+      flag: 1 as const,
+    }));
 
     createUserSchedules(
       {
         prompt: userPrompt,
-        schedules: [
-          {
-            frequency: manualScheduleData.frequency,
-            day_of_week: getFullDayName(manualScheduleData.day_of_week),
-            time_of_day: utcTime,
-            chat_session: Number(sessionId!),
-            flag: 1,
-          },
-        ],
+        schedules: formattedSchedules,
       },
       {
         onSuccess: () => {
@@ -372,6 +376,57 @@ const LinkedinWorkflowFirst = () => {
       }
     );
   };
+
+  //   if (!isLinkedinConnected) return onOpen();
+  //   if (!manualScheduleData || !generatedText.trim()) {
+  //     toast({
+  //       title: "Missing Data",
+  //       description: "Schedule and generated post text are required.",
+  //       status: "warning",
+  //       duration: 3000,
+  //       isClosable: true,
+  //     });
+  //     return;
+  //   }
+
+  //   // Convert local time to UTC
+  //   const utcTime = convertLocalTimeToUTC(manualScheduleData.time_of_day);
+
+  //   createUserSchedules(
+  //     {
+  //       prompt: userPrompt,
+  //       schedules: [
+  //         {
+  //           frequency: manualScheduleData.frequency,
+  //           day_of_week: getFullDayName(manualScheduleData.day_of_week),
+  //           time_of_day: utcTime,
+  //           chat_session: Number(sessionId!),
+  //           flag: 1,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       onSuccess: () => {
+  //         toast({
+  //           title: "Success!",
+  //           description: "Post successfully scheduled to LinkedIn.",
+  //           status: "success",
+  //           duration: 3000,
+  //           isClosable: true,
+  //         });
+  //       },
+  //       onError: () => {
+  //         toast({
+  //           title: "Error",
+  //           description: "Failed to schedule post.",
+  //           status: "error",
+  //           duration: 3000,
+  //           isClosable: true,
+  //         });
+  //       },
+  //     }
+  //   );
+  // };
 
   const handleLogin = async () => {
     try {
@@ -667,7 +722,9 @@ const LinkedinWorkflowFirst = () => {
             {(scheduleData || manualScheduleData) && (
               <Button
                 onClick={
-                  manualScheduleData ? handleManualSchedule : handleSchedule
+                  manualScheduleData && manualScheduleData?.length > 0
+                    ? handleManualSchedule
+                    : handleSchedule
                 }
                 bg="primary"
                 color="white"

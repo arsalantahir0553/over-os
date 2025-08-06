@@ -30,23 +30,24 @@ export interface ScheduleData {
   frequency: "once" | "weekly" | "monthly";
   day_of_week: string;
   time_of_day: string;
-  end_date?: string; // <-- Add this
+  end_date?: string;
 }
 
 interface SchedulerProps {
-  data?: ScheduleData | null;
-  onScheduleChange?: (data: ScheduleData) => void;
+  data?: ScheduleData[] | null;
+  onScheduleChange?: (data: ScheduleData[]) => void;
 }
 
 const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
-  // Set initial mode based on frequency
+  const defaultSchedule = data && data.length > 0 ? data[0] : null;
+
   const [mode, setMode] = useState<"one-time" | "recurring">(
-    data?.frequency === "weekly" || data?.frequency === "monthly"
+    defaultSchedule?.frequency === "weekly" ||
+      defaultSchedule?.frequency === "monthly"
       ? "recurring"
       : "one-time"
   );
 
-  // Format day of week to match fullDayMap format (Mon, Tue, etc.)
   const formatDayOfWeek = (day: string) => {
     const dayLower = day.toLowerCase();
 
@@ -55,18 +56,14 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
       if (dayLower === "tomorrow") {
         date.setDate(date.getDate() + 1);
       }
-      // Get day index (0 = Sunday, 1 = Monday, etc.)
-      const dayIndex = date.getDay();
-      // Convert to Mon, Tue, etc. format
-      return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dayIndex];
+      return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
     }
 
-    // Handle full day names (e.g., 'Monday' -> 'Mon')
     return day.slice(0, 3);
   };
 
-  // Format time from 12-hour to 24-hour format if needed
   const formatTime = (timeStr: string) => {
+    if (!timeStr.includes(" ")) return timeStr;
     const [time, period] = timeStr.split(" ");
     let [hours, minutes] = time.split(":").map(Number);
 
@@ -79,20 +76,11 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
   };
 
   const [startDate, setStartDate] = useState<Date>(new Date());
-  const [endDate, setEndDate] = useState<Date>(() => {
-    if (data?.end_date) {
-      return new Date(data.end_date);
-    }
-    const fallback = new Date();
-    fallback.setDate(fallback.getDate() + 7);
-    return fallback;
-  });
-
   const [time, setTime] = useState<string>(() => {
-    if (data?.time_of_day) {
+    if (defaultSchedule?.time_of_day) {
       try {
-        return formatTime(data.time_of_day);
-      } catch (e) {
+        return formatTime(defaultSchedule.time_of_day);
+      } catch {
         return "09:00";
       }
     }
@@ -100,37 +88,42 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
   });
 
   const [selectedDays, setSelectedDays] = useState<string[]>(() => {
-    if (data?.day_of_week) {
-      return [formatDayOfWeek(data.day_of_week)];
+    if (data && data.length > 0) {
+      return data.map((s) => formatDayOfWeek(s.day_of_week));
     }
     return [];
   });
 
   const [recurrence, setRecurrence] = useState<string>(
-    data?.frequency === "monthly" ? "monthly" : "weekly"
+    defaultSchedule?.frequency === "monthly" ? "monthly" : "weekly"
   );
 
-  const [duration, setDuration] = useState(() => {
-    if (data?.end_date) {
-      const parsedEnd = new Date(data.end_date);
-      return calculateDurationFromDates(startDate, parsedEnd);
+  const initialEndDate = (() => {
+    if (defaultSchedule?.end_date) {
+      return new Date(defaultSchedule.end_date);
     }
-    return "1 week";
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d;
+  })();
+
+  const [endDate, setEndDate] = useState<Date>(initialEndDate);
+
+  const [duration, setDuration] = useState(() => {
+    return calculateDurationFromDates(startDate, initialEndDate);
   });
 
   const prevValuesRef = useRef({
     mode,
     recurrence,
-    selectedDays: selectedDays[0] || "",
+    selectedDays: selectedDays.join(","),
     time,
   });
 
   const toggleDay = (day: string) => {
     if (mode === "one-time") {
-      // For one-time mode, replace the entire selection with the new day
       setSelectedDays([day]);
     } else {
-      // For recurring mode, keep the existing toggle behavior
       setSelectedDays((prev) =>
         prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
       );
@@ -153,7 +146,7 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
     const currentValues = {
       mode,
       recurrence,
-      selectedDay: selectedDays[0] || "",
+      selectedDays: selectedDays.join(","),
       time,
     };
 
@@ -162,45 +155,35 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
     if (
       currentValues.mode !== prevValues.mode ||
       currentValues.recurrence !== prevValues.recurrence ||
-      currentValues.selectedDay !== prevValues.selectedDays ||
+      currentValues.selectedDays !== prevValues.selectedDays ||
       currentValues.time !== prevValues.time
     ) {
       if (onScheduleChange) {
-        onScheduleChange({
+        const schedules: ScheduleData[] = selectedDays.map((day) => ({
           frequency:
             mode === "one-time" ? "once" : (recurrence as "weekly" | "monthly"),
-          day_of_week: selectedDays[0] || "",
+          day_of_week: day,
           time_of_day: time,
-        });
+          end_date: mode === "recurring" ? endDate.toISOString() : undefined,
+        }));
+        onScheduleChange(schedules);
       }
-      prevValuesRef.current = {
-        mode,
-        recurrence,
-        selectedDays: selectedDays[0] || "",
-        time,
-      };
+
+      prevValuesRef.current = currentValues;
     }
-  }, [mode, recurrence, selectedDays, time, onScheduleChange]);
+  }, [mode, recurrence, selectedDays, time, endDate, onScheduleChange]);
 
   const getOneTimeSchedulePreview = () => {
     const shortDays = selectedDays.map((d) => d.slice(0, 3)).join(", ");
-    return `Post ${selectedDays.length} time (${shortDays}) at ${time} AM`;
+    return `Post ${selectedDays.length} time (${shortDays}) at ${time}`;
   };
+
   const getRecurringSchedulePreview = () => {
     const shortDays = selectedDays.map((d) => d.slice(0, 3)).join(", ");
     return `Post ${
       selectedDays.length
-    } times per week (${shortDays}) at ${time} AM for ${duration} (${startDate.toDateString()} - ${endDate.toDateString()})`;
+    } times per week (${shortDays}) at ${time} for ${duration} (${startDate.toDateString()} - ${endDate.toDateString()})`;
   };
-
-  useEffect(() => {
-    if (data?.end_date) {
-      const parsedEnd = new Date(data.end_date);
-      setEndDate(parsedEnd);
-      setDuration(calculateDurationFromDates(startDate, parsedEnd));
-    }
-  }, [data?.end_date, startDate]);
-
   return (
     <Box
       width="100%"
