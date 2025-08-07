@@ -90,7 +90,7 @@ export const useDeleteSchedule = () => {
   });
 };
 
-interface UpdateSchedulePayload {
+export interface UpdateSchedulePayload {
   prompt: string;
   frequency: "once" | "weekly" | "monthly";
   day_of_week?: string;
@@ -102,7 +102,7 @@ export const updateSchedule = async (
   id: string,
   data: UpdateSchedulePayload
 ) => {
-  const response = await api.put(
+  const response = await api.patch(
     `${API_WORKFLOW_URL}/user-schedules/${id}/`,
     data
   );

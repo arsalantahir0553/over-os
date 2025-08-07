@@ -1,6 +1,8 @@
 import {
   calculateDurationFromDates,
   calculateEndDateFromDuration,
+  convertLocalTimeToUTC,
+  formatTimeToAMPM,
 } from "@/utils/helpers/functions.helper";
 import {
   Box,
@@ -22,9 +24,22 @@ import { useState, useEffect, useRef } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { LuClock } from "react-icons/lu";
+import {
+  useUpdateSchedule,
+  type UpdateSchedulePayload,
+} from "@/utils/apis/django.api";
 
 const daysOfWeek = ["M", "T", "W", "T", "F", "S", "S"];
 const fullDayMap = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const fullDayNames = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 
 export interface ScheduleData {
   frequency: "once" | "weekly" | "monthly";
@@ -36,9 +51,20 @@ export interface ScheduleData {
 interface SchedulerProps {
   data?: ScheduleData[] | null;
   onScheduleChange?: (data: ScheduleData[]) => void;
+  showUpdateButton?: boolean;
+  id?: string;
+  prompt?: string;
+  refetchSessionData?: () => void;
 }
 
-const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
+const Scheduler = ({
+  data,
+  onScheduleChange,
+  showUpdateButton,
+  id,
+  prompt = "",
+  refetchSessionData,
+}: SchedulerProps) => {
   const defaultSchedule = data && data.length > 0 ? data[0] : null;
 
   const [mode, setMode] = useState<"one-time" | "recurring">(
@@ -175,15 +201,49 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
 
   const getOneTimeSchedulePreview = () => {
     const shortDays = selectedDays.map((d) => d.slice(0, 3)).join(", ");
-    return `Post ${selectedDays.length} time (${shortDays}) at ${time}`;
+    const formattedTime = formatTimeToAMPM(time);
+    return `Post ${selectedDays.length} time (${shortDays}) at ${formattedTime}`;
   };
 
   const getRecurringSchedulePreview = () => {
     const shortDays = selectedDays.map((d) => d.slice(0, 3)).join(", ");
+    const formattedTime = formatTimeToAMPM(time);
     return `Post ${
       selectedDays.length
-    } times per week (${shortDays}) at ${time} for ${duration} (${startDate.toDateString()} - ${endDate.toDateString()})`;
+    } times per week (${shortDays}) at ${formattedTime} for ${duration} (${startDate.toDateString()} - ${endDate.toDateString()})`;
   };
+
+  const { mutate: updateSchedule, isPending } = useUpdateSchedule();
+
+  const handleUpdateSchedule = () => {
+    if (!id) return;
+
+    // Get the index of the selected day to map to full day name
+    const dayIndex = fullDayMap.findIndex((day) => day === selectedDays[0]);
+    const fullDayName =
+      dayIndex !== -1 ? fullDayNames[dayIndex] : selectedDays[0];
+
+    // Format the end date to YYYY-MM-DD if it exists
+    const formatDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    const payload: UpdateSchedulePayload = {
+      prompt,
+      frequency:
+        mode === "one-time" ? "once" : (recurrence as "weekly" | "monthly"),
+      day_of_week: fullDayName,
+      time_of_day: convertLocalTimeToUTC(time),
+      end_date: mode === "recurring" ? formatDate(endDate) : undefined,
+    };
+
+    updateSchedule({ id, data: payload });
+    refetchSessionData?.();
+  };
+
   return (
     <Box
       width="100%"
@@ -213,8 +273,11 @@ const Scheduler = ({ data, onScheduleChange }: SchedulerProps) => {
             color="white"
             _hover={{ bg: "blue.500" }}
             flexShrink={0}
+            onClick={handleUpdateSchedule}
+            isLoading={isPending}
+            isDisabled={!id}
           >
-            Scheduled
+            {showUpdateButton ? "Update Schedule" : "Scheduled"}
           </Button>
         </Flex>
 

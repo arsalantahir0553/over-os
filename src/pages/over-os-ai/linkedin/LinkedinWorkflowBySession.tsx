@@ -41,6 +41,7 @@ import {
 } from "@/utils/apis/django.api";
 import {
   convertLocalTimeToUTC,
+  convertUTCToLocalTime,
   getFullDayName,
 } from "@/utils/helpers/functions.helper";
 import { RiCalendarScheduleLine } from "react-icons/ri";
@@ -95,6 +96,7 @@ const LinkedinWorkflowBySession = () => {
   const [generatedMessageId, setGeneratedMessageId] = useState<number | null>(
     null
   );
+  const [scheduleId, setScheduleId] = useState<string | null>(null);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const filesArray = Array.from(e.target.files);
@@ -120,11 +122,14 @@ const LinkedinWorkflowBySession = () => {
   const { refetch, isFetching } = useOAuthInit();
   const navigate = useNavigate();
 
-  const { data: ChatSessionData, isLoading } = useGetSessionChatMessages(
-    sessionId!
-  );
+  const {
+    data: SessionData,
+    isLoading,
+    refetch: refetchSessionData,
+  } = useGetSessionChatMessages(sessionId!);
 
-  useEffect(() => {}, []);
+  const ChatSessionData = SessionData?.messages;
+  const ScheduleData = SessionData?.schedules;
 
   useEffect(() => {
     if (ChatSessionData) {
@@ -132,6 +137,19 @@ const LinkedinWorkflowBySession = () => {
       setGeneratedText(ChatSessionData[0]?.content || "");
       setUserMessageId(ChatSessionData[1]?.id || null);
       setGeneratedMessageId(ChatSessionData[0]?.id || null);
+      console.log("ChatSessionData.schedules", ChatSessionData);
+
+      // ✅ NEW: Set existing schedule into scheduleData state
+      if (ScheduleData && ScheduleData.length > 0) {
+        const formatted = ScheduleData.map((s: any) => ({
+          frequency: s.frequency,
+          day_of_week: s.day_of_week,
+          time_of_day: convertUTCToLocalTime(s.time_of_day),
+          end_date: s.end_date || undefined,
+        }));
+        setScheduleData(formatted);
+        setScheduleId(ScheduleData[0]?.id || null);
+      }
     }
   }, [ChatSessionData]);
 
@@ -625,6 +643,10 @@ const LinkedinWorkflowBySession = () => {
                 onScheduleChange={(updatedData) => {
                   setScheduleData(updatedData);
                 }}
+                id={scheduleId!}
+                prompt={userPrompt}
+                showUpdateButton={true}
+                refetchSessionData={refetchSessionData}
               />
             ))}
 

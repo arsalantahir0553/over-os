@@ -19,7 +19,7 @@ const getSessionChatMessages = async (sessionId: string) => {
   const response = await api.get(
     `${API_WORKFLOW_URL}/chat-sessions/${sessionId}`
   );
-  return response.data.messages;
+  return response.data;
 };
 
 export const useGetSessionChatMessages = (sessionId: string) => {
