@@ -19,6 +19,7 @@ import {
   Text,
   VStack,
   useColorModeValue,
+  useToast,
 } from "@chakra-ui/react";
 import { useState, useEffect, useRef } from "react";
 import DatePicker from "react-datepicker";
@@ -73,6 +74,7 @@ const Scheduler = ({
       ? "recurring"
       : "one-time"
   );
+  const toast = useToast();
 
   const formatDayOfWeek = (day: string) => {
     const dayLower = day.toLowerCase();
@@ -240,7 +242,29 @@ const Scheduler = ({
       end_date: mode === "recurring" ? formatDate(endDate) : undefined,
     };
 
-    updateSchedule({ id, data: payload });
+    updateSchedule(
+      { id, data: payload },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: "Schedule updated successfully.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+        },
+        onError: () => {
+          toast({
+            title: "Error",
+            description: "Failed to update schedule.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        },
+      }
+    );
     refetchSessionData?.();
   };
 
