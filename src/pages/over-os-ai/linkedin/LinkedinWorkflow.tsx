@@ -57,7 +57,10 @@ const LinkedinWorkflow = () => {
 
     localStorage.setItem(LOCAL_STORAGE_KEYS.prompt, userPrompt);
     localStorage.setItem(LOCAL_STORAGE_KEYS.firstTime, "true");
-    localStorage.setItem(LOCAL_STORAGE_KEYS.manualSchedule, "true");
+    localStorage.setItem(
+      LOCAL_STORAGE_KEYS.manualSchedule,
+      showScheduler.toString()
+    );
     localStorage.setItem(
       LOCAL_STORAGE_KEYS.scheduleData,
       JSON.stringify(scheduleData)

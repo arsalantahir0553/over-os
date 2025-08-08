@@ -87,17 +87,19 @@ const LinkedinWorkflowFirst = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showManualScheduler, setShowManualScheduler] = useState(false);
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
-  const showScheduler = localStorage.getItem("linkedin_manual_schedule");
-  const savedScheduleData = localStorage.getItem("linkedin_schedule_data");
 
   useEffect(() => {
-    if (showScheduler) {
+    const showManual = localStorage.getItem("linkedin_manual_schedule");
+    if (showManual === "true") {
+      // Check the actual value, not just existence
       setShowManualScheduler(true);
     }
     localStorage.removeItem("linkedin_manual_schedule");
+    const savedScheduleData = localStorage.getItem("linkedin_schedule_data");
     if (savedScheduleData) {
       setManualScheduleData(JSON.parse(savedScheduleData));
     }
+    localStorage.removeItem("linkedin_schedule_data");
   }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -272,6 +274,8 @@ const LinkedinWorkflowFirst = () => {
     });
   };
 
+  console.log("scheduleData", scheduleData);
+
   const handleSchedule = () => {
     if (!isLinkedinConnected) return onOpen();
     if (!scheduleData) return;
@@ -323,7 +327,6 @@ const LinkedinWorkflowFirst = () => {
     );
   };
 
-  console.log("scheduleData", scheduleData);
   console.log("manuakl schedule data", manualScheduleData);
 
   const handleManualSchedule = () => {

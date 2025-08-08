@@ -242,30 +242,32 @@ const Scheduler = ({
       end_date: mode === "recurring" ? formatDate(endDate) : undefined,
     };
 
-    updateSchedule(
-      { id, data: payload },
-      {
-        onSuccess: () => {
-          toast({
-            title: "Success!",
-            description: "Schedule updated successfully.",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
-        },
-        onError: () => {
-          toast({
-            title: "Error",
-            description: "Failed to update schedule.",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
-        },
-      }
-    );
-    refetchSessionData?.();
+    console.log("payload", payload);
+
+    // updateSchedule(
+    //   { id, data: payload },
+    //   {
+    //     onSuccess: () => {
+    //       toast({
+    //         title: "Success!",
+    //         description: "Schedule updated successfully.",
+    //         status: "success",
+    //         duration: 3000,
+    //         isClosable: true,
+    //       });
+    //     },
+    //     onError: () => {
+    //       toast({
+    //         title: "Error",
+    //         description: "Failed to update schedule.",
+    //         status: "error",
+    //         duration: 3000,
+    //         isClosable: true,
+    //       });
+    //     },
+    //   }
+    // );
+    // refetchSessionData?.();
   };
 
   return (
@@ -297,11 +299,9 @@ const Scheduler = ({
             color="white"
             _hover={{ bg: "blue.500" }}
             flexShrink={0}
-            onClick={handleUpdateSchedule}
-            isLoading={isPending}
-            isDisabled={!id}
+            cursor="default"
           >
-            {showUpdateButton ? "Update Schedule" : "Scheduled"}
+            {showUpdateButton ? "Scheduled" : "Schedule"}
           </Button>
         </Flex>
 
@@ -337,7 +337,7 @@ const Scheduler = ({
                       Days
                     </Text>
                     <SimpleGrid
-                      columns={{ base: 7, lg: 10 }}
+                      columns={{ base: 7, lg: 12 }}
                       spacing={{ base: 1, md: 2 }}
                       w="100%"
                       maxW="100%"
@@ -634,6 +634,18 @@ const Scheduler = ({
               </VStack>
             </TabPanel>
           </TabPanels>
+          <Flex w="100%" justifyContent="flex-end">
+            <Button
+              onClick={handleUpdateSchedule}
+              isLoading={isPending}
+              isDisabled={!id}
+              size={{ base: "xs", sm: "sm" }}
+              flexShrink={0}
+              maxW={{ base: "100%", md: "160px" }}
+            >
+              Update Schedule
+            </Button>
+          </Flex>
         </Tabs>
       </VStack>
     </Box>

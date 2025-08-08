@@ -15,7 +15,7 @@ import {
 import { motion } from "framer-motion";
 import { Clock10Icon, PlusIcon, SendHorizonal, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import DashboardWorkflows from "./DashboardWorkflows";
 
@@ -27,11 +27,6 @@ import {
 import { AiOutlineProduct } from "react-icons/ai";
 import { FiBookOpen, FiMonitor, FiTarget, FiTrendingUp } from "react-icons/fi";
 import { PiRankingThin } from "react-icons/pi";
-import {
-  useCreateChatSession,
-  useGetAllChatSessions,
-} from "@/utils/apis/chat-sessions";
-import { useChatSession } from "@/context/ChatSessionContext";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const categoryIcons: Record<string, any> = {
@@ -46,7 +41,6 @@ const categoryIcons: Record<string, any> = {
 const DashboardHome = () => {
   const { userInput, setUserInput, selectedImages, setSelectedImages } =
     useUserInput();
-  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatPrompt = localStorage.getItem("chat_prompt");
   const [isDone, setIsDone] = useState(false);
@@ -71,9 +65,6 @@ const DashboardHome = () => {
   const workflowId = searchParams.get("id") || "";
 
   const { data: workflowDetails } = useGetWorkflowById(workflowId);
-  const { mutate: createChatSession } = useCreateChatSession();
-  const { setActiveSessionId } = useChatSession();
-  const { refetch: refetchChatSessions } = useGetAllChatSessions();
 
   useEffect(() => {
     if (workflowDetails?.prompt) {
@@ -108,29 +99,11 @@ const DashboardHome = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (userInput.trim() !== "") {
-        createChatSession(userInput, {
-          onSuccess: (data) => {
-            console.log("data", data);
-            refetchChatSessions();
-            setActiveSessionId(data.id);
-            navigate(`/chat/${data.id}`);
-          },
-        });
-      }
     }
   };
 
   const handleSubmit = () => {
     if (userInput.trim() !== "") {
-      createChatSession(userInput, {
-        onSuccess: (data) => {
-          console.log("data", data);
-          refetchChatSessions();
-          setActiveSessionId(data.id);
-          navigate(`/chat/${data.id}`);
-        },
-      });
     }
   };
 
