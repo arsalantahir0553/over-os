@@ -18,7 +18,13 @@ import {
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { FiCalendar, FiChevronLeft, FiClock, FiTrash2 } from "react-icons/fi";
+import {
+  FiCalendar,
+  FiChevronLeft,
+  FiClock,
+  FiGlobe,
+  FiTrash2,
+} from "react-icons/fi";
 
 const MySchedules = () => {
   const navigate = useNavigate();
@@ -165,10 +171,18 @@ const MySchedules = () => {
                 </Text>
               </HStack>
 
+              {schedule.timezone && (
+                <HStack color={textColor}>
+                  <Icon as={FiGlobe} />
+                  <Text>{schedule.timezone}</Text>
+                </HStack>
+              )}
+
               {schedule.day_of_week && (
                 <HStack color={textColor}>
                   <Icon as={FiCalendar} />
                   <Text>
+                    {schedule.frequency === "once" && `${schedule.day_of_week}`}
                     {schedule.frequency === "weekly" &&
                       `Every ${schedule.day_of_week}`}
                     {schedule.frequency === "monthly" &&
