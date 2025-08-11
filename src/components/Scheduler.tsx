@@ -5,6 +5,7 @@ import {
   calculateEndDateFromDuration,
   // convertLocalTimeToUTC, // no longer used for payload (kept out)
   formatTimeToAMPM,
+  normalizeTimeTo24Hour,
 } from "@/utils/helpers/functions.helper";
 import {
   Box,
@@ -282,7 +283,7 @@ const Scheduler = ({
       frequency:
         mode === "one-time" ? "once" : (recurrence as "weekly" | "monthly"),
       day_of_week: fullDayName,
-      time_of_day: time, // <-- send exact selected time, no conversion
+      time_of_day: normalizeTimeTo24Hour(time), // <-- send exact selected time, no conversion
       timezone, // <-- include selected timezone
       end_date: mode === "recurring" ? formatDate(endDate) : undefined,
     };
@@ -339,7 +340,7 @@ const Scheduler = ({
               Schedule LinkedIn Publishing
             </Text>
           </Flex>
-          <Button
+          {/* <Button
             size={{ base: "xs", sm: "sm" }}
             bg="blue.600"
             color="white"
@@ -348,7 +349,7 @@ const Scheduler = ({
             cursor="default"
           >
             {showUpdateButton ? "Scheduled" : "Schedule"}
-          </Button>
+          </Button> */}
         </Flex>
 
         <Tabs

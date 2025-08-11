@@ -137,3 +137,43 @@ export const formatTimeToAMPM = (timeStr: string) => {
     hour12: true,
   });
 };
+
+export const normalizeTimeTo24Hour = (timeStr: string): string => {
+  if (!timeStr) return "00:00";
+
+  try {
+    let hours: number;
+    let minutes: number;
+
+    // Match 12-hour format with optional minutes and AM/PM
+    const amPmMatch = timeStr.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+    if (amPmMatch) {
+      let [, hourStr, minuteStr = "00", meridiem] = amPmMatch;
+      hours = parseInt(hourStr, 10);
+      minutes = parseInt(minuteStr, 10);
+
+      if (meridiem.toUpperCase() === "PM" && hours !== 12) {
+        hours += 12;
+      } else if (meridiem.toUpperCase() === "AM" && hours === 12) {
+        hours = 0;
+      }
+    } else {
+      // Assume 24-hour format "HH:mm"
+      const [hourStr, minuteStr = "00"] = timeStr.split(":");
+      hours = parseInt(hourStr, 10);
+      minutes = parseInt(minuteStr, 10);
+
+      if (isNaN(hours) || isNaN(minutes)) {
+        console.error("Invalid time format. Use HH:mm or HH:mm AM/PM.");
+        return "00:00";
+      }
+    }
+
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
+  } catch (error) {
+    console.error("Error normalizing time:", error);
+    return "00:00";
+  }
+};

@@ -39,7 +39,10 @@ import {
   useOAuthInit,
   usePostToLinkedin,
 } from "@/utils/apis/django.api";
-import { getFullDayName } from "@/utils/helpers/functions.helper";
+import {
+  getFullDayName,
+  normalizeTimeTo24Hour,
+} from "@/utils/helpers/functions.helper";
 import type { ScheduleData } from "@/utils/types/types";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useNavigate, useParams } from "react-router-dom";
@@ -306,7 +309,7 @@ const LinkedinWorkflowBySession = () => {
     const formattedSchedules = scheduleData.map((schedule) => ({
       frequency: schedule.frequency,
       day_of_week: getFullDayName(schedule.day_of_week),
-      time_of_day: schedule.time_of_day,
+      time_of_day: normalizeTimeTo24Hour(schedule.time_of_day),
       timezone: schedule.timezone,
       chat_session: Number(sessionId!),
       flag: 1 as const,
@@ -358,7 +361,7 @@ const LinkedinWorkflowBySession = () => {
     const formattedSchedules = manualScheduleData.map((schedule) => ({
       frequency: schedule.frequency,
       day_of_week: getFullDayName(schedule.day_of_week),
-      time_of_day: schedule.time_of_day,
+      time_of_day: normalizeTimeTo24Hour(schedule.time_of_day),
       timezone: schedule.timezone,
       chat_session: Number(sessionId!),
       flag: 1 as const,
