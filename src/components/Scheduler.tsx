@@ -244,30 +244,30 @@ const Scheduler = ({
 
     console.log("payload", payload);
 
-    // updateSchedule(
-    //   { id, data: payload },
-    //   {
-    //     onSuccess: () => {
-    //       toast({
-    //         title: "Success!",
-    //         description: "Schedule updated successfully.",
-    //         status: "success",
-    //         duration: 3000,
-    //         isClosable: true,
-    //       });
-    //     },
-    //     onError: () => {
-    //       toast({
-    //         title: "Error",
-    //         description: "Failed to update schedule.",
-    //         status: "error",
-    //         duration: 3000,
-    //         isClosable: true,
-    //       });
-    //     },
-    //   }
-    // );
-    // refetchSessionData?.();
+    updateSchedule(
+      { id, data: payload },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success!",
+            description: "Schedule updated successfully.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+        },
+        onError: () => {
+          toast({
+            title: "Error",
+            description: "Failed to update schedule.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        },
+      }
+    );
+    refetchSessionData?.();
   };
 
   return (
