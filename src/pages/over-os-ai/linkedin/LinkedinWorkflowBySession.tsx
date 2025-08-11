@@ -39,11 +39,8 @@ import {
   useOAuthInit,
   usePostToLinkedin,
 } from "@/utils/apis/django.api";
-import {
-  convertLocalTimeToUTC,
-  convertUTCToLocalTime,
-  getFullDayName,
-} from "@/utils/helpers/functions.helper";
+import { getFullDayName } from "@/utils/helpers/functions.helper";
+import type { ScheduleData } from "@/utils/types/types";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -65,13 +62,6 @@ const LOCAL_STORAGE_KEYS = {
   response: "linkedin_response",
   imageUrls: "linkedin_image_urls",
 };
-
-interface ScheduleData {
-  frequency: "once" | "weekly" | "monthly";
-  day_of_week: string;
-  time_of_day: string;
-  end_date?: string;
-}
 
 const LinkedinWorkflowBySession = () => {
   const { sessionId } = useParams();
@@ -144,7 +134,9 @@ const LinkedinWorkflowBySession = () => {
         const formatted = ScheduleData.map((s: any) => ({
           frequency: s.frequency,
           day_of_week: s.day_of_week,
-          time_of_day: convertUTCToLocalTime(s.time_of_day),
+          time_of_day: s.time_of_day,
+          timezone:
+            s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
           end_date: s.end_date || undefined,
         }));
         setScheduleData(formatted);
@@ -314,7 +306,8 @@ const LinkedinWorkflowBySession = () => {
     const formattedSchedules = scheduleData.map((schedule) => ({
       frequency: schedule.frequency,
       day_of_week: getFullDayName(schedule.day_of_week),
-      time_of_day: convertLocalTimeToUTC(schedule.time_of_day),
+      time_of_day: schedule.time_of_day,
+      timezone: schedule.timezone,
       chat_session: Number(sessionId!),
       flag: 1 as const,
     }));
@@ -365,7 +358,8 @@ const LinkedinWorkflowBySession = () => {
     const formattedSchedules = manualScheduleData.map((schedule) => ({
       frequency: schedule.frequency,
       day_of_week: getFullDayName(schedule.day_of_week),
-      time_of_day: convertLocalTimeToUTC(schedule.time_of_day),
+      time_of_day: schedule.time_of_day,
+      timezone: schedule.timezone,
       chat_session: Number(sessionId!),
       flag: 1 as const,
     }));

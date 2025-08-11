@@ -35,10 +35,8 @@ import {
   useOAuthInit,
   usePostToLinkedin,
 } from "@/utils/apis/django.api";
-import {
-  convertLocalTimeToUTC,
-  getFullDayName,
-} from "@/utils/helpers/functions.helper";
+import { getFullDayName } from "@/utils/helpers/functions.helper";
+import type { ScheduleData } from "@/utils/types/types";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -60,13 +58,6 @@ const LOCAL_STORAGE_KEYS = {
   response: "linkedin_response",
   imageUrls: "linkedin_image_urls",
 };
-
-interface ScheduleData {
-  frequency: "once" | "weekly" | "monthly";
-  day_of_week: string;
-  time_of_day: string;
-  end_date?: string;
-}
 
 const LinkedinWorkflowFirst = () => {
   const { sessionId } = useParams();
@@ -294,7 +285,9 @@ const LinkedinWorkflowFirst = () => {
     const formattedSchedules = scheduleData.map((schedule) => ({
       frequency: schedule.frequency,
       day_of_week: getFullDayName(schedule.day_of_week),
-      time_of_day: convertLocalTimeToUTC(schedule.time_of_day),
+      time_of_day: schedule.time_of_day,
+      timezone:
+        schedule.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       chat_session: Number(sessionId!),
       flag: 1 as const,
     }));
@@ -347,7 +340,9 @@ const LinkedinWorkflowFirst = () => {
     const formattedSchedules = manualScheduleData.map((schedule) => ({
       frequency: schedule.frequency,
       day_of_week: getFullDayName(schedule.day_of_week),
-      time_of_day: convertLocalTimeToUTC(schedule.time_of_day),
+      time_of_day: schedule.time_of_day,
+      timezone:
+        schedule.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       chat_session: Number(sessionId!),
       flag: 1 as const,
     }));
@@ -379,57 +374,6 @@ const LinkedinWorkflowFirst = () => {
       }
     );
   };
-
-  //   if (!isLinkedinConnected) return onOpen();
-  //   if (!manualScheduleData || !generatedText.trim()) {
-  //     toast({
-  //       title: "Missing Data",
-  //       description: "Schedule and generated post text are required.",
-  //       status: "warning",
-  //       duration: 3000,
-  //       isClosable: true,
-  //     });
-  //     return;
-  //   }
-
-  //   // Convert local time to UTC
-  //   const utcTime = convertLocalTimeToUTC(manualScheduleData.time_of_day);
-
-  //   createUserSchedules(
-  //     {
-  //       prompt: userPrompt,
-  //       schedules: [
-  //         {
-  //           frequency: manualScheduleData.frequency,
-  //           day_of_week: getFullDayName(manualScheduleData.day_of_week),
-  //           time_of_day: utcTime,
-  //           chat_session: Number(sessionId!),
-  //           flag: 1,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       onSuccess: () => {
-  //         toast({
-  //           title: "Success!",
-  //           description: "Post successfully scheduled to LinkedIn.",
-  //           status: "success",
-  //           duration: 3000,
-  //           isClosable: true,
-  //         });
-  //       },
-  //       onError: () => {
-  //         toast({
-  //           title: "Error",
-  //           description: "Failed to schedule post.",
-  //           status: "error",
-  //           duration: 3000,
-  //           isClosable: true,
-  //         });
-  //       },
-  //     }
-  //   );
-  // };
 
   const handleLogin = async () => {
     try {
@@ -722,7 +666,7 @@ const LinkedinWorkflowFirst = () => {
                 ? "Post Now"
                 : "Post to LinkedIn"}
             </Button>
-            {(scheduleData || manualScheduleData) && (
+            {(scheduleData?.length || manualScheduleData?.length || 0) > 0 && (
               <Button
                 onClick={
                   manualScheduleData && manualScheduleData?.length > 0

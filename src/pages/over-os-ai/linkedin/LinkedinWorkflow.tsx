@@ -19,7 +19,8 @@ import { useOAuthInit } from "@/utils/apis/django.api";
 import { useQueryClient } from "@tanstack/react-query";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
-import Scheduler, { type ScheduleData } from "@/components/Scheduler";
+import Scheduler from "@/components/Scheduler";
+import type { ScheduleData } from "@/utils/types/types";
 
 const LOCAL_STORAGE_KEYS = {
   prompt: "linkedin_prompt",

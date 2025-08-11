@@ -1,7 +1,9 @@
+// Scheduler.tsx
+import moment from "moment-timezone"; // <--- moment-timezone import
 import {
   calculateDurationFromDates,
   calculateEndDateFromDuration,
-  convertLocalTimeToUTC,
+  // convertLocalTimeToUTC, // no longer used for payload (kept out)
   formatTimeToAMPM,
 } from "@/utils/helpers/functions.helper";
 import {
@@ -29,6 +31,7 @@ import {
   useUpdateSchedule,
   type UpdateSchedulePayload,
 } from "@/utils/apis/django.api";
+import type { ScheduleData } from "@/utils/types/types";
 
 const daysOfWeek = ["M", "T", "W", "T", "F", "S", "S"];
 const fullDayMap = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -41,13 +44,6 @@ const fullDayNames = [
   "Saturday",
   "Sunday",
 ];
-
-export interface ScheduleData {
-  frequency: "once" | "weekly" | "monthly";
-  day_of_week: string;
-  time_of_day: string;
-  end_date?: string;
-}
 
 interface SchedulerProps {
   data?: ScheduleData[] | null;
@@ -103,6 +99,7 @@ const Scheduler = ({
       .padStart(2, "0")}`;
   };
 
+  // Dates & time state (kept as in your original)
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [time, setTime] = useState<string>(() => {
     if (defaultSchedule?.time_of_day) {
@@ -141,11 +138,44 @@ const Scheduler = ({
     return calculateDurationFromDates(startDate, initialEndDate);
   });
 
+  // ------------------ moment-timezone state ------------------
+  const [timezones, setTimezones] = useState<string[]>([]);
+  const detectedTZ =
+    typeof Intl !== "undefined"
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone
+      : "UTC";
+  const [timezone, setTimezone] = useState<string>(
+    // if server returns timezone on schedule object (optional), use it
+    (defaultSchedule && (defaultSchedule as any).timezone) ||
+      detectedTZ ||
+      "UTC"
+  );
+
+  useEffect(() => {
+    // populate timezone list from moment-timezone
+    try {
+      const names = moment.tz.names();
+      setTimezones(names);
+    } catch (e) {
+      // fallback small list
+      setTimezones([
+        "UTC",
+        "Asia/Karachi",
+        "America/New_York",
+        "Europe/London",
+        "Asia/Kolkata",
+      ]);
+    }
+  }, []);
+
+  // ----------------------------------------------------------------
+
   const prevValuesRef = useRef({
     mode,
     recurrence,
     selectedDays: selectedDays.join(","),
     time,
+    timezone,
   });
 
   const toggleDay = (day: string) => {
@@ -176,6 +206,7 @@ const Scheduler = ({
       recurrence,
       selectedDays: selectedDays.join(","),
       time,
+      timezone,
     };
 
     const prevValues = prevValuesRef.current;
@@ -184,7 +215,8 @@ const Scheduler = ({
       currentValues.mode !== prevValues.mode ||
       currentValues.recurrence !== prevValues.recurrence ||
       currentValues.selectedDays !== prevValues.selectedDays ||
-      currentValues.time !== prevValues.time
+      currentValues.time !== prevValues.time ||
+      currentValues.timezone !== prevValues.timezone
     ) {
       if (onScheduleChange) {
         const schedules: ScheduleData[] = selectedDays.map((day) => ({
@@ -193,18 +225,29 @@ const Scheduler = ({
           day_of_week: day,
           time_of_day: time,
           end_date: mode === "recurring" ? endDate.toISOString() : undefined,
+          // timezone is optional on ScheduleData; if you want to include it add timezone?: string to the interface above
+          // (we still include it on the object, TypeScript may warn if interface doesn't declare it)
+          ...(timezone ? { timezone } : {}),
         }));
         onScheduleChange(schedules);
       }
 
       prevValuesRef.current = currentValues;
     }
-  }, [mode, recurrence, selectedDays, time, endDate, onScheduleChange]);
+  }, [
+    mode,
+    recurrence,
+    selectedDays,
+    time,
+    endDate,
+    timezone,
+    onScheduleChange,
+  ]);
 
   const getOneTimeSchedulePreview = () => {
     const shortDays = selectedDays.map((d) => d.slice(0, 3)).join(", ");
     const formattedTime = formatTimeToAMPM(time);
-    return `Post ${selectedDays.length} time (${shortDays}) at ${formattedTime}`;
+    return `Post ${selectedDays.length} time (${shortDays}) at ${formattedTime} (${timezone})`;
   };
 
   const getRecurringSchedulePreview = () => {
@@ -212,7 +255,7 @@ const Scheduler = ({
     const formattedTime = formatTimeToAMPM(time);
     return `Post ${
       selectedDays.length
-    } times per week (${shortDays}) at ${formattedTime} for ${duration} (${startDate.toDateString()} - ${endDate.toDateString()})`;
+    } times per week (${shortDays}) at ${formattedTime} ${timezone} for ${duration} (${startDate.toDateString()} - ${endDate.toDateString()})`;
   };
 
   const { mutate: updateSchedule, isPending } = useUpdateSchedule();
@@ -233,19 +276,22 @@ const Scheduler = ({
       return `${year}-${month}-${day}`;
     };
 
-    const payload: UpdateSchedulePayload = {
+    // Send the exact user selected time (HH:mm) + timezone to backend
+    const payloadData = {
       prompt,
       frequency:
         mode === "one-time" ? "once" : (recurrence as "weekly" | "monthly"),
       day_of_week: fullDayName,
-      time_of_day: convertLocalTimeToUTC(time),
+      time_of_day: time, // <-- send exact selected time, no conversion
+      timezone, // <-- include selected timezone
       end_date: mode === "recurring" ? formatDate(endDate) : undefined,
     };
 
-    console.log("payload", payload);
+    console.log("payload", payloadData);
 
+    // cast to API type if needed
     updateSchedule(
-      { id, data: payload },
+      { id, data: payloadData as unknown as UpdateSchedulePayload },
       {
         onSuccess: () => {
           toast({
@@ -337,7 +383,7 @@ const Scheduler = ({
                       Days
                     </Text>
                     <SimpleGrid
-                      columns={{ base: 7, lg: 12 }}
+                      columns={{ base: 7, md: 7 }}
                       spacing={{ base: 1, md: 2 }}
                       w="100%"
                       maxW="100%"
@@ -393,6 +439,29 @@ const Scheduler = ({
                       borderColor="border"
                     />
                   </Box>
+
+                  {/* Timezone selector for One-Time */}
+                  <Box
+                    flex={{ base: "1 1 100%", sm: "1" }}
+                    minW={{ base: "100%", sm: "auto" }}
+                  >
+                    <Text fontSize="sm" mb={1} color="mutedText">
+                      Timezone
+                    </Text>
+                    <Select
+                      value={timezone}
+                      onChange={(e) => setTimezone(e.target.value)}
+                      fontSize="sm"
+                      bg="surface"
+                      borderColor="border"
+                    >
+                      {timezones.map((tz) => (
+                        <option key={tz} value={tz}>
+                          {tz}
+                        </option>
+                      ))}
+                    </Select>
+                  </Box>
                 </Flex>
 
                 <Box
@@ -431,11 +500,7 @@ const Scheduler = ({
             {/* ---------------- RECURRING ---------------- */}
             <TabPanel px={0}>
               <VStack spacing={4} align="stretch">
-                <Flex
-                  gap={{ base: 3, md: 4 }}
-                  flexWrap="wrap"
-                  alignItems="flex-start"
-                >
+                <Flex>
                   <Box
                     flex={{ base: "1 1 100%", sm: "1" }}
                     minW={{ base: "100%", sm: "200px" }}
@@ -452,11 +517,16 @@ const Scheduler = ({
                       borderColor="border"
                     >
                       <option value="weekly">Weekly</option>
-                      <option value="monthly">Monthly</option>
+                      {/* <option value="monthly">Monthly</option> */}
                     </Select>
                   </Box>
-
-                  <Flex direction={"column"} gap={{ base: 3, md: 4 }}></Flex>
+                </Flex>
+                <Flex
+                  gap={{ base: 3, md: 4 }}
+                  flexWrap="wrap"
+                  alignItems="flex-start"
+                >
+                  {/* <Flex direction={"column"} gap={{ base: 3, md: 4 }}></Flex> */}
 
                   <Box
                     flex={{ base: "1 1 100%", lg: "1" }}
@@ -522,6 +592,29 @@ const Scheduler = ({
                       borderColor="border"
                     />
                   </Box>
+
+                  {/* Timezone selector for Recurring */}
+                  <Box
+                    flex={{ base: "1 1 100%", sm: "1" }}
+                    minW={{ base: "100%", sm: "auto" }}
+                  >
+                    <Text fontSize="sm" mb={1} color="mutedText">
+                      Timezone
+                    </Text>
+                    <Select
+                      value={timezone}
+                      onChange={(e) => setTimezone(e.target.value)}
+                      fontSize="sm"
+                      bg="surface"
+                      borderColor="border"
+                    >
+                      {timezones.map((tz) => (
+                        <option key={tz} value={tz}>
+                          {tz}
+                        </option>
+                      ))}
+                    </Select>
+                  </Box>
                 </Flex>
 
                 <Flex gap={{ base: 3, md: 4 }} flexWrap="wrap">
@@ -541,9 +634,8 @@ const Scheduler = ({
                     >
                       <option>1 week</option>
                       <option>2 weeks</option>
-                      <option>1 month</option>
-                      <option>2 months</option>
-                      <option>12 weeks</option>
+                      <option>4 weeks</option>
+                      <option>8 weeks</option>
                       <option>Until stopped</option>
                     </Select>
                   </Box>
@@ -634,18 +726,20 @@ const Scheduler = ({
               </VStack>
             </TabPanel>
           </TabPanels>
-          <Flex w="100%" justifyContent="flex-end">
-            <Button
-              onClick={handleUpdateSchedule}
-              isLoading={isPending}
-              isDisabled={!id}
-              size={{ base: "xs", sm: "sm" }}
-              flexShrink={0}
-              maxW={{ base: "100%", md: "160px" }}
-            >
-              Update Schedule
-            </Button>
-          </Flex>
+          {!!showUpdateButton && (
+            <Flex w="100%" justifyContent="flex-end">
+              <Button
+                onClick={handleUpdateSchedule}
+                isLoading={isPending}
+                isDisabled={!id}
+                size={{ base: "xs", sm: "sm" }}
+                flexShrink={0}
+                maxW={{ base: "100%", md: "160px" }}
+              >
+                Update Schedule
+              </Button>
+            </Flex>
+          )}
         </Tabs>
       </VStack>
     </Box>

@@ -99,14 +99,11 @@ export const calculateEndDateFromDuration = (
     case "2 weeks":
       newDate.setDate(start.getDate() + 14);
       break;
-    case "1 month":
-      newDate.setMonth(start.getMonth() + 1);
+    case "4 weeks":
+      newDate.setDate(start.getDate() + 28);
       break;
-    case "2 months":
-      newDate.setMonth(start.getMonth() + 2);
-      break;
-    case "12 weeks":
-      newDate.setDate(start.getDate() + 84);
+    case "8 weeks":
+      newDate.setDate(start.getDate() + 56);
       break;
     case "Until stopped":
       newDate.setFullYear(start.getFullYear() + 10); // arbitrarily far in future
@@ -124,9 +121,8 @@ export const calculateDurationFromDates = (start: Date, end: Date): string => {
 
   if (daysDiff <= 7) return "1 week";
   if (daysDiff <= 14) return "2 weeks";
-  if (daysDiff <= 31) return "1 month";
-  if (daysDiff <= 62) return "2 months";
-  if (daysDiff <= 84) return "12 weeks";
+  if (daysDiff <= 31) return "4 weeks";
+  if (daysDiff <= 62) return "8 weeks";
   return "Until stopped";
 };
 

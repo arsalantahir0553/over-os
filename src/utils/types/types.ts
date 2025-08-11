@@ -13,3 +13,11 @@ export interface UserSchedule {
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
 }
+
+export interface ScheduleData {
+  frequency: "once" | "weekly" | "monthly";
+  day_of_week: string;
+  time_of_day: string;
+  timezone?: string;
+  end_date?: string;
+}
