@@ -61,6 +61,30 @@ export const useChat = () => {
   });
 };
 
+interface UpdateSessionTitleInput {
+  messageId: number;
+  title: string;
+}
+
+const updateSessionTitle = async ({
+  messageId,
+  title,
+}: UpdateSessionTitleInput) => {
+  const response = await api.patch(
+    `${API_WORKFLOW_URL}/chat-sessions/${messageId}/`,
+    {
+      title,
+    }
+  );
+  return response.data;
+};
+
+export const useUpdateSessionTitle = () => {
+  return useMutation({
+    mutationFn: (data: UpdateSessionTitleInput) => updateSessionTitle(data),
+  });
+};
+
 interface UpdateChatMessageInput {
   messageId: number;
   session: number;

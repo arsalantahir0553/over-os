@@ -5,14 +5,20 @@ import {
   Flex,
   IconButton,
   Image,
+  Input,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   SkeletonCircle,
   SkeletonText,
-  // SkeletonCircle,
-  // SkeletonText,
   Text,
   useBreakpointValue,
   VStack,
@@ -22,6 +28,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronUpIcon,
+  EditIcon,
   MessageSquareText,
 } from "lucide-react";
 import { useState } from "react";
@@ -45,7 +52,10 @@ import SettingsIcon from "../../../assets/svgs/settings.svg";
 import { useLoggedInUser, useLogout } from "@/utils/apis/auth.api";
 
 import { useChatSession } from "@/context/ChatSessionContext";
-import { useGetAllChatSessions } from "@/utils/apis/chat-sessions";
+import {
+  useGetAllChatSessions,
+  useUpdateSessionTitle,
+} from "@/utils/apis/chat-sessions";
 import { useWorkflowCategories } from "@/utils/apis/workflow.api";
 import { AiOutlineProduct } from "react-icons/ai";
 import { PiRankingThin } from "react-icons/pi";
@@ -74,11 +84,16 @@ const LinkedinSidebar = () => {
     base: false,
     md: isExpanded,
   });
-
+  const [hoveredSessionId, setHoveredSessionId] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editSessionId, setEditSessionId] = useState<string | null>(null);
   const { data: UserData, isLoading: isUserLoading } = useLoggedInUser();
-  const { data: SessionData } = useGetAllChatSessions();
+  const { data: SessionData, refetch } = useGetAllChatSessions();
   console.log("SessionData", SessionData);
   const User = UserData?.data;
+  const updateTitleMutation = useUpdateSessionTitle();
+
   const handleNavigate = (category: string) => {
     navigate(`/workflow/category/${encodeURIComponent(category)}`);
   };
@@ -88,6 +103,31 @@ const LinkedinSidebar = () => {
     localStorage.removeItem("linkedin_response");
     localStorage.removeItem("linkedin_image_urls");
     window.location.href = "/workflow/linkedin"; // Full page reload
+  };
+
+  const handleSaveTitle = async () => {
+    if (!editSessionId || !editTitle.trim()) return;
+
+    try {
+      await updateTitleMutation.mutateAsync(
+        {
+          messageId: parseInt(editSessionId),
+          title: editTitle.trim(),
+        },
+        {
+          onSuccess: () => {
+            refetch();
+            setIsEditModalOpen(false);
+          },
+          onError: (error) => {
+            console.error("Failed to update title:", error);
+            // You might want to show an error toast here
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating title:", error);
+    }
   };
 
   return (
@@ -214,16 +254,22 @@ const LinkedinSidebar = () => {
                   cursor="pointer"
                   align="center"
                   justifyContent="space-between"
-                  onClick={() => {
-                    if (session.id === activeSessionId) {
-                      setActiveSessionId(null);
-                    } else {
-                      setActiveSessionId(session.id);
-                      navigate(`/workflow/linkedin/${session.id}`);
-                    }
-                  }}
+                  onMouseEnter={() => setHoveredSessionId(session.id)}
+                  onMouseLeave={() => setHoveredSessionId(null)}
                 >
-                  <Flex gap={2} align="start" w="full">
+                  <Flex
+                    gap={2}
+                    align="start"
+                    w="full"
+                    onClick={() => {
+                      if (session.id === activeSessionId) {
+                        setActiveSessionId(null);
+                      } else {
+                        setActiveSessionId(session.id);
+                        navigate(`/workflow/linkedin/${session.id}`);
+                      }
+                    }}
+                  >
                     <Box mt={0.5}>
                       <MessageSquareText size={16} />
                     </Box>
@@ -241,6 +287,23 @@ const LinkedinSidebar = () => {
                       )}
                     </Box>
                   </Flex>
+
+                  {/* Edit icon only on hover */}
+                  {hoveredSessionId === session.id && (
+                    <IconButton
+                      aria-label="Edit title"
+                      size="xs"
+                      icon={<EditIcon size={16} />}
+                      variant="ghost"
+                      color="whiteAlpha.800"
+                      onClick={(e) => {
+                        e.stopPropagation(); // prevent parent click
+                        setEditTitle(session.title);
+                        setEditSessionId(session.id);
+                        setIsEditModalOpen(true);
+                      }}
+                    />
+                  )}
                 </Flex>
               ))
             ) : (
@@ -258,6 +321,55 @@ const LinkedinSidebar = () => {
         isLoading={isUserLoading}
         isExpanded={responsiveIsExpanded}
       />
+
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        size="lg"
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent
+          bg="surface2"
+          color="white"
+          maxW={{ base: "90%", md: "600px" }}
+          w="full"
+        >
+          <ModalHeader>Edit Title</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              placeholder="Enter new title"
+              bg="white"
+              color="black"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSaveTitle();
+                }
+              }}
+            />
+          </ModalBody>
+          <ModalFooter gap={2}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditModalOpen(false)}
+              isDisabled={updateTitleMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              colorScheme="blue"
+              onClick={handleSaveTitle}
+              isLoading={updateTitleMutation.isPending}
+              loadingText="Saving..."
+            >
+              Save
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
