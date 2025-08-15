@@ -66,8 +66,23 @@ const LinkedinWorkflowFirst = () => {
   const { sessionId } = useParams();
   console.log(sessionId);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [userPrompt, setUserPrompt] = useState("");
+  const [userPrompt, setUserPrompt] = useState(
+    localStorage.getItem("linkedin_prompt") || ""
+  );
   const [generatedText, setGeneratedText] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Handle initial textarea height when component mounts or userPrompt changes
+  useEffect(() => {
+    if (textareaRef.current && userPrompt) {
+      const textarea = textareaRef.current;
+      // Reset height to auto to get the correct scrollHeight for the content
+      textarea.style.height = "auto";
+      // Set the height to the scrollHeight, but not more than max height (6rem = 96px)
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 96)}px`;
+    }
+  }, [userPrompt]);
+
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [scheduleData, setScheduleData] = useState<ScheduleData[] | null>(null);
   const [manualScheduleData, setManualScheduleData] = useState<
@@ -116,7 +131,8 @@ const LinkedinWorkflowFirst = () => {
   const { mutate: generatePrompt, isPending: isGenerating } = useChat();
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
-  const { mutate: createUserSchedules } = useCreateUserSchedules();
+  const { mutate: createUserSchedules, isPending: isCreatingSchedule } =
+    useCreateUserSchedules();
   const { refetch, isFetching } = useOAuthInit();
   const navigate = useNavigate();
 
@@ -189,13 +205,15 @@ const LinkedinWorkflowFirst = () => {
             });
           }
         },
-        onError: () => {
+        onError: (error: any) => {
           clearInterval(intervalRef.current!);
           setLoadingMessage(null);
+          const errorMessage =
+            error?.response?.data?.message ||
+            "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.";
           toast({
             title: "Post Generation Failed",
-            description:
-              "Try writing something more specific — like what topic you want to post about, your audience, or the tone you're going for.",
+            description: errorMessage,
             status: "error",
             duration: 3000,
             isClosable: true,
@@ -544,6 +562,7 @@ const LinkedinWorkflowFirst = () => {
             }}
             color="text"
             pr="2.5rem"
+            ref={textareaRef}
             rows={1} // Start with 1 visible row
           />
 
@@ -640,15 +659,18 @@ const LinkedinWorkflowFirst = () => {
             onChange={(e) => setGeneratedText(e.target.value)}
             placeholder="AI-generated post will appear here"
             fontSize="md"
+            bg="surface2"
             minHeight="180px"
-            p={0}
+            pt={4}
             color="text"
             resize="none"
-            border="none"
+            border="1px solid"
+            borderColor="#292929"
             overflow="hidden"
             _placeholder={{ color: "gray.500" }}
             _focus={{
-              border: "none",
+              border: "1px solid",
+              borderColor: "primary",
               boxShadow: "none",
             }}
           />
@@ -678,9 +700,10 @@ const LinkedinWorkflowFirst = () => {
                 }
                 bg="primary"
                 color="white"
-                isLoading={isPublishing}
                 _hover={{ bg: "brand.400" }}
                 leftIcon={<CalendarIcon size={16} />}
+                isLoading={isCreatingSchedule}
+                isDisabled={isCreatingSchedule}
               >
                 Schedule Post
               </Button>

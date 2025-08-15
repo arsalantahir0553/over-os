@@ -67,7 +67,7 @@ const LinkedinWorkflow = () => {
       JSON.stringify(scheduleData)
     );
 
-    createChatSession(userPrompt, {
+    createChatSession(userPrompt.slice(0, 200), {
       onSuccess: (data) => {
         console.log("chat session created:", data.data);
         setActiveSessionId(data.data.id);

@@ -78,7 +78,7 @@ const LinkedinSidebar = () => {
   const { data: categories = [] } = useWorkflowCategories();
   const [isExpanded, setIsExpanded] = useState(true);
   const [showExplore, setShowExplore] = useState(false);
-  const [showMyWorkflows, setShowMyWorkflows] = useState(false);
+  const [showMyWorkflows, setShowMyWorkflows] = useState(true);
   const { activeSessionId, setActiveSessionId } = useChatSession();
   const responsiveIsExpanded = useBreakpointValue({
     base: false,

@@ -18,6 +18,7 @@ import {
 import { motion } from "framer-motion";
 import {
   CalendarIcon,
+  EditIcon,
   ListChecks,
   PlusIcon,
   SendIcon,
@@ -72,6 +73,18 @@ const LinkedinWorkflowBySession = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userPrompt, setUserPrompt] = useState("");
   const [generatedText, setGeneratedText] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Handle initial textarea height when component mounts or userPrompt changes
+  useEffect(() => {
+    if (textareaRef.current && userPrompt) {
+      const textarea = textareaRef.current;
+      // Reset height to auto to get the correct scrollHeight for the content
+      textarea.style.height = "auto";
+      // Set the height to the scrollHeight, but not more than max height (6rem = 96px)
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 96)}px`;
+    }
+  }, [userPrompt]);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [scheduleData, setScheduleData] = useState<ScheduleData[] | null>(null);
   const [manualScheduleData, setManualScheduleData] = useState<
@@ -565,6 +578,7 @@ const LinkedinWorkflowBySession = () => {
             }}
             color="text"
             pr="2.5rem"
+            ref={textareaRef}
             rows={1} // Start with 1 visible row
           />
 
@@ -659,21 +673,38 @@ const LinkedinWorkflowBySession = () => {
 
         {/* Generated Text Area */}
         {generatedText && (
+          <Box
+            mb={-10}
+            zIndex={2}
+            display={"flex"}
+            alignItems={"center"}
+            gap={2}
+            fontSize={"12px"}
+          >
+            {" "}
+            Edit Post
+            <EditIcon size={14} />
+          </Box>
+        )}
+        {generatedText && (
           <Textarea
             ref={generatedTextRef}
             value={generatedText}
             onChange={(e) => setGeneratedText(e.target.value)}
             placeholder="AI-generated post will appear here"
             fontSize="md"
+            bg="surface2"
             minHeight="180px"
-            p={0}
+            pt={4}
             color="text"
             resize="none"
-            border="none"
+            border="1px solid"
+            borderColor="#292929"
             overflow="hidden"
             _placeholder={{ color: "gray.500" }}
             _focus={{
-              border: "none",
+              border: "1px solid",
+              borderColor: "primary",
               boxShadow: "none",
             }}
           />
