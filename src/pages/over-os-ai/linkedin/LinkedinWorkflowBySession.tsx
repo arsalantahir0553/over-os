@@ -46,6 +46,11 @@ import {
 import type { ScheduleData } from "@/utils/types/types";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useParams } from "react-router-dom";
+import { FiTrash2 } from "react-icons/fi";
+import { Switch, useDisclosure as useModalDisclosure } from "@chakra-ui/react";
+import CustomModal from "@/components/modals/CustomModal";
+import { useQueryClient } from "@tanstack/react-query";
+import { useDeleteSchedule } from "@/utils/apis/django.api";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -89,6 +94,19 @@ const LinkedinWorkflowBySession = () => {
   const [manualScheduleData, setManualScheduleData] = useState<
     ScheduleData[] | null
   >(null);
+  const [isScheduleActive, setIsScheduleActive] = useState(true);
+  const {
+    isOpen: isDeleteModalOpen,
+    onOpen: onDeleteModalOpen,
+    onClose: onDeleteModalClose,
+  } = useModalDisclosure();
+
+  // Reset scheduler state when session changes
+  useEffect(() => {
+    setScheduleData(null);
+    setManualScheduleData(null);
+    setShowManualScheduler(false);
+  }, [sessionId]);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
   const loadingIndexRef = useRef<number>(0);
@@ -123,8 +141,10 @@ const LinkedinWorkflowBySession = () => {
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
   const { mutate: createUserSchedules } = useCreateUserSchedules();
+  const { mutate: deleteSchedule } = useDeleteSchedule();
   const { mutate: updateChatMessage } = useUpdateChatMessage();
   const { refetch, isFetching } = useOAuthInit();
+  const queryClient = useQueryClient();
   // const navigate = useNavigate();
 
   const {
@@ -341,6 +361,7 @@ const LinkedinWorkflowBySession = () => {
             duration: 3000,
             isClosable: true,
           });
+          queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
         },
         onError: () => {
           toast({
@@ -393,6 +414,7 @@ const LinkedinWorkflowBySession = () => {
             duration: 3000,
             isClosable: true,
           });
+          queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
         },
         onError: () => {
           toast({
@@ -648,16 +670,63 @@ const LinkedinWorkflowBySession = () => {
 
           {isGenerating ||
             (scheduleData && generatedText && (
-              <Scheduler
-                data={scheduleData}
-                onScheduleChange={(updatedData) => {
-                  setScheduleData(updatedData);
-                }}
-                id={scheduleId!}
-                prompt={userPrompt}
-                showUpdateButton={true}
-                refetchSessionData={refetchSessionData}
-              />
+              <Box mt={4}>
+                <Flex
+                  justify="space-between"
+                  align="center"
+                  mb={4}
+                  p={4}
+                  bg="surface2"
+                  borderRadius="md"
+                >
+                  <Box>
+                    <Text fontWeight="medium" mb={1}>
+                      Schedule Status
+                    </Text>
+                    <Flex align="center" gap={2}>
+                      <Box
+                        w="8px"
+                        h="8px"
+                        bg={isScheduleActive ? "green.500" : "orange.500"}
+                        borderRadius="full"
+                      />
+                      <Text fontSize="sm">
+                        {isScheduleActive ? "Active" : "Paused"}
+                      </Text>
+                    </Flex>
+                  </Box>
+                  <Flex gap={3}>
+                    <Flex align="center" gap={2}>
+                      <Text fontSize="sm">
+                        {isScheduleActive ? "Pause" : "Resume"} Schedule
+                      </Text>
+                      <Switch
+                        colorScheme="green"
+                        isChecked={isScheduleActive}
+                        onChange={(e) => setIsScheduleActive(e.target.checked)}
+                      />
+                    </Flex>
+                    <IconButton
+                      aria-label="Delete schedule"
+                      icon={<FiTrash2 size={16} />}
+                      size="sm"
+                      variant="ghost"
+                      colorScheme="red"
+                      onClick={onDeleteModalOpen}
+                    />
+                  </Flex>
+                </Flex>
+                <Scheduler
+                  data={scheduleData}
+                  onScheduleChange={(updatedData) => {
+                    setScheduleData(updatedData);
+                  }}
+                  id={scheduleId!}
+                  prompt={userPrompt}
+                  showUpdateButton={true}
+                  refetchSessionData={refetchSessionData}
+                />
+              </Box>
             ))}
 
           {/* ================================================== */}
@@ -710,24 +779,22 @@ const LinkedinWorkflowBySession = () => {
         )}
 
         {/* Submit */}
-        {generatedText && (
+        {generatedText && !scheduleData && (
           <Flex justify="flex-end" gap={2}>
             <Button
               onClick={handleSubmit}
-              bg={scheduleData || manualScheduleData ? "surface2" : "primary"}
+              bg={manualScheduleData ? "surface2" : "primary"}
               color="white"
               isLoading={isPublishing}
               _hover={{ bg: "gray.600" }}
               leftIcon={<SendIcon size={15} />}
             >
-              {scheduleData || manualScheduleData
-                ? "Post Now"
-                : "Post to LinkedIn"}
+              {manualScheduleData ? "Post Now" : "Post to LinkedIn"}
             </Button>
-            {(scheduleData || manualScheduleData) && (
+            {manualScheduleData && (
               <Button
                 onClick={
-                  manualScheduleData && manualScheduleData?.length > 0
+                  manualScheduleData?.length > 0
                     ? handleManualSchedule
                     : handleSchedule
                 }
@@ -743,6 +810,50 @@ const LinkedinWorkflowBySession = () => {
           </Flex>
         )}
       </VStack>
+
+      <CustomModal
+        isOpen={isDeleteModalOpen}
+        onClose={onDeleteModalClose}
+        onSubmit={() => {
+          if (scheduleId) {
+            deleteSchedule(scheduleId, {
+              onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
+                setScheduleData(null);
+                setScheduleId(null);
+                onDeleteModalClose();
+                toast({
+                  title: "Success",
+                  description: "Schedule deleted successfully.",
+                  status: "success",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              },
+              onError: () => {
+                toast({
+                  title: "Error",
+                  description: "Failed to delete schedule. Please try again.",
+                  status: "error",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              },
+            });
+          }
+        }}
+        onCancel={onDeleteModalClose}
+        header="Delete Schedule"
+        submitText="Delete"
+        cancelText="Cancel"
+        submitButtonColor="red"
+      >
+        <Text>
+          Are you sure you want to delete this schedule? This action cannot be
+          undone.
+        </Text>
+      </CustomModal>
+
       <LinkedinLoginModal
         isOpen={isOpen}
         onClose={onClose}

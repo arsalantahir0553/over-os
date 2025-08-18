@@ -16,7 +16,13 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { CalendarIcon, PlusIcon, SendIcon, Upload } from "lucide-react";
+import {
+  CalendarIcon,
+  EditIcon,
+  PlusIcon,
+  SendIcon,
+  Upload,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
@@ -35,7 +41,8 @@ import {
 } from "@/utils/helpers/functions.helper";
 import type { ScheduleData } from "@/utils/types/types";
 import { RiCalendarScheduleLine } from "react-icons/ri";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -90,7 +97,8 @@ const LinkedinWorkflowFirst = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showManualScheduler, setShowManualScheduler] = useState(false);
   const generatedTextRef = useRef<HTMLTextAreaElement>(null);
-
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   useEffect(() => {
     const showManual = localStorage.getItem("linkedin_manual_schedule");
     if (showManual === "true") {
@@ -321,6 +329,8 @@ const LinkedinWorkflowFirst = () => {
             duration: 3000,
             isClosable: true,
           });
+          queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
+          navigate(`/workflow/linkedin/${sessionId}`);
         },
         onError: () => {
           toast({
@@ -376,6 +386,8 @@ const LinkedinWorkflowFirst = () => {
             duration: 3000,
             isClosable: true,
           });
+          queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
+          navigate(`/workflow/linkedin/${sessionId}`);
         },
         onError: () => {
           toast({
@@ -646,6 +658,20 @@ const LinkedinWorkflowFirst = () => {
         </Flex>
 
         {/* Generated Text Area */}
+        {generatedText && (
+          <Box
+            mb={-10}
+            zIndex={2}
+            display={"flex"}
+            alignItems={"center"}
+            gap={2}
+            fontSize={"12px"}
+          >
+            {" "}
+            Edit Post
+            <EditIcon size={14} />
+          </Box>
+        )}
         {generatedText && (
           <Textarea
             ref={generatedTextRef}
