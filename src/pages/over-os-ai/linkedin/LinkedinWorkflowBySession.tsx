@@ -19,7 +19,6 @@ import { motion } from "framer-motion";
 import {
   CalendarIcon,
   EditIcon,
-  ListChecks,
   PlusIcon,
   SendIcon,
   Upload,
@@ -46,7 +45,7 @@ import {
 } from "@/utils/helpers/functions.helper";
 import type { ScheduleData } from "@/utils/types/types";
 import { RiCalendarScheduleLine } from "react-icons/ri";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -126,7 +125,7 @@ const LinkedinWorkflowBySession = () => {
   const { mutate: createUserSchedules } = useCreateUserSchedules();
   const { mutate: updateChatMessage } = useUpdateChatMessage();
   const { refetch, isFetching } = useOAuthInit();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const {
     data: SessionData,
@@ -433,16 +432,16 @@ const LinkedinWorkflowBySession = () => {
     words: [
       "Boost your reach",
       "AI for Thought Leadership",
-      "Post on LinkedIn",
+      "I'm Your Personalized Linkedin Agent",
     ],
     delaySpeed: 2000,
     typeSpeed: 10,
     deleteSpeed: 10,
   });
 
-  const handleSchedules = () => {
-    navigate("/workflow/linkedin/schedules");
-  };
+  // const handleSchedules = () => {
+  //   navigate("/workflow/linkedin/schedules");
+  // };
 
   if (isLoading) {
     return <LoadingOverlay message="" />;
@@ -459,7 +458,7 @@ const LinkedinWorkflowBySession = () => {
       borderRadius="xl"
       position="relative"
     >
-      {isLinkedinConnected && (
+      {/* {isLinkedinConnected && (
         <Button
           position="absolute"
           fontSize={{ base: "10px", md: "sm" }}
@@ -472,7 +471,7 @@ const LinkedinWorkflowBySession = () => {
         >
           My Schedules
         </Button>
-      )}
+      )} */}
       <VStack spacing={10} align="stretch">
         {/* Heading */}
         <Box textAlign="center">
@@ -540,7 +539,7 @@ const LinkedinWorkflowBySession = () => {
         {/* Prompt Input + Generate */}
         <Flex direction="column" gap={3}>
           <Text fontSize="sm" color="mutedText">
-            What would you like to post about?
+            Please let me know what would you like to write about
           </Text>
           <Textarea
             placeholder="Tell me about your marketing goal..."

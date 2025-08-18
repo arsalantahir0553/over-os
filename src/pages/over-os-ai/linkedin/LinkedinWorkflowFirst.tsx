@@ -16,13 +16,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import {
-  CalendarIcon,
-  ListChecks,
-  PlusIcon,
-  SendIcon,
-  Upload,
-} from "lucide-react";
+import { CalendarIcon, PlusIcon, SendIcon, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
@@ -41,7 +35,7 @@ import {
 } from "@/utils/helpers/functions.helper";
 import type { ScheduleData } from "@/utils/types/types";
 import { RiCalendarScheduleLine } from "react-icons/ri";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -134,7 +128,7 @@ const LinkedinWorkflowFirst = () => {
   const { mutate: createUserSchedules, isPending: isCreatingSchedule } =
     useCreateUserSchedules();
   const { refetch, isFetching } = useOAuthInit();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const autoGenerateIfFirstTime = () => {
     const firstTime = localStorage.getItem("linkedin_first_time");
@@ -421,16 +415,16 @@ const LinkedinWorkflowFirst = () => {
     words: [
       "Boost your reach",
       "AI for Thought Leadership",
-      "Post on LinkedIn",
+      "I'm Your Personalized Linkedin Agent",
     ],
     delaySpeed: 2000,
     typeSpeed: 10,
     deleteSpeed: 10,
   });
 
-  const handleSchedules = () => {
-    navigate("/workflow/linkedin/schedules");
-  };
+  // const handleSchedules = () => {
+  //   navigate("/workflow/linkedin/schedules");
+  // };
 
   return (
     <Box
@@ -443,7 +437,7 @@ const LinkedinWorkflowFirst = () => {
       borderRadius="xl"
       position="relative"
     >
-      {isLinkedinConnected && (
+      {/* {isLinkedinConnected && (
         <Button
           position="absolute"
           fontSize={{ base: "10px", md: "sm" }}
@@ -456,7 +450,7 @@ const LinkedinWorkflowFirst = () => {
         >
           My Schedules
         </Button>
-      )}
+      )} */}
       <VStack spacing={10} align="stretch">
         {/* Heading */}
         <Box textAlign="center">
@@ -524,7 +518,7 @@ const LinkedinWorkflowFirst = () => {
         {/* Prompt Input + Generate */}
         <Flex direction="column" gap={3}>
           <Text fontSize="sm" color="mutedText">
-            What would you like to post about?
+            Please let me know what would you like to write about
           </Text>
           <Textarea
             placeholder="Tell me about your marketing goal..."

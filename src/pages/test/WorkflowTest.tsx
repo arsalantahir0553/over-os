@@ -348,7 +348,7 @@ const LinkedinWorkflow = () => {
         {/* Prompt Input + Generate */}
         <Flex direction="column" gap={3}>
           <Text fontSize="sm" color="mutedText">
-            What would you like to post about?
+            Please let me know what would you like to write about
           </Text>
           <Textarea
             placeholder="Tell me about your marketing goal..."

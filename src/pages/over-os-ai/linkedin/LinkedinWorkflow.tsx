@@ -8,19 +8,18 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { ListChecks } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
 // import TaskStepsList from "./TaskStepList";
+import Scheduler from "@/components/Scheduler";
 import { useChatSession } from "@/context/ChatSessionContext";
 import { useCreateChatSession } from "@/utils/apis/chat-sessions";
 import { useOAuthInit } from "@/utils/apis/django.api";
+import type { ScheduleData } from "@/utils/types/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
-import Scheduler from "@/components/Scheduler";
-import type { ScheduleData } from "@/utils/types/types";
 
 const LOCAL_STORAGE_KEYS = {
   prompt: "linkedin_prompt",
@@ -101,16 +100,16 @@ const LinkedinWorkflow = () => {
     words: [
       "Boost your reach",
       "AI for Thought Leadership",
-      "Post on LinkedIn",
+      "I'm Your Personalized Linkedin Agent",
     ],
     delaySpeed: 2000,
     typeSpeed: 10,
     deleteSpeed: 10,
   });
 
-  const handleSchedules = () => {
-    navigate("/workflow/linkedin/schedules");
-  };
+  // const handleSchedules = () => {
+  //   navigate("/workflow/linkedin/schedules");
+  // };
 
   return (
     <Box
@@ -123,7 +122,7 @@ const LinkedinWorkflow = () => {
       borderRadius="xl"
       position="relative"
     >
-      {isLinkedinConnected && (
+      {/* {isLinkedinConnected && (
         <Button
           position="absolute"
           fontSize={{ base: "10px", md: "sm" }}
@@ -136,7 +135,7 @@ const LinkedinWorkflow = () => {
         >
           My Schedules
         </Button>
-      )}
+      )} */}
       <VStack spacing={10} align="stretch">
         {/* Heading */}
         <Box textAlign="center">
@@ -162,7 +161,7 @@ const LinkedinWorkflow = () => {
         {/* Prompt Input + Generate */}
         <Flex direction="column" gap={3}>
           <Text fontSize="sm" color="mutedText">
-            What would you like to post about?
+            Please let me know what would you like to write about
           </Text>
           <Textarea
             placeholder="Tell me about your marketing goal..."
