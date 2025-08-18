@@ -40,7 +40,7 @@ const LinkedinWorkflow = () => {
   const queryClient = useQueryClient();
   const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
   const [showScheduler, setShowScheduler] = useState(false);
-  const [scheduleData, setScheduleData] = useState<ScheduleData[]>([]);
+  const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
 
   useEffect(() => {
     const savedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.prompt);
@@ -258,7 +258,7 @@ const LinkedinWorkflow = () => {
         {showScheduler && (
           <Scheduler
             data={scheduleData}
-            onScheduleChange={(updatedData: ScheduleData[]) => {
+            onScheduleChange={(updatedData: ScheduleData) => {
               setScheduleData(updatedData);
             }}
           />

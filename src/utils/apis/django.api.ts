@@ -41,17 +41,15 @@ export const usePostToLinkedin = () => {
   });
 };
 
-export interface ScheduleItem {
-  frequency: "once" | "weekly" | "monthly";
-  day_of_week: string;
-  time_of_day: string; // format: HH:mm:ss
-  chat_session?: number;
-  flag?: 1;
-}
-
 export interface UserScheduleInput {
   prompt: string;
-  schedules: ScheduleItem[];
+  frequency: "once" | "weekly" | "monthly";
+  days_of_week: string[];
+  time_of_day: string; // format: HH:mm:ss
+  chat_session?: number;
+  timezone?: string;
+  end_date?: string;
+  flag?: 1;
 }
 
 const createUserSchedules = async (data: UserScheduleInput) => {
@@ -93,8 +91,9 @@ export const useDeleteSchedule = () => {
 export interface UpdateSchedulePayload {
   prompt: string;
   frequency: "once" | "weekly" | "monthly";
-  day_of_week?: string;
+  days_of_week?: string[];
   time_of_day: string;
+  timezone: string;
   end_date?: string;
 }
 

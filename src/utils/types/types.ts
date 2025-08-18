@@ -17,8 +17,10 @@ export interface UserSchedule {
 
 export interface ScheduleData {
   frequency: "once" | "weekly" | "monthly";
-  day_of_week: string;
+  days_of_week: string[];
   time_of_day: string;
   timezone?: string;
   end_date?: string;
+  chat_session?: number;
+  flag?: 1;
 }

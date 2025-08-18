@@ -27,6 +27,7 @@ import { useEffect, useRef, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
 // import TaskStepsList from "./TaskStepList";
+import CustomModal from "@/components/modals/CustomModal";
 import Scheduler from "@/components/Scheduler";
 import {
   useChat,
@@ -35,6 +36,7 @@ import {
 } from "@/utils/apis/chat-sessions";
 import {
   useCreateUserSchedules,
+  useDeleteSchedule,
   useExtractSchedule,
   useOAuthInit,
   usePostToLinkedin,
@@ -44,13 +46,11 @@ import {
   normalizeTimeTo24Hour,
 } from "@/utils/helpers/functions.helper";
 import type { ScheduleData } from "@/utils/types/types";
+import { Switch, useDisclosure as useModalDisclosure } from "@chakra-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { FiTrash2 } from "react-icons/fi";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useParams } from "react-router-dom";
-import { FiTrash2 } from "react-icons/fi";
-import { Switch, useDisclosure as useModalDisclosure } from "@chakra-ui/react";
-import CustomModal from "@/components/modals/CustomModal";
-import { useQueryClient } from "@tanstack/react-query";
-import { useDeleteSchedule } from "@/utils/apis/django.api";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -90,10 +90,9 @@ const LinkedinWorkflowBySession = () => {
     }
   }, [userPrompt]);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [scheduleData, setScheduleData] = useState<ScheduleData[] | null>(null);
-  const [manualScheduleData, setManualScheduleData] = useState<
-    ScheduleData[] | null
-  >(null);
+  const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
+  const [manualScheduleData, setManualScheduleData] =
+    useState<ScheduleData | null>(null);
   const [isScheduleActive, setIsScheduleActive] = useState(true);
   const {
     isOpen: isDeleteModalOpen,
@@ -154,7 +153,7 @@ const LinkedinWorkflowBySession = () => {
   } = useGetSessionChatMessages(sessionId!);
 
   const ChatSessionData = SessionData?.messages;
-  const ScheduleData = SessionData?.schedules;
+  const ScheduleData = SessionData?.schedules[0];
 
   useEffect(() => {
     if (ChatSessionData) {
@@ -165,17 +164,18 @@ const LinkedinWorkflowBySession = () => {
       console.log("ChatSessionData.schedules", ChatSessionData);
 
       // ✅ NEW: Set existing schedule into scheduleData state
-      if (ScheduleData && ScheduleData.length > 0) {
-        const formatted = ScheduleData.map((s: any) => ({
-          frequency: s.frequency,
-          day_of_week: s.day_of_week,
-          time_of_day: s.time_of_day,
+      if (ScheduleData) {
+        const formatted = {
+          frequency: ScheduleData.frequency,
+          days_of_week: ScheduleData.days_of_week,
+          time_of_day: ScheduleData.time_of_day,
           timezone:
-            s.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-          end_date: s.end_date || undefined,
-        }));
+            ScheduleData.timezone ||
+            Intl.DateTimeFormat().resolvedOptions().timeZone,
+          end_date: ScheduleData.end_date || undefined,
+        };
         setScheduleData(formatted);
-        setScheduleId(ScheduleData[0]?.id || null);
+        setScheduleId(ScheduleData.id || null);
       }
     }
   }, [ChatSessionData]);
@@ -262,14 +262,12 @@ const LinkedinWorkflowBySession = () => {
     extractSchedule(userPrompt, {
       onSuccess: (data) => {
         if (data.data.day_of_week !== null) {
-          setScheduleData([
-            {
-              frequency: data.data.frequency,
-              day_of_week: data.data.day_of_week,
-              time_of_day: data.data.time_of_day,
-              end_date: data.data.end_date,
-            },
-          ]);
+          setScheduleData({
+            frequency: data.data.frequency,
+            days_of_week: [data.data.day_of_week],
+            time_of_day: data.data.time_of_day,
+            end_date: data.data.end_date,
+          });
         } else {
           setScheduleData(null);
         }
@@ -327,7 +325,7 @@ const LinkedinWorkflowBySession = () => {
     if (!isLinkedinConnected) return onOpen();
     if (!scheduleData) return;
 
-    if (!scheduleData.length || !generatedText.trim()) {
+    if (!scheduleData || !generatedText.trim()) {
       toast({
         title: "Missing Data",
         description: "Schedule and generated post text are required.",
@@ -338,19 +336,20 @@ const LinkedinWorkflowBySession = () => {
       return;
     }
 
-    const formattedSchedules = scheduleData.map((schedule) => ({
-      frequency: schedule.frequency,
-      day_of_week: getFullDayName(schedule.day_of_week),
-      time_of_day: normalizeTimeTo24Hour(schedule.time_of_day),
-      timezone: schedule.timezone,
+    const formattedSchedules = {
+      frequency: scheduleData.frequency,
+      days_of_week: scheduleData.days_of_week.map(getFullDayName),
+      time_of_day: normalizeTimeTo24Hour(scheduleData.time_of_day),
+      timezone: scheduleData.timezone,
+      end_date: scheduleData.end_date,
       chat_session: Number(sessionId!),
       flag: 1 as const,
-    }));
+    };
 
     createUserSchedules(
       {
         prompt: userPrompt,
-        schedules: formattedSchedules,
+        ...formattedSchedules,
       },
       {
         onSuccess: () => {
@@ -380,7 +379,7 @@ const LinkedinWorkflowBySession = () => {
     if (!isLinkedinConnected) return onOpen();
     if (!manualScheduleData) return;
 
-    if (!manualScheduleData.length || !generatedText.trim()) {
+    if (!manualScheduleData || !generatedText.trim()) {
       toast({
         title: "Missing Data",
         description: "Schedule and generated post text are required.",
@@ -391,19 +390,20 @@ const LinkedinWorkflowBySession = () => {
       return;
     }
 
-    const formattedSchedules = manualScheduleData.map((schedule) => ({
-      frequency: schedule.frequency,
-      day_of_week: getFullDayName(schedule.day_of_week),
-      time_of_day: normalizeTimeTo24Hour(schedule.time_of_day),
-      timezone: schedule.timezone,
+    const formattedSchedules = {
+      frequency: manualScheduleData.frequency,
+      days_of_week: manualScheduleData.days_of_week.map(getFullDayName),
+      time_of_day: normalizeTimeTo24Hour(manualScheduleData.time_of_day),
+      timezone: manualScheduleData.timezone,
+      end_date: manualScheduleData.end_date,
       chat_session: Number(sessionId!),
       flag: 1 as const,
-    }));
+    };
 
     createUserSchedules(
       {
         prompt: userPrompt,
-        schedules: formattedSchedules,
+        ...formattedSchedules,
       },
       {
         onSuccess: () => {
@@ -794,9 +794,7 @@ const LinkedinWorkflowBySession = () => {
             {manualScheduleData && (
               <Button
                 onClick={
-                  manualScheduleData?.length > 0
-                    ? handleManualSchedule
-                    : handleSchedule
+                  manualScheduleData ? handleManualSchedule : handleSchedule
                 }
                 bg="primary"
                 color="white"

@@ -47,8 +47,8 @@ const fullDayNames = [
 ];
 
 interface SchedulerProps {
-  data?: ScheduleData[] | null;
-  onScheduleChange?: (data: ScheduleData[]) => void;
+  data?: ScheduleData | null;
+  onScheduleChange?: (data: ScheduleData) => void;
   showUpdateButton?: boolean;
   id?: string;
   prompt?: string;
@@ -63,8 +63,7 @@ const Scheduler = ({
   prompt = "",
   refetchSessionData,
 }: SchedulerProps) => {
-  const defaultSchedule = data && data.length > 0 ? data[0] : null;
-
+  const defaultSchedule = data;
   const [mode, setMode] = useState<"one-time" | "recurring">(
     defaultSchedule?.frequency === "weekly" ||
       defaultSchedule?.frequency === "monthly"
@@ -114,8 +113,13 @@ const Scheduler = ({
   });
 
   const [selectedDays, setSelectedDays] = useState<string[]>(() => {
-    if (data && data.length > 0) {
-      return data.map((s) => formatDayOfWeek(s.day_of_week));
+    if (data?.days_of_week) {
+      if (Array.isArray(data.days_of_week)) {
+        // case: array → format all days
+        return data.days_of_week.map(formatDayOfWeek);
+      }
+      // case: string → format single day
+      return [formatDayOfWeek(data.days_of_week)];
     }
     return [];
   });
@@ -220,17 +224,16 @@ const Scheduler = ({
       currentValues.timezone !== prevValues.timezone
     ) {
       if (onScheduleChange) {
-        const schedules: ScheduleData[] = selectedDays.map((day) => ({
+        const schedule: ScheduleData = {
           frequency:
             mode === "one-time" ? "once" : (recurrence as "weekly" | "monthly"),
-          day_of_week: day,
+          days_of_week: selectedDays,
           time_of_day: time,
           end_date: mode === "recurring" ? endDate.toISOString() : undefined,
-          // timezone is optional on ScheduleData; if you want to include it add timezone?: string to the interface above
-          // (we still include it on the object, TypeScript may warn if interface doesn't declare it)
+
           ...(timezone ? { timezone } : {}),
-        }));
-        onScheduleChange(schedules);
+        };
+        onScheduleChange(schedule);
       }
 
       prevValuesRef.current = currentValues;

@@ -85,10 +85,9 @@ const LinkedinWorkflowFirst = () => {
   }, [userPrompt]);
 
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [scheduleData, setScheduleData] = useState<ScheduleData[] | null>(null);
-  const [manualScheduleData, setManualScheduleData] = useState<
-    ScheduleData[] | null
-  >(null);
+  const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
+  const [manualScheduleData, setManualScheduleData] =
+    useState<ScheduleData | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
   const loadingIndexRef = useRef<number>(0);
@@ -227,14 +226,12 @@ const LinkedinWorkflowFirst = () => {
     extractSchedule(prompt || userPrompt, {
       onSuccess: (data) => {
         if (data.data.day_of_week !== null) {
-          setScheduleData([
-            {
-              frequency: data.data.frequency,
-              day_of_week: data.data.day_of_week,
-              time_of_day: data.data.time_of_day,
-              end_date: data.data.end_date,
-            },
-          ]);
+          setScheduleData({
+            frequency: data.data.frequency,
+            days_of_week: [data.data.day_of_week],
+            time_of_day: data.data.time_of_day,
+            end_date: data.data.end_date,
+          });
         } else {
           setScheduleData(null);
         }
@@ -294,7 +291,7 @@ const LinkedinWorkflowFirst = () => {
     if (!isLinkedinConnected) return onOpen();
     if (!scheduleData) return;
 
-    if (!scheduleData.length || !generatedText.trim()) {
+    if (!scheduleData || !generatedText.trim()) {
       toast({
         title: "Missing Data",
         description: "Schedule and generated post text are required.",
@@ -305,20 +302,21 @@ const LinkedinWorkflowFirst = () => {
       return;
     }
 
-    const formattedSchedules = scheduleData.map((schedule) => ({
-      frequency: schedule.frequency,
-      day_of_week: getFullDayName(schedule.day_of_week),
-      time_of_day: normalizeTimeTo24Hour(schedule.time_of_day),
+    const formattedSchedules = {
+      frequency: scheduleData.frequency,
+      days_of_week: scheduleData.days_of_week.map(getFullDayName),
+      time_of_day: normalizeTimeTo24Hour(scheduleData.time_of_day),
       timezone:
-        schedule.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+        scheduleData.timezone ||
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
       chat_session: Number(sessionId!),
       flag: 1 as const,
-    }));
+    };
 
     createUserSchedules(
       {
         prompt: userPrompt,
-        schedules: formattedSchedules,
+        ...formattedSchedules,
       },
       {
         onSuccess: () => {
@@ -351,7 +349,7 @@ const LinkedinWorkflowFirst = () => {
     if (!isLinkedinConnected) return onOpen();
     if (!manualScheduleData) return;
 
-    if (!manualScheduleData.length || !generatedText.trim()) {
+    if (!manualScheduleData || !generatedText.trim()) {
       toast({
         title: "Missing Data",
         description: "Schedule Manual and generated post text are required.",
@@ -362,20 +360,21 @@ const LinkedinWorkflowFirst = () => {
       return;
     }
 
-    const formattedSchedules = manualScheduleData.map((schedule) => ({
-      frequency: schedule.frequency,
-      day_of_week: getFullDayName(schedule.day_of_week),
-      time_of_day: normalizeTimeTo24Hour(schedule.time_of_day),
+    const formattedSchedules = {
+      frequency: manualScheduleData.frequency,
+      days_of_week: manualScheduleData.days_of_week.map(getFullDayName),
+      time_of_day: normalizeTimeTo24Hour(manualScheduleData.time_of_day),
       timezone:
-        schedule.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+        manualScheduleData.timezone ||
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
       chat_session: Number(sessionId!),
       flag: 1 as const,
-    }));
+    };
 
     createUserSchedules(
       {
         prompt: userPrompt,
-        schedules: formattedSchedules,
+        ...formattedSchedules,
       },
       {
         onSuccess: () => {
@@ -711,12 +710,10 @@ const LinkedinWorkflowFirst = () => {
                 ? "Post Now"
                 : "Post to LinkedIn"}
             </Button>
-            {(scheduleData?.length || manualScheduleData?.length || 0) > 0 && (
+            {(scheduleData || manualScheduleData) && (
               <Button
                 onClick={
-                  manualScheduleData && manualScheduleData?.length > 0
-                    ? handleManualSchedule
-                    : handleSchedule
+                  manualScheduleData ? handleManualSchedule : handleSchedule
                 }
                 bg="primary"
                 color="white"
