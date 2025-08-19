@@ -119,3 +119,20 @@ export const useUpdateSchedule = () => {
     }) => updateSchedule(id, data),
   });
 };
+
+// === API ===
+export const toggleScheduleStatus = async (id: string, status: 'active' | 'inactive') => {
+  const response = await api.patch(
+    `${API_WORKFLOW_URL}/user-schedules/${id}/`,
+    { status: status }
+  );
+  return response.data;
+};
+
+// === Hook ===
+export const useToggleScheduleStatus = () => {
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'active' | 'inactive' }) =>
+      toggleScheduleStatus(id, status),
+  });
+};

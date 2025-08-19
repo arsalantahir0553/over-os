@@ -5,6 +5,7 @@ import {
   calculateEndDateFromDuration,
   // convertLocalTimeToUTC, // no longer used for payload (kept out)
   formatTimeToAMPM,
+  getFullDayName,
   normalizeTimeTo24Hour,
 } from "@/utils/helpers/functions.helper";
 import {
@@ -36,15 +37,6 @@ import type { ScheduleData } from "@/utils/types/types";
 
 const daysOfWeek = ["M", "T", "W", "T", "F", "S", "S"];
 const fullDayMap = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const fullDayNames = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
 
 interface SchedulerProps {
   data?: ScheduleData | null;
@@ -267,11 +259,6 @@ const Scheduler = ({
   const handleUpdateSchedule = () => {
     if (!id) return;
 
-    // Get the index of the selected day to map to full day name
-    const dayIndex = fullDayMap.findIndex((day) => day === selectedDays[0]);
-    const fullDayName =
-      dayIndex !== -1 ? fullDayNames[dayIndex] : selectedDays[0];
-
     // Format the end date to YYYY-MM-DD if it exists
     const formatDate = (date: Date) => {
       const year = date.getFullYear();
@@ -285,9 +272,9 @@ const Scheduler = ({
       prompt,
       frequency:
         mode === "one-time" ? "once" : (recurrence as "weekly" | "monthly"),
-      day_of_week: fullDayName,
-      time_of_day: normalizeTimeTo24Hour(time), // <-- send exact selected time, no conversion
-      timezone, // <-- include selected timezone
+      days_of_week: selectedDays.map(getFullDayName), // Now sending array of selected days
+      time_of_day: normalizeTimeTo24Hour(time),
+      timezone,
       end_date: mode === "recurring" ? formatDate(endDate) : undefined,
     };
 

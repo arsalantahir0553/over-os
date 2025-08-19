@@ -40,6 +40,7 @@ import {
   useExtractSchedule,
   useOAuthInit,
   usePostToLinkedin,
+  useToggleScheduleStatus,
 } from "@/utils/apis/django.api";
 import {
   getFullDayName,
@@ -93,7 +94,8 @@ const LinkedinWorkflowBySession = () => {
   const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
   const [manualScheduleData, setManualScheduleData] =
     useState<ScheduleData | null>(null);
-  const [isScheduleActive, setIsScheduleActive] = useState(true);
+  const [scheduleStatus, setScheduleStatus] = useState<'active' | 'inactive'>('active');
+  const { mutate: toggleSchedule } = useToggleScheduleStatus();
   const {
     isOpen: isDeleteModalOpen,
     onOpen: onDeleteModalOpen,
@@ -687,23 +689,44 @@ const LinkedinWorkflowBySession = () => {
                       <Box
                         w="8px"
                         h="8px"
-                        bg={isScheduleActive ? "green.500" : "orange.500"}
+                        bg={scheduleStatus === 'active' ? "green.500" : "orange.500"}
                         borderRadius="full"
                       />
                       <Text fontSize="sm">
-                        {isScheduleActive ? "Active" : "Paused"}
+                        {scheduleStatus === 'active' ? "Active" : "Paused"}
                       </Text>
                     </Flex>
                   </Box>
                   <Flex gap={3}>
                     <Flex align="center" gap={2}>
                       <Text fontSize="sm">
-                        {isScheduleActive ? "Pause" : "Resume"} Schedule
+                        {scheduleStatus === 'active' ? "Pause" : "Resume"} Schedule
                       </Text>
                       <Switch
                         colorScheme="green"
-                        isChecked={isScheduleActive}
-                        onChange={(e) => setIsScheduleActive(e.target.checked)}
+                        isChecked={scheduleStatus === 'active'}
+                        onChange={(e) => {
+                          const newStatus = e.target.checked ? 'active' : 'inactive';
+                          setScheduleStatus(newStatus);
+                          if (scheduleId) {
+                            toggleSchedule(
+                              { id: scheduleId, status: newStatus },
+                              {
+                                onError: () => {
+                                  // Revert on error
+                                  setScheduleStatus(scheduleStatus === 'active' ? 'inactive' : 'active');
+                                  toast({
+                                    title: "Error",
+                                    description: `Failed to ${newStatus === 'active' ? 'resume' : 'pause'} schedule. Please try again.`,
+                                    status: "error",
+                                    duration: 3000,
+                                    isClosable: true,
+                                  });
+                                },
+                              }
+                            );
+                          }
+                        }}
                       />
                     </Flex>
                     <IconButton
