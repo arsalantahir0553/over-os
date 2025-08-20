@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "./axios.interceptor";
 
 const API_WORKFLOW_URL = import.meta.env.VITE_DJANGO_URL;
@@ -42,22 +42,45 @@ export const useCreateChatSession = () => {
   });
 };
 
-interface chatInput {
-  session: number;
+interface ChatInput {
   message: string;
 }
 
-const chat = async ({ session, message }: chatInput) => {
+const chat = async (sessionId: number, { message }: ChatInput) => {
   const response = await api.post(`${API_WORKFLOW_URL}/chat-messages/`, {
-    session,
+    session: sessionId,
     message,
   });
   return response.data;
 };
 
-export const useChat = () => {
+export const useChat = (sessionId: number) => {
+  const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: (data: chatInput) => chat(data),
+    mutationKey: ["chat", sessionId],
+    mutationFn: (data: ChatInput) => chat(sessionId, data),
+    onMutate: async (variables) => {
+      // 👀 Optimistically put something in cache so UI can show "loading"
+      queryClient.setQueryData(["chat", sessionId], (old: any) => ({
+        ...old,
+        status: "loading",
+        message: variables.message,
+      }));
+    },
+    onSuccess: (data) => {
+      // 👀 Store response in cache so it’s still there when you navigate back
+      queryClient.setQueryData(["chat", sessionId], {
+        status: "success",
+        data,
+      });
+    },
+    onError: (error) => {
+      queryClient.setQueryData(["chat", sessionId], {
+        status: "error",
+        error,
+      });
+    },
   });
 };
 

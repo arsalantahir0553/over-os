@@ -52,6 +52,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { FiTrash2 } from "react-icons/fi";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useParams } from "react-router-dom";
+import { useChatStore } from "@/store/chat-session.store";
 
 const loadingMessages = [
   "Just a moment — we’re working on something great for you…",
@@ -79,7 +80,12 @@ const LinkedinWorkflowBySession = () => {
   const [userPrompt, setUserPrompt] = useState("");
   const [generatedText, setGeneratedText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
+  const { sessions, sendMessage } = useChatStore();
+  const session = sessions[Number(sessionId)] || {
+    loading: false,
+    data: [],
+    error: null,
+  };
   // Handle initial textarea height when component mounts or userPrompt changes
   useEffect(() => {
     if (textareaRef.current && userPrompt) {
@@ -94,7 +100,9 @@ const LinkedinWorkflowBySession = () => {
   const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
   const [manualScheduleData, setManualScheduleData] =
     useState<ScheduleData | null>(null);
-  const [scheduleStatus, setScheduleStatus] = useState<'active' | 'inactive'>('active');
+  const [scheduleStatus, setScheduleStatus] = useState<"active" | "inactive">(
+    "active"
+  );
   const { mutate: toggleSchedule } = useToggleScheduleStatus();
   const {
     isOpen: isDeleteModalOpen,
@@ -138,7 +146,9 @@ const LinkedinWorkflowBySession = () => {
     }
   }, [generatedText]);
 
-  const { mutate: generatePrompt, isPending: isGenerating } = useChat();
+  const { mutate: generatePrompt, isPending: isGenerating } = useChat(
+    Number(sessionId)
+  );
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
   const { mutate: createUserSchedules } = useCreateUserSchedules();
@@ -158,12 +168,21 @@ const LinkedinWorkflowBySession = () => {
   const ScheduleData = SessionData?.schedules[0];
 
   useEffect(() => {
-    if (ChatSessionData) {
-      setUserPrompt(ChatSessionData[1]?.content || "");
-      setGeneratedText(ChatSessionData[0]?.content || "");
-      setUserMessageId(ChatSessionData[1]?.id || null);
-      setGeneratedMessageId(ChatSessionData[0]?.id || null);
-      console.log("ChatSessionData.schedules", ChatSessionData);
+    if (ChatSessionData && ChatSessionData.length > 0) {
+      // Find the latest user message
+      const latestUser = [...ChatSessionData].find(
+        (msg) => msg.message_type === "user"
+      );
+
+      // Find the latest system message
+      const latestSystem = [...ChatSessionData].find(
+        (msg) => msg.message_type === "system"
+      );
+
+      setUserPrompt(latestUser?.content || "");
+      setGeneratedText(latestSystem?.content || "");
+      setUserMessageId(latestUser?.id || null);
+      setGeneratedMessageId(latestSystem?.id || null);
 
       // ✅ NEW: Set existing schedule into scheduleData state
       if (ScheduleData) {
@@ -180,7 +199,7 @@ const LinkedinWorkflowBySession = () => {
         setScheduleId(ScheduleData.id || null);
       }
     }
-  }, [ChatSessionData]);
+  }, [ChatSessionData, ScheduleData]);
 
   const handleGenerate = () => {
     if (!userPrompt.trim()) return;
@@ -201,7 +220,6 @@ const LinkedinWorkflowBySession = () => {
 
     generatePrompt(
       {
-        session: Number(sessionId!),
         message: userPrompt,
       },
       {
@@ -689,24 +707,31 @@ const LinkedinWorkflowBySession = () => {
                       <Box
                         w="8px"
                         h="8px"
-                        bg={scheduleStatus === 'active' ? "green.500" : "orange.500"}
+                        bg={
+                          scheduleStatus === "active"
+                            ? "green.500"
+                            : "orange.500"
+                        }
                         borderRadius="full"
                       />
                       <Text fontSize="sm">
-                        {scheduleStatus === 'active' ? "Active" : "Paused"}
+                        {scheduleStatus === "active" ? "Active" : "Paused"}
                       </Text>
                     </Flex>
                   </Box>
                   <Flex gap={3}>
                     <Flex align="center" gap={2}>
                       <Text fontSize="sm">
-                        {scheduleStatus === 'active' ? "Pause" : "Resume"} Schedule
+                        {scheduleStatus === "active" ? "Pause" : "Resume"}{" "}
+                        Schedule
                       </Text>
                       <Switch
                         colorScheme="green"
-                        isChecked={scheduleStatus === 'active'}
+                        isChecked={scheduleStatus === "active"}
                         onChange={(e) => {
-                          const newStatus = e.target.checked ? 'active' : 'inactive';
+                          const newStatus = e.target.checked
+                            ? "active"
+                            : "inactive";
                           setScheduleStatus(newStatus);
                           if (scheduleId) {
                             toggleSchedule(
@@ -714,10 +739,18 @@ const LinkedinWorkflowBySession = () => {
                               {
                                 onError: () => {
                                   // Revert on error
-                                  setScheduleStatus(scheduleStatus === 'active' ? 'inactive' : 'active');
+                                  setScheduleStatus(
+                                    scheduleStatus === "active"
+                                      ? "inactive"
+                                      : "active"
+                                  );
                                   toast({
                                     title: "Error",
-                                    description: `Failed to ${newStatus === 'active' ? 'resume' : 'pause'} schedule. Please try again.`,
+                                    description: `Failed to ${
+                                      newStatus === "active"
+                                        ? "resume"
+                                        : "pause"
+                                    } schedule. Please try again.`,
                                     status: "error",
                                     duration: 3000,
                                     isClosable: true,

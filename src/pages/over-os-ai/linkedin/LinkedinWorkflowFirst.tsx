@@ -129,7 +129,9 @@ const LinkedinWorkflowFirst = () => {
     }
   }, [generatedText]);
 
-  const { mutate: generatePrompt, isPending: isGenerating } = useChat();
+  const { mutate: generatePrompt, isPending: isGenerating } = useChat(
+    Number(sessionId)
+  );
   const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
   const { mutate: extractSchedule } = useExtractSchedule();
   const { mutate: createUserSchedules, isPending: isCreatingSchedule } =
@@ -166,7 +168,6 @@ const LinkedinWorkflowFirst = () => {
 
     generatePrompt(
       {
-        session: Number(sessionId!),
         message: prompt || userPrompt,
       },
       {

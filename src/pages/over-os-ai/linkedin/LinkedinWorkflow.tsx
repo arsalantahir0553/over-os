@@ -160,11 +160,11 @@ const LinkedinWorkflow = () => {
 
         {/* Prompt Input + Generate */}
         <Flex direction="column" gap={3}>
-          <Text fontSize="sm" color="mutedText">
+          {/* <Text fontSize="sm" color="mutedText">
             Please let me know what would you like to write about
-          </Text>
+          </Text> */}
           <Textarea
-            placeholder="Tell me about your marketing goal..."
+            placeholder="Please let me know what would you like to write about..."
             variant="unstyled"
             fontSize={{ md: "lg", base: "sm" }}
             fontWeight="medium"
@@ -180,7 +180,7 @@ const LinkedinWorkflow = () => {
             borderColor="accent"
             borderRadius="0"
             _placeholder={{
-              color: "gray.600",
+              color: "gray.500",
               lineHeight: "1.5",
             }}
             _focus={{
