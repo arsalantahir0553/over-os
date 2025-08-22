@@ -241,6 +241,7 @@ const LinkedinSidebar = () => {
           <SidebarSection>
             {SessionData ? (
               SessionData.results?.length > 0 ? (
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 SessionData.results.map((session: any) => (
                   <Flex
                     key={session.id}
@@ -262,7 +263,7 @@ const LinkedinSidebar = () => {
                   >
                     <Flex
                       gap={2}
-                      align="start"
+                      align="center"
                       w="full"
                       onClick={() => {
                         if (session.id === activeSessionId) {
@@ -278,19 +279,24 @@ const LinkedinSidebar = () => {
                       <Box mt={0.5}>
                         <MessageSquareText size={16} />
                       </Box>
-                      <Box
-                        w="full"
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
-                      >
-                        <Text fontSize="sm" maxW="150px" noOfLines={1}>
-                          {session.title}
-                        </Text>
-                        {session.is_contain_schedules && (
-                          <FiClock size={16} color="gray.400" />
-                        )}
-                      </Box>
+                      <Text fontSize="sm" flex={1} noOfLines={1}>
+                        {session.title}
+                      </Text>
+                      {session.is_contain_schedules && (
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          w="20px"
+                          h="20px"
+                          borderRadius="full"
+                          bg="blue.500"
+                          color="white"
+                          flexShrink={0}
+                        >
+                          <FiClock size={12} />
+                        </Box>
+                      )}
                     </Flex>
 
                     {/* Edit icon only on hover */}

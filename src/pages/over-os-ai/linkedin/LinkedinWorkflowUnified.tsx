@@ -213,6 +213,7 @@ const LinkedinWorkflowUnified = () => {
       // Update store with existing data
       if (sessionIdNum) {
         updateSessionData(sessionIdNum, {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           data: ChatSessionData.map((msg: any) => ({
             id: msg.id.toString(),
             content: msg.content,
@@ -473,6 +474,7 @@ const LinkedinWorkflowUnified = () => {
         localStorage.removeItem(LOCAL_STORAGE_KEYS.response);
         localStorage.removeItem(LOCAL_STORAGE_KEYS.imageUrls);
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (error: any) => {
         console.log("error", error.response.data.message);
         toast({
@@ -511,7 +513,9 @@ const LinkedinWorkflowUnified = () => {
       time_of_day: normalizeTimeTo24Hour(
         currentSession.scheduleData.time_of_day
       ),
-      timezone: currentSession.scheduleData.timezone,
+      timezone:
+        currentSession.scheduleData.timezone ||
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
       end_date: currentSession.scheduleData.end_date
         ? new Date(currentSession.scheduleData.end_date)
             .toISOString()
@@ -572,7 +576,9 @@ const LinkedinWorkflowUnified = () => {
       time_of_day: normalizeTimeTo24Hour(
         currentSession.manualScheduleData.time_of_day
       ),
-      timezone: currentSession.manualScheduleData.timezone,
+      timezone:
+        currentSession.manualScheduleData.timezone ||
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
       end_date: currentSession.manualScheduleData.end_date
         ? new Date(currentSession.manualScheduleData.end_date)
             .toISOString()
