@@ -14,10 +14,12 @@ import { LinkedinLoginModal } from "./LinkedinLoginModal";
 // import TaskStepsList from "./TaskStepList";
 import Scheduler from "@/components/Scheduler";
 import { useChatSession } from "@/context/ChatSessionContext";
+import { useChatStore } from "@/store/chat-session.store";
 import { useCreateChatSession } from "@/utils/apis/chat-sessions";
 import { useOAuthInit } from "@/utils/apis/django.api";
 import type { ScheduleData } from "@/utils/types/types";
 import { useQueryClient } from "@tanstack/react-query";
+import { SendIcon } from "lucide-react";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 
@@ -41,6 +43,13 @@ const LinkedinWorkflow = () => {
   const isLinkedinConnected = localStorage.getItem("is_linkedin_connected");
   const [showScheduler, setShowScheduler] = useState(false);
   const [scheduleData, setScheduleData] = useState<ScheduleData | null>(null);
+
+  // Zustand store
+  const {
+    setActiveSession,
+    updateSessionData,
+    setUserPrompt: setStoreUserPrompt,
+  } = useChatStore();
 
   useEffect(() => {
     const savedPrompt = localStorage.getItem(LOCAL_STORAGE_KEYS.prompt);
@@ -69,9 +78,27 @@ const LinkedinWorkflow = () => {
     createChatSession(userPrompt.slice(0, 200), {
       onSuccess: (data) => {
         console.log("chat session created:", data.data);
-        setActiveSessionId(data.data.id);
+        const newSessionId = data.data.id;
+        setActiveSessionId(newSessionId);
+        setActiveSession(newSessionId);
+
+        // Initialize session in Zustand store
+        updateSessionData(newSessionId, {
+          loading: false,
+          data: [],
+          error: null,
+          scheduleData: null,
+          manualScheduleData: null,
+          showManualScheduler: false,
+          loadingMessage: null,
+          lastUpdated: Date.now(),
+        });
+
+        // Set user prompt in store
+        setStoreUserPrompt(newSessionId, userPrompt);
+
         queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
-        navigate(`/workflow/linkedin/n/${data.data.id}`);
+        navigate(`/workflow/linkedin/${newSessionId}`);
       },
       onError: (error) => {
         console.error("chat session creation failed", error);
@@ -202,57 +229,31 @@ const LinkedinWorkflow = () => {
             rows={1} // Start with 1 visible row
           />
 
-          <Flex justify="space-between" gap={3}>
-            <Box
+          <Flex justify="flex-end" gap={3}>
+            <Button
+              bg={showScheduler ? "brand.400" : "surfaceButton"}
               display={"flex"}
               gap={2}
-              w={"full"}
-              justifyContent={"space-between"}
+              color="white"
+              _hover={{ bg: "brand.400" }}
+              size={{ md: "md", base: "xs" }}
+              onClick={() => setShowScheduler((prev) => !prev)}
             >
-              <Flex gap={2} align="center">
-                <Button
-                  bg={showScheduler ? "brand.400" : "surfaceButton"}
-                  display={"flex"}
-                  gap={2}
-                  color="white"
-                  _hover={{ bg: "brand.400" }}
-                  size={{ md: "md", base: "xs" }}
-                  onClick={() => setShowScheduler((prev) => !prev)}
-                >
-                  Schedule{" "}
-                  <Box as="span" mb={"-2px"}>
-                    <RiCalendarScheduleLine />
-                  </Box>
-                </Button>
-                {/* <Tooltip label="Upload images" rounded="md">
-                  <IconButton
-                    icon={<Upload size={16} />}
-                    aria-label="Upload"
-                    size={{ md: "sm", base: "xs" }}
-                    bg={iconBg}
-                    color={iconColor}
-                    _hover={{ bg: iconHoverBg }}
-                    onClick={() => fileInputRef.current?.click()}
-                  />
-                </Tooltip>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  ref={fileInputRef}
-                  style={{ display: "none" }}
-                />*/}
-              </Flex>
-              <Button
-                onClick={handleGenerate}
-                bg="surfaceButton"
-                color="white"
-                _hover={{ bg: "brand.400" }}
-                size={{ md: "md", base: "xs" }}
-              >
-                Generate
-              </Button>
-            </Box>
+              <Box as="span" mb={"-2px"}>
+                <RiCalendarScheduleLine />
+              </Box>
+              Schedule{" "}
+            </Button>
+            <Button
+              onClick={handleGenerate}
+              bg="surfaceButton"
+              color="white"
+              _hover={{ bg: "brand.400" }}
+              size={{ md: "md", base: "xs" }}
+              leftIcon={<SendIcon size={14} />}
+            >
+              Generate
+            </Button>
           </Flex>
         </Flex>
         {showScheduler && (
@@ -263,6 +264,10 @@ const LinkedinWorkflow = () => {
             }}
           />
         )}
+        {/* ================================================== */}
+        {/* steps  */}
+        {/* <TaskStepsList /> */}
+        {/* ================================================== */}
       </VStack>
       <LinkedinLoginModal
         isOpen={isOpen}

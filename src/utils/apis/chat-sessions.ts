@@ -26,6 +26,7 @@ export const useGetSessionChatMessages = (sessionId: string) => {
   return useQuery({
     queryFn: () => getSessionChatMessages(sessionId),
     queryKey: ["chat-sessions", sessionId],
+    enabled: !!sessionId, // Only run when sessionId exists
   });
 };
 
@@ -44,43 +45,32 @@ export const useCreateChatSession = () => {
 
 interface ChatInput {
   message: string;
+  session?: number;
 }
 
-const chat = async (sessionId: number, { message }: ChatInput) => {
-  const response = await api.post(`${API_WORKFLOW_URL}/chat-messages/`, {
-    session: sessionId,
-    message,
-  });
-  return response.data;
+const chat = async ({ message, session }: ChatInput) => {
+  try {
+    const payload: any = { message };
+    if (session) {
+      payload.session = session;
+    }
+
+    const response = await api.post(
+      `${API_WORKFLOW_URL}/chat-messages/`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending chat message:", error);
+    throw error;
+  }
 };
 
-export const useChat = (sessionId: number) => {
-  const queryClient = useQueryClient();
-
+export const useChat = (sessionId?: number) => {
   return useMutation({
-    mutationKey: ["chat", sessionId],
-    mutationFn: (data: ChatInput) => chat(sessionId, data),
-    onMutate: async (variables) => {
-      // 👀 Optimistically put something in cache so UI can show "loading"
-      queryClient.setQueryData(["chat", sessionId], (old: any) => ({
-        ...old,
-        status: "loading",
-        message: variables.message,
-      }));
-    },
-    onSuccess: (data) => {
-      // 👀 Store response in cache so it’s still there when you navigate back
-      queryClient.setQueryData(["chat", sessionId], {
-        status: "success",
-        data,
-      });
-    },
-    onError: (error) => {
-      queryClient.setQueryData(["chat", sessionId], {
-        status: "error",
-        error,
-      });
-    },
+    mutationKey: ["chat"],
+    mutationFn: (data: { message: string }) =>
+      chat({ ...data, session: sessionId }),
   });
 };
 

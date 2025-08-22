@@ -1,5 +1,8 @@
 // Scheduler.tsx
-import moment from "moment-timezone"; // <--- moment-timezone import
+import {
+  useUpdateSchedule,
+  type UpdateSchedulePayload,
+} from "@/utils/apis/django.api";
 import {
   calculateDurationFromDates,
   calculateEndDateFromDuration,
@@ -8,13 +11,13 @@ import {
   getFullDayName,
   normalizeTimeTo24Hour,
 } from "@/utils/helpers/functions.helper";
+import type { ScheduleData } from "@/utils/types/types";
 import {
   Box,
   Button,
   Flex,
   Input,
   Select,
-  SimpleGrid,
   Tab,
   TabList,
   TabPanel,
@@ -25,15 +28,11 @@ import {
   useColorModeValue,
   useToast,
 } from "@chakra-ui/react";
-import { useState, useEffect, useRef } from "react";
+import moment from "moment-timezone"; // <--- moment-timezone import
+import { useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { LuClock } from "react-icons/lu";
-import {
-  useUpdateSchedule,
-  type UpdateSchedulePayload,
-} from "@/utils/apis/django.api";
-import type { ScheduleData } from "@/utils/types/types";
 
 const daysOfWeek = ["M", "T", "W", "T", "F", "S", "S"];
 const fullDayMap = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -363,7 +362,7 @@ const Scheduler = ({
               <VStack spacing={4} align="stretch">
                 <Flex
                   flexDirection={{ base: "column", md: "row" }}
-                  gap={{ base: 3, md: 4 }}
+                  gap={{ base: 3, md: 3 }}
                   flexWrap="wrap"
                 >
                   <Box
@@ -373,9 +372,7 @@ const Scheduler = ({
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Days
                     </Text>
-                    <SimpleGrid
-                      columns={{ base: 7, md: 7 }}
-                      spacing={{ base: 1, md: 2 }}
+                    <Box
                       w="100%"
                       maxW="100%"
                       overflowX="auto"
@@ -390,28 +387,39 @@ const Scheduler = ({
                         },
                       }}
                     >
-                      {fullDayMap.map((day, idx) => (
-                        <Button
-                          key={idx}
-                          size="xs"
-                          variant={
-                            selectedDays.includes(day) ? "solid" : "outline"
-                          }
-                          colorScheme={
-                            selectedDays.includes(day) ? "blue" : "gray"
-                          }
-                          onClick={() => toggleDay(day)}
-                          w={{ base: "28px", sm: "32px", md: "40px" }}
-                          h={{ base: "28px", sm: "32px", md: "40px" }}
-                          minW={{ base: "28px", sm: "32px", md: "40px" }}
-                          p={0}
-                          flexShrink={0}
-                          fontSize={{ base: "xs", sm: "sm" }}
-                        >
-                          {daysOfWeek[idx]}
-                        </Button>
-                      ))}
-                    </SimpleGrid>
+                      <Flex
+                        gap={{ base: 1, sm: 4, md: 3 }}
+                        minW="fit-content"
+                        justify={{
+                          base: "space-between",
+                          sm: "center",
+                          md: "flex-start",
+                        }}
+                        wrap="nowrap"
+                      >
+                        {fullDayMap.map((day, idx) => (
+                          <Button
+                            key={idx}
+                            size="xs"
+                            variant={
+                              selectedDays.includes(day) ? "solid" : "outline"
+                            }
+                            colorScheme={
+                              selectedDays.includes(day) ? "blue" : "gray"
+                            }
+                            onClick={() => toggleDay(day)}
+                            w={{ base: "34px", sm: "50px", md: "40px" }}
+                            h={{ base: "34px", sm: "50px", md: "40px" }}
+                            minW={{ base: "28px", sm: "32px", md: "40px" }}
+                            p={0}
+                            flexShrink={0}
+                            fontSize={{ base: "xs", sm: "sm" }}
+                          >
+                            {daysOfWeek[idx]}
+                          </Button>
+                        ))}
+                      </Flex>
+                    </Box>
                   </Box>
 
                   <Box
@@ -513,7 +521,7 @@ const Scheduler = ({
                   </Box>
                 </Flex>
                 <Flex
-                  gap={{ base: 3, md: 4 }}
+                  gap={{ base: 3, md: 3 }}
                   flexWrap="wrap"
                   alignItems="flex-start"
                 >
@@ -526,9 +534,7 @@ const Scheduler = ({
                     <Text fontSize="sm" mb={1} color="mutedText">
                       Days
                     </Text>
-                    <SimpleGrid
-                      columns={7}
-                      spacing={{ base: 1, md: 2 }}
+                    <Box
                       w="100%"
                       maxW="100%"
                       overflowX="auto"
@@ -543,28 +549,39 @@ const Scheduler = ({
                         },
                       }}
                     >
-                      {fullDayMap.map((day, idx) => (
-                        <Button
-                          key={idx}
-                          size="xs"
-                          variant={
-                            selectedDays.includes(day) ? "solid" : "outline"
-                          }
-                          colorScheme={
-                            selectedDays.includes(day) ? "blue" : "gray"
-                          }
-                          onClick={() => toggleDay(day)}
-                          w={{ base: "28px", sm: "32px", md: "40px" }}
-                          h={{ base: "28px", sm: "32px", md: "40px" }}
-                          minW={{ base: "28px", sm: "32px", md: "40px" }}
-                          p={0}
-                          flexShrink={0}
-                          fontSize={{ base: "xs", sm: "sm" }}
-                        >
-                          {daysOfWeek[idx]}
-                        </Button>
-                      ))}
-                    </SimpleGrid>
+                      <Flex
+                        gap={{ base: 1, sm: 4, md: 3 }}
+                        minW="fit-content"
+                        justify={{
+                          base: "space-between",
+                          sm: "center",
+                          md: "flex-start",
+                        }}
+                        wrap="nowrap"
+                      >
+                        {fullDayMap.map((day, idx) => (
+                          <Button
+                            key={idx}
+                            size="xs"
+                            variant={
+                              selectedDays.includes(day) ? "solid" : "outline"
+                            }
+                            colorScheme={
+                              selectedDays.includes(day) ? "blue" : "gray"
+                            }
+                            onClick={() => toggleDay(day)}
+                            w={{ base: "28px", sm: "50px", md: "40px" }}
+                            h={{ base: "28px", sm: "50px", md: "40px" }}
+                            minW={{ base: "28px", sm: "50px", md: "40px" }}
+                            p={0}
+                            flexShrink={0}
+                            fontSize={{ base: "xs", sm: "sm" }}
+                          >
+                            {daysOfWeek[idx]}
+                          </Button>
+                        ))}
+                      </Flex>
+                    </Box>
                   </Box>
 
                   <Box

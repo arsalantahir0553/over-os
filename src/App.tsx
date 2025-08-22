@@ -23,7 +23,7 @@ import TempChatResponse from "./pages/over-os-ai/chat/TempChatResponse";
 import DashboardLayout from "./pages/over-os-ai/layout";
 import LinkedInCallback from "./pages/over-os-ai/linkedin/LinkedInCallback";
 import LinkedinHistoryDetails from "./pages/over-os-ai/linkedin/LinkedinHistoryDetails";
-import LinkedinWorkflow from "./pages/over-os-ai/linkedin/LinkedinWorkflow";
+
 import WorkflowLibrary from "./pages/over-os-ai/workflow-library";
 import PrivacyPolicy from "./pages/privacy-policy";
 import WaitingList from "./pages/waiting-list";
@@ -33,8 +33,8 @@ import WorkflowTest from "./pages/test/WorkflowTest";
 import DjangoTest from "./pages/test/DjangoTest";
 import MySchedules from "./pages/over-os-ai/schedules";
 import VerifyPasswordOtp from "./pages/auth/VerifyPasswordOtp";
-import LinkedinWorkflowBySession from "./pages/over-os-ai/linkedin/LinkedinWorkflowBySession";
-import LinkedinWorkflowFirst from "./pages/over-os-ai/linkedin/LinkedinWorkflowFirst";
+import LinkedinWorkflowUnified from "./pages/over-os-ai/linkedin/LinkedinWorkflowUnified";
+import LinkedinWorkflow from "./pages/over-os-ai/linkedin/LinkedinWorkflow";
 
 const App = () => {
   useEffect(() => {
@@ -78,34 +78,22 @@ const App = () => {
           <Route element={<LinkedinLayout />}>
             <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
             <Route
-              path="/workflow/linkedin/:sessionId"
-              element={<LinkedinWorkflowBySession />}
-            />
-            <Route
-              path="/workflow/linkedin/n/:sessionId"
-              element={<LinkedinWorkflowFirst />}
-            />
-            <Route
               path="/workflow/linkedin/schedules"
               element={<MySchedules />}
             />
-            <Route path="/workflow/linkedin-test" element={<WorkflowTest />} />
-            <Route path="/workflow/django" element={<DjangoTest />} />
             <Route
-              path="/workflow/linkedin/:historyId"
+              path="/workflow/linkedin/history/:historyId"
               element={<LinkedinHistoryDetails />}
             />
+            <Route
+              path="/workflow/linkedin/:sessionId"
+              element={<LinkedinWorkflowUnified />}
+            />
+            <Route path="/workflow/linkedin-test" element={<WorkflowTest />} />
+            <Route path="/workflow/django" element={<DjangoTest />} />
           </Route>
         </Route>
 
-        <Route element={<LinkedinLayout />}>
-          <Route path="/workflow/linkedin" element={<LinkedinWorkflow />} />
-          <Route path="/workflow/linkedin-test" element={<WorkflowTest />} />
-          <Route
-            path="/workflow/linkedin/:historyId"
-            element={<LinkedinHistoryDetails />}
-          />
-        </Route>
         {/* </Route> */}
         <Route element={<DashboardLayout />}>
           <Route path="/explore" element={<WorkflowLibrary />} />

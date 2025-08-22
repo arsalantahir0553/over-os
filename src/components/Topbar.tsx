@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import Logo from "../assets/svgs/logo.svg";
 
 const TopBar = () => {
-  const isMobile = useBreakpointValue({ base: true, md: false });
+  const isMobile = useBreakpointValue({ base: true, lg: false });
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 

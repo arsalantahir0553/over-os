@@ -9,26 +9,19 @@ import {
   Input,
   Text,
   Textarea,
-  Tooltip,
-  useColorModeValue,
   useDisclosure,
   useToast,
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import {
-  CalendarIcon,
-  EditIcon,
-  PlusIcon,
-  SendIcon,
-  Upload,
-} from "lucide-react";
+import { CalendarIcon, PlusIcon, SendIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Cursor, useTypewriter } from "react-simple-typewriter";
 import { LinkedinLoginModal } from "./LinkedinLoginModal";
 // import TaskStepsList from "./TaskStepList";
 import CustomModal from "@/components/modals/CustomModal";
 import Scheduler from "@/components/Scheduler";
+import { useChatStore } from "@/store/chat-session.store";
 import {
   useChat,
   useGetSessionChatMessages,
@@ -46,13 +39,11 @@ import {
   getFullDayName,
   normalizeTimeTo24Hour,
 } from "@/utils/helpers/functions.helper";
-import type { ScheduleData } from "@/utils/types/types";
 import { Switch, useDisclosure as useModalDisclosure } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { FiTrash2 } from "react-icons/fi";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { useParams } from "react-router-dom";
-import { useChatStore } from "@/store/chat-session.store";
 
 const loadingMessages = [
   "Just a moment — we're working on something great for you…",
@@ -73,7 +64,7 @@ const LOCAL_STORAGE_KEYS = {
   imageUrls: "linkedin_image_urls",
 };
 
-const LinkedinWorkflowBySession = () => {
+const LinkedinWorkflowUnified = () => {
   const { sessionId } = useParams();
   const sessionIdNum = Number(sessionId);
   console.log(sessionId);
@@ -90,7 +81,6 @@ const LinkedinWorkflowBySession = () => {
   // Zustand store
   const {
     sessions,
-    sendMessage,
     setActiveSession,
     updateSessionData,
     setLoading,
@@ -119,14 +109,28 @@ const LinkedinWorkflowBySession = () => {
   const [userPrompt, setUserPrompt] = useState("");
   const [generatedText, setLocalGeneratedText] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [scheduleStatus, setScheduleStatus] = useState<"active" | "inactive">(
-    "active"
-  );
   const [userMessageId, setUserMessageId] = useState<number | null>(null);
   const [generatedMessageId, setGeneratedMessageId] = useState<number | null>(
     null
   );
+  const [scheduleStatus, setScheduleStatus] = useState<"active" | "inactive">(
+    "active"
+  );
   const [scheduleId, setScheduleId] = useState<string | null>(null);
+
+  // Loading message rotation
+  const loadingIndexRef = useRef<number>(0);
+  const intervalRef = useRef<number | null>(null);
+
+  // API hooks
+  const { mutate: generatePrompt } = useChat(sessionIdNum);
+  const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
+  const { mutate: extractSchedule } = useExtractSchedule();
+  const { mutate: createUserSchedules } = useCreateUserSchedules();
+  const { mutate: deleteSchedule } = useDeleteSchedule();
+  const { mutate: updateChatMessage } = useUpdateChatMessage();
+  const { mutate: toggleScheduleStatus } = useToggleScheduleStatus();
+  const { refetch, isFetching } = useOAuthInit();
 
   const {
     isOpen: isDeleteModalOpen,
@@ -134,23 +138,9 @@ const LinkedinWorkflowBySession = () => {
     onClose: onDeleteModalClose,
   } = useModalDisclosure();
 
-  // Loading message rotation
-  const loadingIndexRef = useRef<number>(0);
-  const intervalRef = useRef<number | null>(null);
-
-  // API hooks
-  const { mutate: generatePrompt, isPending: isGenerating } =
-    useChat(sessionIdNum);
-  const { mutate: publishPost, isPending: isPublishing } = usePostToLinkedin();
-  const { mutate: extractSchedule } = useExtractSchedule();
-  const { mutate: createUserSchedules } = useCreateUserSchedules();
-  const { mutate: deleteSchedule } = useDeleteSchedule();
-  const { mutate: updateChatMessage } = useUpdateChatMessage();
-  const { refetch, isFetching } = useOAuthInit();
-
   const {
     data: SessionData,
-    isLoading,
+    // isLoading,
     refetch: refetchSessionData,
   } = useGetSessionChatMessages(sessionId!);
 
@@ -257,18 +247,50 @@ const LinkedinWorkflowBySession = () => {
   ]);
 
   // Handle auto-generation for first-time sessions
-  useEffect(() => {
+  const autoGenerateIfFirstTime = () => {
     const firstTime = localStorage.getItem("linkedin_first_time");
     const storedPrompt = localStorage.getItem("linkedin_prompt");
+    const showManualSchedule = localStorage.getItem("linkedin_manual_schedule");
+    const storedScheduleData = localStorage.getItem("linkedin_schedule_data");
+
+    console.log("autoGenerateIfFirstTime called:", {
+      firstTime,
+      storedPrompt,
+      sessionIdNum,
+      showManualSchedule,
+      storedScheduleData,
+    });
+
     if (firstTime && storedPrompt && sessionIdNum) {
+      console.log("Setting up auto-generation with prompt:", storedPrompt);
       setUserPrompt(storedPrompt);
       setStoreUserPrompt(sessionIdNum, storedPrompt);
+
+      // Load manual schedule data if it exists
+      if (showManualSchedule === "true" && storedScheduleData) {
+        try {
+          const scheduleData = JSON.parse(storedScheduleData);
+          console.log("Loading manual schedule data:", scheduleData);
+          updateManualScheduleData(sessionIdNum, scheduleData);
+          setShowManualScheduler(sessionIdNum, true);
+        } catch (error) {
+          console.error("Error parsing stored schedule data:", error);
+        }
+      }
+
       setTimeout(() => {
+        console.log("Calling handleGenerate with prompt:", storedPrompt);
         handleGenerate(storedPrompt);
         localStorage.removeItem("linkedin_first_time");
+        localStorage.removeItem("linkedin_manual_schedule");
+        localStorage.removeItem("linkedin_schedule_data");
       }, 200);
     }
-  }, [sessionIdNum, setStoreUserPrompt]);
+  };
+
+  useEffect(() => {
+    autoGenerateIfFirstTime();
+  }, [sessionIdNum]);
 
   // Cleanup interval on unmount
   useEffect(() => {
@@ -288,9 +310,18 @@ const LinkedinWorkflowBySession = () => {
   };
 
   const handleGenerate = (prompt?: string) => {
-    if (!userPrompt.trim()) return;
-
     const finalPrompt = prompt || userPrompt;
+
+    console.log("handleGenerate called with:", {
+      prompt,
+      userPrompt,
+      finalPrompt,
+    });
+
+    if (!finalPrompt.trim()) {
+      console.log("No prompt provided, returning early");
+      return;
+    }
 
     // Update store
     setStoreUserPrompt(sessionIdNum, finalPrompt);
@@ -314,6 +345,8 @@ const LinkedinWorkflowBySession = () => {
       });
     }
 
+    console.log("Making generatePrompt API call with:", finalPrompt);
+    const currentSessionId = sessionIdNum; // Capture current session ID
     generatePrompt(
       {
         message: finalPrompt,
@@ -322,12 +355,12 @@ const LinkedinWorkflowBySession = () => {
         onSuccess: (data) => {
           console.log("data", data);
           clearInterval(intervalRef.current!);
-          setLoading(sessionIdNum, false);
-          setLoadingMessage(sessionIdNum, null);
+          setLoading(currentSessionId, false);
+          setLoadingMessage(currentSessionId, null);
 
           if (data.data === null) {
             setError(
-              sessionIdNum,
+              currentSessionId,
               "Post generation failed. Try writing something more specific."
             );
             toast({
@@ -342,14 +375,13 @@ const LinkedinWorkflowBySession = () => {
           }
 
           if (data.data.content) {
-            setGeneratedText(sessionIdNum, data.data.content);
-            setLocalGeneratedText(data.data.content);
+            setGeneratedText(currentSessionId, data.data.content);
 
             // Update system message in API if it exists
             if (generatedMessageId) {
               updateChatMessage({
                 messageId: generatedMessageId,
-                session: sessionIdNum,
+                session: currentSessionId,
                 message: data.data.content,
               });
             }
@@ -361,7 +393,7 @@ const LinkedinWorkflowBySession = () => {
             );
           } else {
             setError(
-              sessionIdNum,
+              currentSessionId,
               "Post generation failed. Try writing something more specific."
             );
             toast({
@@ -376,10 +408,10 @@ const LinkedinWorkflowBySession = () => {
         },
         onError: () => {
           clearInterval(intervalRef.current!);
-          setLoading(sessionIdNum, false);
-          setLoadingMessage(sessionIdNum, null);
+          setLoading(currentSessionId, false);
+          setLoadingMessage(currentSessionId, null);
           setError(
-            sessionIdNum,
+            currentSessionId,
             "Post generation failed. Try writing something more specific."
           );
           toast({
@@ -480,7 +512,11 @@ const LinkedinWorkflowBySession = () => {
         currentSession.scheduleData.time_of_day
       ),
       timezone: currentSession.scheduleData.timezone,
-      end_date: currentSession.scheduleData.end_date,
+      end_date: currentSession.scheduleData.end_date
+        ? new Date(currentSession.scheduleData.end_date)
+            .toISOString()
+            .split("T")[0]
+        : undefined,
       chat_session: sessionIdNum,
       flag: 1 as const,
     };
@@ -537,7 +573,11 @@ const LinkedinWorkflowBySession = () => {
         currentSession.manualScheduleData.time_of_day
       ),
       timezone: currentSession.manualScheduleData.timezone,
-      end_date: currentSession.manualScheduleData.end_date,
+      end_date: currentSession.manualScheduleData.end_date
+        ? new Date(currentSession.manualScheduleData.end_date)
+            .toISOString()
+            .split("T")[0]
+        : undefined,
       chat_session: sessionIdNum,
       flag: 1 as const,
     };
@@ -582,9 +622,9 @@ const LinkedinWorkflowBySession = () => {
   };
 
   const MotionText = motion(Text);
-  const iconBg = useColorModeValue("gray.100", "gray.700");
-  const iconHoverBg = useColorModeValue("gray.200", "gray.600");
-  const iconColor = useColorModeValue("gray.700", "accent");
+  // const iconBg = useColorModeValue("gray.100", "gray.700");
+  // const iconHoverBg = useColorModeValue("gray.200", "gray.600");
+  // const iconColor = useColorModeValue("gray.700", "accent");
 
   const [typewriterText] = useTypewriter({
     words: [
@@ -596,10 +636,6 @@ const LinkedinWorkflowBySession = () => {
     typeSpeed: 10,
     deleteSpeed: 10,
   });
-
-  if (isLoading) {
-    return <LoadingOverlay message="" />;
-  }
 
   return (
     <Box
@@ -677,50 +713,79 @@ const LinkedinWorkflowBySession = () => {
 
         {/* Prompt Input + Generate */}
         <Flex direction="column" gap={3}>
-          <Text fontSize="sm" color="mutedText">
-            Please let me know what would you like to write about
-          </Text>
-          <Textarea
-            placeholder="Tell me about your marketing goal..."
-            variant="unstyled"
-            fontSize={{ md: "lg", base: "sm" }}
-            fontWeight="medium"
-            resize="none"
-            overflow="hidden"
-            padding="0"
-            lineHeight="1.5"
-            height="auto"
-            minH="1.5rem"
-            maxH="6rem"
-            border="none"
-            borderBottom="2px solid"
-            borderColor="accent"
-            borderRadius="0"
-            _placeholder={{
-              color: "gray.600",
-              lineHeight: "1.5",
-            }}
-            _focus={{
-              borderColor: "primary",
-              boxShadow: "none",
-            }}
-            value={userPrompt}
-            onChange={(e) => {
-              setUserPrompt(e.target.value);
-              setStoreUserPrompt(sessionIdNum, e.target.value);
-              e.currentTarget.style.height = "auto";
-              e.currentTarget.style.height = `${Math.min(
-                e.currentTarget.scrollHeight,
-                6 * 16
-              )}px`;
-            }}
-            color="text"
-            pr="2.5rem"
-            ref={textareaRef}
-            rows={1}
-          />
+          {/* <Text fontSize="sm" color="mutedText">
+                Please let me know what would you like to write about
+            </Text> */}
+          <Box position="relative">
+            <Textarea
+              placeholder="Please let me know what would you like to write about..."
+              variant="unstyled"
+              fontSize={{ md: "lg", base: "sm" }}
+              fontWeight="medium"
+              resize="none"
+              overflow="hidden"
+              padding="0"
+              paddingRight="3rem"
+              lineHeight="1.5"
+              height="auto"
+              minH="1.5rem"
+              maxH="6rem"
+              border="none"
+              borderBottom="2px solid"
+              borderColor="accent"
+              borderRadius="0"
+              _placeholder={{
+                color: "gray.500",
+                lineHeight: "1.5",
+              }}
+              _focus={{
+                borderColor: "primary",
+                boxShadow: "none",
+              }}
+              value={userPrompt}
+              onChange={(e) => {
+                setUserPrompt(e.target.value);
+                setStoreUserPrompt(sessionIdNum, e.target.value);
+                e.currentTarget.style.height = "auto";
+                e.currentTarget.style.height = `${Math.min(
+                  e.currentTarget.scrollHeight,
+                  6 * 16
+                )}px`;
+              }}
+              color="text"
+              ref={textareaRef}
+              rows={1}
+            />
+            {/* <IconButton
+              icon={<Upload size={16} />}
+              aria-label="Upload images"
+              size="sm"
+              position="absolute"
+              right="0"
+              top="50%"
+              transform="translateY(-50%)"
+              bg="transparent"
+              color={iconColor}
+              _hover={{ bg: "transparent" }}
+              onClick={() => fileInputRef.current?.click()}
+            /> */}
+            <Input
+              type="file"
+              accept="image/*"
+              multiple
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+              style={{ display: "none" }}
+            />
+            {selectedImages.length > 0 && (
+              <Text color="mutedText" fontSize="sm" mt={2}>
+                {selectedImages.length} image
+                {selectedImages.length > 1 ? "s" : ""} selected
+              </Text>
+            )}
+          </Box>
 
-          <Flex justify="space-between" gap={3}>
+          <Flex justify="flex-end" gap={3}>
             <Button
               bg={
                 currentSession.showManualScheduler
@@ -739,50 +804,22 @@ const LinkedinWorkflowBySession = () => {
                 )
               }
             >
-              Schedule{" "}
               <Box as="span" mb={"-2px"}>
                 <RiCalendarScheduleLine />
               </Box>
+              Schedule{" "}
             </Button>
-            <Box display={"flex"} gap={2}>
-              <Flex gap={2} align="center">
-                <Tooltip label="Upload images" rounded="md">
-                  <IconButton
-                    icon={<Upload size={16} />}
-                    aria-label="Upload"
-                    size={{ md: "sm", base: "xs" }}
-                    bg={iconBg}
-                    color={iconColor}
-                    _hover={{ bg: iconHoverBg }}
-                    onClick={() => fileInputRef.current?.click()}
-                  />
-                </Tooltip>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  ref={fileInputRef}
-                  onChange={handleImageUpload}
-                  style={{ display: "none" }}
-                />
-                {selectedImages.length > 0 && (
-                  <Text color="mutedText" fontSize="sm">
-                    {selectedImages.length} image
-                    {selectedImages.length > 1 ? "s" : ""} selected
-                  </Text>
-                )}
-              </Flex>
-              <Button
-                onClick={() => handleGenerate()}
-                isLoading={currentSession.loading || isGenerating}
-                bg="surfaceButton"
-                color="white"
-                _hover={{ bg: "brand.400" }}
-                size={{ md: "md", base: "xs" }}
-              >
-                Generate
-              </Button>
-            </Box>
+            <Button
+              onClick={() => handleGenerate()}
+              isLoading={currentSession.loading}
+              bg="surfaceButton"
+              color="white"
+              _hover={{ bg: "brand.400" }}
+              size={{ md: "md", base: "xs" }}
+              leftIcon={<SendIcon size={14} />}
+            >
+              Generate
+            </Button>
           </Flex>
 
           {!currentSession.scheduleData &&
@@ -796,7 +833,7 @@ const LinkedinWorkflowBySession = () => {
             )}
 
           {currentSession.loading ||
-            (currentSession.scheduleData && generatedText && (
+            (ScheduleData && generatedText && (
               <Box mt={4}>
                 <Flex
                   justify="space-between"
@@ -807,7 +844,7 @@ const LinkedinWorkflowBySession = () => {
                   borderRadius="md"
                 >
                   <Box>
-                    <Text fontWeight="medium" mb={1}>
+                    <Text fontWeight="medium" mb={{ md: 1, base: 3 }}>
                       Schedule Status
                     </Text>
                     <Flex align="center" gap={2}>
@@ -826,11 +863,10 @@ const LinkedinWorkflowBySession = () => {
                       </Text>
                     </Flex>
                   </Box>
-                  <Flex gap={3}>
+                  <Flex gap={3} mb={{ md: 0, base: -8 }}>
                     <Flex align="center" gap={2}>
                       <Text fontSize="sm">
-                        {scheduleStatus === "active" ? "Pause" : "Resume"}{" "}
-                        Schedule
+                        {scheduleStatus === "active" ? "Pause" : "Resume"} Agent
                       </Text>
                       <Switch
                         colorScheme="green"
@@ -841,7 +877,27 @@ const LinkedinWorkflowBySession = () => {
                             : "inactive";
                           setScheduleStatus(newStatus);
                           if (scheduleId) {
-                            // Add toggle schedule logic here
+                            toggleScheduleStatus(
+                              { id: scheduleId, status: newStatus },
+                              {
+                                onSuccess: () => {
+                                  console.log(
+                                    "Schedule status toggled successfully"
+                                  );
+                                },
+                                onError: () => {
+                                  console.log(
+                                    "Failed to toggle schedule status"
+                                  );
+                                  // Revert the status if the API call fails
+                                  setScheduleStatus(
+                                    newStatus === "active"
+                                      ? "inactive"
+                                      : "active"
+                                  );
+                                },
+                              }
+                            );
                           }
                         }}
                       />
@@ -869,6 +925,16 @@ const LinkedinWorkflowBySession = () => {
               </Box>
             ))}
 
+          {/* Show scheduler without status bar when there's extracted schedule data but no saved schedule */}
+          {!ScheduleData && currentSession.scheduleData && generatedText && (
+            <Scheduler
+              data={currentSession.scheduleData}
+              onScheduleChange={(updatedData) => {
+                updateScheduleData(sessionIdNum, updatedData);
+              }}
+            />
+          )}
+
           {currentSession.loading && currentSession.loadingMessage && (
             <LoadingOverlay message={currentSession.loadingMessage} />
           )}
@@ -877,16 +943,19 @@ const LinkedinWorkflowBySession = () => {
         {/* Generated Text Area */}
         {generatedText && (
           <Box
-            mb={-10}
+            mb={-16}
+            mr={2}
             zIndex={2}
             display={"flex"}
             alignItems={"center"}
+            justifyContent={"flex-end"}
             gap={2}
             fontSize={"12px"}
+            color="gray.500"
+            fontStyle="italic"
           >
-            {" "}
             Edit Post
-            <EditIcon size={14} />
+            {/* <EditIcon size={14} /> */}
           </Box>
         )}
         {generatedText && (
@@ -917,28 +986,38 @@ const LinkedinWorkflowBySession = () => {
         )}
 
         {/* Submit */}
-        {generatedText && !currentSession.scheduleData && (
+        {generatedText && !ScheduleData && (
           <Flex justify="flex-end" gap={2}>
             <Button
               onClick={handleSubmit}
-              bg={currentSession.manualScheduleData ? "surface2" : "primary"}
+              bg={
+                currentSession.manualScheduleData || currentSession.scheduleData
+                  ? "surface2"
+                  : "primary"
+              }
               color="white"
               isLoading={isPublishing}
               _hover={{ bg: "gray.600" }}
               leftIcon={<SendIcon size={15} />}
             >
-              {currentSession.manualScheduleData
+              {currentSession.manualScheduleData || currentSession.scheduleData
                 ? "Post Now"
                 : "Post to LinkedIn"}
             </Button>
-            {currentSession.manualScheduleData && (
+            {(currentSession.manualScheduleData ||
+              currentSession.scheduleData) && (
               <Button
-                onClick={handleManualSchedule}
+                onClick={
+                  currentSession.manualScheduleData
+                    ? handleManualSchedule
+                    : handleSchedule
+                }
                 bg="primary"
                 color="white"
-                isLoading={isPublishing}
                 _hover={{ bg: "brand.400" }}
                 leftIcon={<CalendarIcon size={16} />}
+                isLoading={isPublishing}
+                isDisabled={isPublishing}
               >
                 Schedule Post
               </Button>
@@ -985,8 +1064,8 @@ const LinkedinWorkflowBySession = () => {
         submitButtonColor="red"
       >
         <Text>
-          Are you sure you want to delete this schedule? This action cannot be
-          undone.
+          Do you want to delete the schedule for this agent? This will stop the
+          agent's execution.
         </Text>
       </CustomModal>
 
@@ -1000,4 +1079,4 @@ const LinkedinWorkflowBySession = () => {
   );
 };
 
-export default LinkedinWorkflowBySession;
+export default LinkedinWorkflowUnified;
